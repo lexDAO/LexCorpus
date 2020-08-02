@@ -80,39 +80,39 @@ library Roles {
     }
 }
 
-contract LexDAORole is Context {
+contract GovernorRole is Context {
     using Roles for Roles.Role;
 
-    event LexDAOadded(address indexed account);
-    event LexDAOremoved(address indexed account);
+    event GovernorAdded(address indexed account);
+    event GovernorRemoved(address indexed account);
 
-    Roles.Role private _lexDAOs;
+    Roles.Role private _governors;
 
-    modifier onlyLexDAO() {
-        require(isLexDAO(_msgSender()), "LexDAORole: caller does not have the lexDAO role");
+    modifier onlyGovernor() {
+        require(isGovernor(_msgSender()), "GovernorRole: caller does not have the governor role");
         _;
     }
     
-    function isLexDAO(address account) public view returns (bool) {
-        return _lexDAOs.has(account);
+    function isGovernor(address account) public view returns (bool) {
+        return _governors.has(account);
     }
 
-    function addLexDAO(address account) public onlyLexDAO {
-        _addLexDAO(account);
+    function addGovernor(address account) public onlyGovernor {
+        _addGovernor(account);
     }
 
-    function renounceLexDAO() public {
-        _removeLexDAO(_msgSender());
+    function renounceGovernor() public {
+        _removeGovernor(_msgSender());
     }
 
-    function _addLexDAO(address account) internal {
-        _lexDAOs.add(account);
-        emit LexDAOadded(account);
+    function _addGovernor(address account) internal {
+        _governors.add(account);
+        emit GovernorAdded(account);
     }
 
-    function _removeLexDAO(address account) internal {
-        _lexDAOs.remove(account);
-        emit LexDAOremoved(account);
+    function _removeGovernor(address account) internal {
+        _governors.remove(account);
+        emit GovernorRemoved(account);
     }
 }
 
@@ -900,21 +900,19 @@ contract ERC20Pausable is Pausable, ERC20 {
 }
 
 /**
- * @dev Implementation of ERC20 standard designed for detailed tokenization with optional lexDAO governance (lexdao.org).
+ * @dev Implementation of ERC20 standard designed for detailed tokenization with optional governance.
  */
-contract LexToken is LexDAORole, ERC20Burnable, ERC20Capped, ERC20Mintable, ERC20Pausable {
+contract LexToken is GovernorRole, ERC20Burnable, ERC20Capped, ERC20Mintable, ERC20Pausable {
     address payable public owner;
     uint256 public ethPurchaseRate;
     bytes32 public stamp;
     bool public forSale;
-    bool public lexDAOcertified;  
-    bool public lexDAOgoverned;
+    bool public governed;
     
-    event LexDAOcertify(bytes32 indexed details, bool indexed lexDAOcertified);
-    event LexDAOslashStake(bytes32 indexed details);
-    event LexDAOtransfer(bytes32 indexed details);
+    event GovernedSlashStake(bytes32 indexed details);
+    event GovernedTransfer(bytes32 indexed details);
     event RedeemLexToken(address indexed sender, uint256 indexed amount, bytes32 indexed details);
-    event UpdateLexTokenGovernance(bytes32 indexed details, bool indexed lexDAOgoverned);
+    event UpdateGovernance(bytes32 indexed details, bool indexed governed);
     event UpdateLexTokenOwner(address indexed owner, bytes32 indexed details);
     event UpdateLexTokenPurchaseRate(uint256 indexed ethPurchaseRate, bytes32 indexed details);
     event UpdateLexTokenSale(uint256 indexed saleAmount, bytes32 indexed details, bool indexed forSale);
@@ -928,20 +926,19 @@ contract LexToken is LexDAORole, ERC20Burnable, ERC20Capped, ERC20Mintable, ERC2
         uint256 _ethPurchaseRate, 
         uint256 initialOwnerAmount, 
         uint256 initialSaleAmount,
-        address _lexDAO,
+        address _governor,
         address payable _owner,
-	      bytes32 _stamp,
-	      bool _forSale,
-        bool _lexDAOgoverned) public 
-        ERC20(name, symbol)
-        ERC20Capped(cap) {
+	bytes32 _stamp,
+	bool _forSale,
+        bool _governed
+    ) public ERC20(name, symbol) ERC20Capped(cap) {
         ethPurchaseRate = _ethPurchaseRate;
         owner = _owner;
-	      stamp = _stamp;
-	      forSale = _forSale;
-        lexDAOgoverned = _lexDAOgoverned;
+	stamp = _stamp;
+	forSale = _forSale;
+        governed = _governed;
 
-	      _addLexDAO(_lexDAO);
+	_addGovernor(_governor);
         _addMinter(_owner);
         _addPauser(_owner);
         _mint(_owner, initialOwnerAmount);
@@ -974,11 +971,11 @@ contract LexToken is LexDAORole, ERC20Burnable, ERC20Capped, ERC20Mintable, ERC2
         _;
     }
     
-    function stake() payable external onlyLexDAOgoverned onlyOwner {}
+    function stake() payable external onlyGoverned onlyOwner {}
     
-    function updateLexTokenGovernance(bytes32 details, bool _lexDAOgoverned) external onlyOwner {
-        lexDAOgoverned = _lexDAOgoverned; // owner adjusts lexDAO governance 
-        emit UpdateLexTokenGovernance(details, lexDAOgoverned);
+    function updateGovernance(bytes32 details, bool _governed) external onlyOwner {
+        governed = _governed; // owner adjusts governance 
+        emit UpdateGovernance(details, governed);
     }
     
     function updateLexTokenOwner(address payable _owner, bytes32 details) external onlyOwner {
@@ -1005,71 +1002,60 @@ contract LexToken is LexDAORole, ERC20Burnable, ERC20Capped, ERC20Mintable, ERC2
     /***************
     LEXDAO FUNCTIONS
     ***************/
-    modifier onlyLexDAOgoverned() {
-        require(lexDAOgoverned == true, "lexToken not under lexDAO governance");
+    modifier onlyGoverned() {
+        require(governed == true, "lexToken not under governance");
         _;
     }
 
-    function lexDAOcertify(bytes32 details, bool _lexDAOcertified) external onlyLexDAO {
-        lexDAOcertified = _lexDAOcertified; // lexDAO governance adjusts token certification
-        emit LexDAOcertify(details, lexDAOcertified);
-    }
-    
-    function lexDAOslashStake(address payable to, uint256 amount, bytes32 details) external onlyLexDAO onlyLexDAOgoverned {
-        (bool success, ) = to.call.value(amount)(""); // lexDAO governance directs slashed stake
+    function governedSlashStake(address payable to, uint256 amount, bytes32 details) external onlyGovernor onlyGoverned {
+        (bool success, ) = to.call.value(amount)(""); // governance directs slashed stake
         require(success, "transfer failed");
-        emit LexDAOslashStake(details);
+        emit GovernedSlashStake(details);
     }
 
-    function lexDAOstamp(bytes32 _stamp) external onlyLexDAO onlyLexDAOgoverned {
-        stamp = _stamp; // lexDAO governance adjusts token stamp
+    function governedStamp(bytes32 _stamp) external onlyGovernor onlyGoverned {
+        stamp = _stamp; // governance adjusts token stamp
         emit UpdateLexTokenStamp(stamp);
     }
     
-    function lexDAOtransfer(address from, address to, uint256 amount, bytes32 details) external onlyLexDAO onlyLexDAOgoverned {
-        _transfer(from, to, amount); // lexDAO governance transfers token balance
-        emit LexDAOtransfer(details);
+    function governedTransfer(address from, address to, uint256 amount, bytes32 details) external onlyGovernor onlyGoverned {
+        _transfer(from, to, amount); // governance transfers token balance
+        emit GovernedTransfer(details);
     }
 }
 
 /**
- * @dev Factory pattern to clone new token contracts with optional lexDAO governance.
+ * @dev Factory pattern to clone new token contracts with optional governance.
  */
 contract LexTokenFactory is Context {
     LexToken private LT;
-    address payable public _lexDAO;
-    uint256 public factoryFee;
+    address payable public lexDAO;
     bytes32 public stamp;
 
-    event NewLexToken(address indexed LT, address indexed owner, bool indexed lexDAOgoverned);
+    event NewLexToken(address indexed LT, address indexed owner, bool indexed forSale);
     event PayLexDAO(address indexed sender, uint256 indexed payment, bytes32 indexed details);
-    event UpdateFactoryFee(uint256 indexed factoryFee);
     event UpdateFactoryStamp(bytes32 indexed stamp);
     event UpdateLexDAO(address indexed lexDAO);
     
-    constructor (
-        address payable lexDAO,
-        uint256 _factoryFee, 
-	      bytes32 _stamp) public 
-    {
-        _lexDAO = lexDAO;
-        factoryFee = _factoryFee;
-	      stamp = _stamp;
+    constructor (address payable _lexDAO, bytes32 _stamp) public {
+        lexDAO = _lexDAO;
+	stamp = _stamp;
     }
     
-    function newLexToken( // public issues stamped lexToken for factory ether (Ξ) fee
+    function newLexToken( // public can issue stamped lexToken, program initial sale & governance
         string memory name, 
-	      string memory symbol,
-	      uint8 decimals,
-	      uint256 cap,
-	      uint256 _ethPurchaseRate,
-	      uint256 initialOwnerAmount,
-	      uint256 initialSaleAmount,
-	      address payable _owner,
-	      bytes32 _stamp,
-	      bool _forSale,
-	      bool _lexDAOgoverned) payable public {
-	      require(msg.value == factoryFee, "factory fee not attached");
+	string memory symbol,
+	uint8 decimals,
+	uint256 cap,
+	uint256 _ethPurchaseRate,
+	uint256 initialOwnerAmount,
+	uint256 initialSaleAmount,
+	address _governor,
+	address payable _owner,
+	bytes32 _stamp,
+	bool _forSale,
+	bool _governed
+    ) payable public {
 
         LT = new LexToken(
             name, 
@@ -1079,19 +1065,19 @@ contract LexTokenFactory is Context {
             _ethPurchaseRate,
             initialOwnerAmount,
             initialSaleAmount,
-            _lexDAO,
+            _governor,
             _owner,
-	          _stamp,
-	          _forSale,
-            _lexDAOgoverned);
+	    _stamp,
+	    _forSale,
+            _governed);
         
-        (bool success, ) = _lexDAO.call.value(msg.value)("");
+        (bool success, ) = lexDAO.call.value(msg.value)("");
         require(success, "transfer failed");
-        emit NewLexToken(address(LT), _owner, _lexDAOgoverned);
+        emit NewLexToken(address(LT), _owner, _forSale);
     }
     
     function payLexDAO(bytes32 details) payable external { // public attaches ether (Ξ) with details to lexDAO
-        (bool success, ) = _lexDAO.call.value(msg.value)("");
+        (bool success, ) = lexDAO.call.value(msg.value)("");
         require(success, "transfer failed");
         emit PayLexDAO(_msgSender(), msg.value, details);
     }
@@ -1100,22 +1086,17 @@ contract LexTokenFactory is Context {
     LEXDAO FUNCTIONS
     ***************/
     modifier onlyLexDAO() {
-        require(_msgSender() == _lexDAO, "caller not lexDAO");
+        require(_msgSender() == lexDAO, "caller not lexDAO");
         _;
     }
 
-    function updateFactoryFee(uint256 _factoryFee) external onlyLexDAO {
-        factoryFee = _factoryFee;
-        emit UpdateFactoryFee(factoryFee);
-    }
-    
     function updateFactoryStamp(bytes32 _stamp) external onlyLexDAO {
         stamp = _stamp;
         emit UpdateFactoryStamp(stamp);
     }
     
-    function updateLexDAO(address payable lexDAO) external onlyLexDAO {
-        _lexDAO = lexDAO;
-        emit UpdateLexDAO(_lexDAO);
+    function updateLexDAO(address payable _lexDAO) external onlyLexDAO {
+        lexDAO = _lexDAO;
+        emit UpdateLexDAO(lexDAO);
     }
 }
