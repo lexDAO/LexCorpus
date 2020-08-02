@@ -999,9 +999,9 @@ contract LexToken is GovernorRole, ERC20Burnable, ERC20Capped, ERC20Mintable, ER
         emit UpdateLexTokenStamp(stamp);
     }
 
-    /***************
-    LEXDAO FUNCTIONS
-    ***************/
+    /*******************
+    GOVERNANCE FUNCTIONS
+    *******************/
     modifier onlyGoverned() {
         require(governed == true, "lexToken not under governance");
         _;
