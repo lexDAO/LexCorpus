@@ -161,7 +161,7 @@ contract LexLockerProvider is Context { // *provider-side splittable digital dea
         bytes32 details) external returns (uint256) {
         require(provider.length == amount.length, "provider amount mismatch");
         
-	      uint256 sum;
+	    uint256 sum;
         
         for (uint256 i = 0; i < provider.length; i++) {
             sum = sum.add(amount[i]);
@@ -213,12 +213,12 @@ contract LexLockerProvider is Context { // *provider-side splittable digital dea
     }
 
     function release(uint256 index) external { // client transfers locker amount(s) (milestone) to provider(s) 
-    	  Locker storage locker = lockers[index];
+    	Locker storage locker = lockers[index];
 	    
-	      require(locker.locked == 0, "locker locked");
-	      require(locker.confirmed == 1, "locker unconfirmed");
-	      require(locker.cap > locker.released, "locker released");
-    	  require(_msgSender() == locker.client, "not locker client"); 
+	    require(locker.locked == 0, "locker locked");
+	    require(locker.confirmed == 1, "locker unconfirmed");
+	    require(locker.cap > locker.released, "locker released");
+    	require(_msgSender() == locker.client, "not locker client"); 
         
         uint256[] memory milestone = locker.amount;
         
@@ -227,11 +227,11 @@ contract LexLockerProvider is Context { // *provider-side splittable digital dea
             locker.released = locker.released.add(milestone[i]);
         }
 
-	      emit Release(index, milestone); 
+	    emit Release(index, milestone); 
     }
     
     function withdraw(uint256 index) external { // withdraw locker remainder to client if termination time passes & no lock
-    	  Locker storage locker = lockers[index];
+    	Locker storage locker = lockers[index];
         
         require(locker.locked == 0, "locker locked");
         require(locker.confirmed == 1, "locker unconfirmed");
@@ -244,7 +244,7 @@ contract LexLockerProvider is Context { // *provider-side splittable digital dea
         
         locker.released = locker.released.add(remainder); 
         
-	      emit Withdraw(index, remainder); 
+	    emit Withdraw(index, remainder); 
     }
     
     /************
@@ -261,23 +261,23 @@ contract LexLockerProvider is Context { // *provider-side splittable digital dea
             require(_msgSender() == locker.client || _msgSender() == locker.provider[i], "not locker party"); 
         }
 
-	      locker.locked = 1; 
+	    locker.locked = 1; 
 	    
-	      emit Lock(_msgSender(), index, details);
+	    emit Lock(_msgSender(), index, details);
     }
     
     function resolve(uint256 index, uint256 clientAward, uint256[] calldata providerAward, bytes32 details) external { // resolver splits locked deposit remainder between client & provider(s)
         Locker storage locker = lockers[index];
         
         uint256 remainder = locker.cap.sub(locker.released); 
-	      uint256 resolutionFee = remainder.div(20); // calculates dispute resolution fee (5% of remainder)
+	    uint256 resolutionFee = remainder.div(20); // calculates dispute resolution fee (5% of remainder)
 	    
-	      require(locker.locked == 1, "locker not locked"); 
-	      require(locker.cap > locker.released, "cap released");
-	      require(_msgSender() == locker.resolver, "not locker resolver");
-	      require(_msgSender() != locker.client, "cannot be locker client");
+	    require(locker.locked == 1, "locker not locked"); 
+	    require(locker.cap > locker.released, "cap released");
+	    require(_msgSender() == locker.resolver, "not locker resolver");
+	    require(_msgSender() != locker.client, "cannot be locker client");
 	    
-	      for (uint256 i = 0; i < locker.provider.length; i++) {
+	    for (uint256 i = 0; i < locker.provider.length; i++) {
             require(msg.sender != locker.provider[i], "cannot be locker provider");
             require(clientAward.add(providerAward[i]) == remainder.sub(resolutionFee), "resolution must match remainder");
             IERC20(locker.token).safeTransfer(locker.provider[i], providerAward[i]);
@@ -286,8 +286,8 @@ contract LexLockerProvider is Context { // *provider-side splittable digital dea
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(locker.resolver, resolutionFee);
 	    
-	      locker.released = locker.released.add(remainder); 
+	    locker.released = locker.released.add(remainder); 
 	    
-	      emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, details);
+	    emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, details);
     }
 }
