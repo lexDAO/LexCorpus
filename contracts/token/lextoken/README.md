@@ -4,4 +4,4 @@
 
 ## Use LexToken
 
-You can deploy a LexToken on Ethereum mainnet: [0x36B3382b8d215658d76f3526C999E55Ea3B027A0](https://etherscan.io/address/0x36B3382b8d215658d76f3526C999E55Ea3B027A0#code)
+You can deploy a LexToken on Ethereum mainnet: [0xFE182942f887ae325D7e163fff12e3d01D1D3Fd9](https://etherscan.io/address/0xFE182942f887ae325D7e163fff12e3d01D1D3Fd9#code)
