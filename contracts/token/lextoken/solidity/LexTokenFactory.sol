@@ -939,9 +939,9 @@ contract LexToken is GovernorRole, ERC20Burnable, ERC20Capped, ERC20Mintable, ER
         governed = _governed;
 
 	_addGovernor(_governor);
-        _addMinter(_owner);
-        _addPauser(_owner);
-        _mint(_owner, initialOwnerAmount);
+        _addMinter(owner);
+        _addPauser(owner);
+        _mint(owner, initialOwnerAmount);
         _mint(address(this), initialSaleAmount);
         _setupDecimals(decimals);
     }
@@ -1007,18 +1007,18 @@ contract LexToken is GovernorRole, ERC20Burnable, ERC20Capped, ERC20Mintable, ER
         _;
     }
 
-    function governedSlashStake(address payable to, uint256 amount, bytes32 details) external onlyGovernor onlyGoverned {
+    function governedSlashStake(address payable to, uint256 amount, bytes32 details) external onlyGoverned onlyGovernor {
         (bool success, ) = to.call.value(amount)(""); // governance directs slashed stake
         require(success, "transfer failed");
         emit GovernedSlashStake(details);
     }
 
-    function governedStamp(bytes32 _stamp) external onlyGovernor onlyGoverned {
+    function governedStamp(bytes32 _stamp) external onlyGoverned onlyGovernor {
         stamp = _stamp; // governance adjusts token stamp
         emit UpdateLexTokenStamp(stamp);
     }
     
-    function governedTransfer(address from, address to, uint256 amount, bytes32 details) external onlyGovernor onlyGoverned {
+    function governedTransfer(address from, address to, uint256 amount, bytes32 details) external onlyGoverned onlyGovernor {
         _transfer(from, to, amount); // governance transfers token balance
         emit GovernedTransfer(details);
     }
