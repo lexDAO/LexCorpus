@@ -5,6 +5,7 @@ In consideration of the following transactions, and for such other good and valu
 ## __**PARTY A DELIVERY:**__ 
 
 token: 0x[[Token EthAddress]]
+
 deposit amount: **[[Party A Deposit Amount]]**
 
 // __**FOR**__ //
