@@ -30,14 +30,50 @@ DEAR MSG.SENDER(S):
 
 pragma solidity 0.5.17;
 
-contract Context { // describes current contract execution context (metaTX support) / openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
-    function _msgSender() internal view returns (address payable) {
-        return msg.sender;
+interface IERC20 { // brief interface for erc20 token txs
+    function transfer(address to, uint256 value) external returns (bool);
+
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+}
+
+interface IWETH { // brief interface for canonical ether token wrapper contract 
+    function deposit() payable external;
+    
+    function transfer(address dst, uint wad) external returns (bool);
+}
+
+library Address { // helper for address type / openzeppelin-contracts/blob/master/contracts/utils/Address.sol
+    function isContract(address account) internal view returns (bool) {
+        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
+        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
+        // for accounts without code, i.e. `keccak256('')`
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        assembly { codehash := extcodehash(account) }
+        return (codehash != accountHash && codehash != 0x0);
+    }
+}
+
+library SafeERC20 { // wrapper around erc20 token txs for non-standard contracts / openzeppelin-contracts/blob/master/contracts/token/ERC20/SafeERC20.sol
+    using Address for address;
+
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
+        _callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
 
-    function _msgData() internal view returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
+    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+        _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
+    }
+
+   function _callOptionalReturn(IERC20 token, bytes memory data) private {
+        require(address(token).isContract(), "SafeERC20: call to non-contract");
+
+        (bool success, bytes memory returndata) = address(token).call(data);
+        require(success, "SafeERC20: low-level call failed");
+
+        if (returndata.length > 0) { // return data is optional
+            require(abi.decode(returndata, (bool)), "SafeERC20: erc20 operation did not succeed");
+        }
     }
 }
 
@@ -75,51 +111,15 @@ library SafeMath { // wrapper over solidity arithmetic for unit under/overflow c
     }
 }
 
-library Address { // helper for address type / openzeppelin-contracts/blob/master/contracts/utils/Address.sol
-    function isContract(address account) internal view returns (bool) {
-        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-        // for accounts without code, i.e. `keccak256('')`
-        bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        assembly { codehash := extcodehash(account) }
-        return (codehash != accountHash && codehash != 0x0);
-    }
-}
-
-interface IERC20 { // brief interface for erc20 token txs
-    function transfer(address to, uint256 value) external returns (bool);
-
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-}
-
-library SafeERC20 { // wrapper around erc20 token txs for non-standard contracts / openzeppelin-contracts/blob/master/contracts/token/ERC20/SafeERC20.sol
-    using Address for address;
-
-    function safeTransfer(IERC20 token, address to, uint256 value) internal {
-        _callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
+contract Context { // describes current contract execution context (metaTX support) / openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
+    function _msgSender() internal view returns (address payable) {
+        return msg.sender;
     }
 
-    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
-        _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
+    function _msgData() internal view returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
     }
-
-   function _callOptionalReturn(IERC20 token, bytes memory data) private {
-        require(address(token).isContract(), "SafeERC20: call to non-contract");
-
-        (bool success, bytes memory returndata) = address(token).call(data);
-        require(success, "SafeERC20: low-level call failed");
-
-        if (returndata.length > 0) { // return data is optional
-            require(abi.decode(returndata, (bool)), "SafeERC20: erc20 operation did not succeed");
-        }
-    }
-}
-
-interface IWETH { // brief interface for canonical ether token wrapper contract 
-    function deposit() payable external;
-    
-    function transfer(address dst, uint wad) external returns (bool);
 }
 
 contract LexGuildLocker is Context { // splittable digital deal lockers w/ embedded arbitration tailored for guild work
@@ -218,12 +218,12 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
     }
 
     function release(uint256 index) external { // client transfers locker milestone batch to provider(s) 
-    	  Locker storage locker = lockers[index];
+    	Locker storage locker = lockers[index];
 	    
-	      require(locker.locked == 0, "locked");
-	      require(locker.confirmed == 1, "!confirmed");
-	      require(locker.cap > locker.released, "released");
-    	  require(_msgSender() == locker.client, "!client"); 
+	require(locker.locked == 0, "locked");
+	require(locker.confirmed == 1, "!confirmed");
+	require(locker.cap > locker.released, "released");
+    	require(_msgSender() == locker.client, "!client"); 
         
         uint256[] memory milestone = locker.batch;
         
@@ -232,11 +232,11 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
             locker.released = locker.released.add(milestone[i]);
         }
 
-	      emit Release(index, milestone); 
+	emit Release(index, milestone); 
     }
     
     function withdraw(uint256 index) external { // withdraw locker remainder to client if termination time passes & no lock
-    	  Locker storage locker = lockers[index];
+    	Locker storage locker = lockers[index];
         
         require(locker.locked == 0, "locked");
         require(locker.confirmed == 1, "!confirmed");
@@ -249,7 +249,7 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
         
         locker.released = locker.released.add(remainder); 
         
-	      emit Withdraw(index, remainder); 
+	emit Withdraw(index, remainder); 
     }
     
     /************
@@ -263,23 +263,23 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
         require(now < locker.termination, "terminated"); 
         require(_msgSender() == locker.client || _msgSender() == locker.provider[0], "!party"); 
 
-	      locker.locked = 1; 
+	locker.locked = 1; 
 	    
-	      emit Lock(_msgSender(), index, details);
+	emit Lock(_msgSender(), index, details);
     }
     
     function resolve(uint256 index, uint256 clientAward, uint256[] calldata providerAward, bytes32 details) external { // resolver splits locked deposit remainder between client & provider(s)
         Locker storage locker = lockers[index];
         
         uint256 remainder = locker.cap.sub(locker.released); 
-	      uint256 resolutionFee = remainder.div(20); // calculates dispute resolution fee (5% of remainder)
+	uint256 resolutionFee = remainder.div(20); // calculates dispute resolution fee (5% of remainder)
 	    
-	      require(locker.locked == 1, "!locked"); 
-	      require(locker.cap > locker.released, "released");
-	      require(_msgSender() == locker.resolver, "!resolver");
-	      require(_msgSender() != locker.client, "resolver == client");
+	require(locker.locked == 1, "!locked"); 
+	require(locker.cap > locker.released, "released");
+	require(_msgSender() == locker.resolver, "!resolver");
+	require(_msgSender() != locker.client, "resolver == client");
 	    
-	      for (uint256 i = 0; i < locker.provider.length; i++) {
+	for (uint256 i = 0; i < locker.provider.length; i++) {
             require(msg.sender != locker.provider[i], "resolver == provider");
             require(clientAward.add(providerAward[i]) == remainder.sub(resolutionFee), "resolution != remainder");
             IERC20(locker.token).safeTransfer(locker.provider[i], providerAward[i]);
@@ -288,8 +288,8 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(locker.resolver, resolutionFee);
 	    
-	      locker.released = locker.released.add(remainder); 
+	locker.released = locker.released.add(remainder); 
 	    
-	      emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, details);
+	emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, details);
     }
 }
