@@ -19,7 +19,9 @@ Following Party A's registration of this Deal Locker ("*DL*") to the smart contr
 Any and all disputes related to this DL and its terms shall be resolved by means of binding arbitration directed by LexDAO and judges associated thereby (*0x06153608b799a3DA838bf7c95Fe21309d2e33b53*).
 
 **Party A:** __*[[Party A Email: Identity | Signature]]*__
+
 0x[[Party A EthAddress]]
 
 **Party B:** __*[[Party B Email: Identity | Signature]]*__
+
 0x[[Party B EthAddress]]
