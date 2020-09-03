@@ -1,6 +1,6 @@
 # LexLocker
 
-[LexLocker](https://github.com/lexDAO/LexLocker) locks in deals with LexDAO smart contracts and legal wrappers.
+[LexLocker](https://github.com/lexDAO/LexLocker) locks in commercial finality with LexDAO smart contracts and legal wrappers.
 
 ## Use LexLocker for Arbitration
 
