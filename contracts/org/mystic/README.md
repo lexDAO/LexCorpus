@@ -2,8 +2,6 @@
 
 You can deploy a [MYSTIC](https://github.com/lexDAO/moloch) on Ethereum mainnet: [0xac384422F1123740CC670F6f6fA866b8BFAF8A98](https://etherscan.io/address/0xac384422F1123740CC670F6f6fA866b8BFAF8A98#code).
 
-Other:
-
 **L2**
 - xDai: [0x44fa6A4fb5e1935383C7623D47b1104E5241A865](https://blockscout.com/poa/xdai/address/0x44fa6A4fb5e1935383C7623D47b1104E5241A865/contracts)
 - IDChain: [0x42beD0785Ec8E50FFf1d0DA0cDe7900C62bD70A3](https://explorer.idchain.one/address/0x42beD0785Ec8E50FFf1d0DA0cDe7900C62bD70A3/contracts)
