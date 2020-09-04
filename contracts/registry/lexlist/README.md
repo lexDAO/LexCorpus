@@ -16,4 +16,4 @@ Beyond qualifying the quality and operations of Ethereum contracts, LexDAO can s
 
 LexDAO MYSTIC currently governs and qualifies LexDAO members for legal licensure and standing with their local bar associations by issuing non-transferrable LXLAW tokens (operated on LexToken "Lite" contract): [0x3e6D94F5eB600a83366EEedb1Ac374972eD8f763](https://etherscan.io/address/0x3e6D94F5eB600a83366EEedb1Ac374972eD8f763#code). 
 
-LXLAW holders can access and update the LexAIR registry: [0x6FAfAD57060201d8Fac9D190d4f42Ef1e68494c2](https://etherscan.io/address/0x3e6D94F5eB600a83366EEedb1Ac374972eD8f763#code).
+LXLAW holders can access and update the LexAIR registry: [0x6FAfAD57060201d8Fac9D190d4f42Ef1e68494c2](https://etherscan.io/address/0x6FAfAD57060201d8Fac9D190d4f42Ef1e68494c2#code).
