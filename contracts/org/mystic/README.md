@@ -12,5 +12,5 @@ You can deploy a [MYSTIC](https://github.com/lexDAO/moloch) on Ethereum mainnet:
 - Ropsten: [0x35b7f8208eA3B652aFDE3Fdb45d5178Fdd75B1E8](https://ropsten.etherscan.io/address/0x35b7f8208eA3B652aFDE3Fdb45d5178Fdd75B1E8#code)
 
 ## LexDAO Deployments
-LexDAO Cooperative: [0x057e820D740D5AAaFfa3c6De08C5c98d990dB00d](https://etherscan.io/address/0x057e820d740d5aaaffa3c6de08c5c98d990db00d#code)
-Aragon Network Moloch DAO: [0xBa1A22228B091D2bC6E111df61Ae6f7e5102Da1a](https://etherscan.io/address/0xba1a22228b091d2bc6e111df61ae6f7e5102da1a#code)
+- LexDAO Cooperative: [0x057e820D740D5AAaFfa3c6De08C5c98d990dB00d](https://etherscan.io/address/0x057e820d740d5aaaffa3c6de08c5c98d990db00d#code)
+- Aragon Network Moloch DAO: [0xBa1A22228B091D2bC6E111df61Ae6f7e5102Da1a](https://etherscan.io/address/0xba1a22228b091d2bc6e111df61ae6f7e5102da1a#code)
