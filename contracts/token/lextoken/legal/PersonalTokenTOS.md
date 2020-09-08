@@ -1,4 +1,4 @@
-These Terms of Service ("***Terms***") form a binding legal agreement between each person who holds or has redeemed $[[Token Symbol]] tokens ("***you***") and [[Token Name]] and related issuers ("***Consultant***"). $[[Token Symbol]] tokens exist on the Ethereum blockchain at an address generated and indexed by the ERC-20 token program located at 0xAD5B189E64f3D972dec81F286b6101782aD37943.
+These Terms of Service ("***Terms***") form a binding legal agreement between each person who holds or has redeemed $[[Token Symbol]] tokens ("***you***") and [[Token Name]] and related issuers ("***Consultant***"). $[[Token Symbol]] tokens exist on the Ethereum blockchain at an address generated and indexed by the ERC-20 token program located at 0xE3556Df3C6adF0A0AB0B70d064c3acD90a59B6e6.
 
 **__Acquiring $[[Token Symbol]]__**
 
