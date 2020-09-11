@@ -201,7 +201,7 @@ contract CloneFactory {
 
 contract LexNFTFactory is CloneFactory {
     address payable public lexDAO;
-    address payable public template;
+    address public template;
     bytes32 public message;
     
     constructor (address payable _lexDAO, address _template, bytes32 _message) public {
