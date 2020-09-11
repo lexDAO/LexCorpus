@@ -187,7 +187,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 contract CloneFactory {
-    function createClone(address payable target) internal returns (address payable result) {
+    function createClone(address target) internal returns (address result) {
         bytes20 targetBytes = bytes20(target);
         assembly {
             let clone := mload(0x40)
@@ -204,7 +204,7 @@ contract LexNFTFactory is CloneFactory {
     address payable public template;
     bytes32 public message;
     
-    constructor (address payable _lexDAO, address payable _template, bytes32 _message) public {
+    constructor (address payable _lexDAO, address _template, bytes32 _message) public {
         lexDAO = _lexDAO;
         template = _template;
         message = _message;
