@@ -21,8 +21,10 @@ contract LexNFT is ReentrancyGuard {
     
     event Approval(address indexed owner, address indexed spender, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
-    event NFTapproval(uint256 index);
-    event NFTtransfer(uint256 index);
+    event NFTapproval(uint256 indexed index);
+    event NFTtransfer(uint256 indexed index);
+    event NFTburn(uint256 indexed index);
+    event NFTmint(uint256 indexed index);
     
     mapping(address => uint256) private balances;
     mapping(uint256 => NFT) public tokenId;
@@ -65,12 +67,13 @@ contract LexNFT is ReentrancyGuard {
         tokenId[totalSupply].tokenDetails = tokenDetails;
         
         emit Transfer(address(0), owner, 1);
-        emit NFTtransfer(totalSupply);
+        emit NFTmint(totalSupply);
         _initReentrancyGuard(); 
     }
     
     function approve(address spender, uint256 index) external returns (bool) {
         NFT storage nft = tokenId[index];
+        
         require(msg.sender == nft.tokenOwner);
     
         nft.tokenSpender = spender;
@@ -93,6 +96,8 @@ contract LexNFT is ReentrancyGuard {
     function burn(uint256 index) external {
         NFT storage nft = tokenId[index];
         
+        require(msg.sender == nft.tokenSpender);
+        
         nft.tokenOwner = address(0);
         nft.tokenSpender = address(0);
         nft.tokenDetails = "";
@@ -101,6 +106,7 @@ contract LexNFT is ReentrancyGuard {
         totalSupply -= 1; 
         
         emit Transfer(msg.sender, address(0), 1);
+        emit NFTburn(index);
     }
     
     function _transfer(address sender, address recipient, uint256 index) internal {
@@ -122,6 +128,17 @@ contract LexNFT is ReentrancyGuard {
         
         return true;
     }
+    
+    function transferBatch(address[] calldata recipient, uint256[] calldata index) external returns (bool) {
+        require(transferable, "!transferable"); 
+        require(recipient.length == index.length, "!recipient/index");
+        
+        for (uint256 i = 0; i < recipient.length; i++) {
+            _transfer(msg.sender, recipient[i], index[i]);
+        }
+
+        return true;
+    }
 
     function transferFrom(address sender, address recipient, uint256 index) external returns (bool) {
         require(transferable, "!transferable");
@@ -139,16 +156,19 @@ contract LexNFT is ReentrancyGuard {
     OWNER FUNCTIONS
     **************/
     function mint(address recipient, string calldata tokenDetails) external onlyOwner {
-        balances[recipient] += 1;
         totalSupply += 1; 
-        require(totalSupply + 1 <= totalSupplyCap, "capped");
+
+        require(totalSupply <= totalSupplyCap, "capped");
+        
+        balances[recipient] += 1;
         tokenId[totalSupply].tokenOwner = recipient;
         tokenId[totalSupply].tokenSpender = recipient;
         tokenId[totalSupply].tokenDetails = tokenDetails;
         
         emit Transfer(address(0), recipient, 1); 
+        emit NFTmint(totalSupply);
     }
-  
+    
     function updateMessage(string calldata _contractDetails) external onlyOwner {
         contractDetails = _contractDetails;
     }
