@@ -19,8 +19,9 @@ contract LexNFT is ReentrancyGuard {
     bool private initialized;
     bool public transferable; 
     
-    event Approval(address indexed owner, address indexed spender, uint256 index);
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
+    event NFTapproval(uint256 index);
     event NFTtransfer(uint256 index);
     
     mapping(address => uint256) private balances;
@@ -40,7 +41,7 @@ contract LexNFT is ReentrancyGuard {
     function init(
         string calldata _name, 
         string calldata _symbol, 
-        address payable _owner, 
+        address _owner, 
         address _resolver, 
         uint256 _totalSupplyCap, 
         string calldata _contractDetails,
@@ -60,18 +61,22 @@ contract LexNFT is ReentrancyGuard {
         balances[owner] += 1;
         totalSupply += 1;
         tokenId[totalSupply].tokenOwner = owner;
+        tokenId[totalSupply].tokenSpender = owner;
         tokenId[totalSupply].tokenDetails = tokenDetails;
         
         emit Transfer(address(0), owner, 1);
+        emit NFTtransfer(totalSupply);
         _initReentrancyGuard(); 
     }
     
     function approve(address spender, uint256 index) external returns (bool) {
         NFT storage nft = tokenId[index];
-        
+        require(msg.sender == nft.tokenOwner);
+    
         nft.tokenSpender = spender;
         
-        emit Approval(msg.sender, spender, index); 
+        emit Approval(msg.sender, spender, 1); 
+        emit NFTapproval(index);
         return true;
     }
     
