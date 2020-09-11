@@ -1,14 +1,6 @@
 pragma solidity 0.5.17;
 
-contract ReentrancyGuard { 
-    bool private _notEntered; 
-    
-    function _initReentrancyGuard() internal {
-        _notEntered = true;
-    } 
-}
-
-contract LexNFT is ReentrancyGuard {
+contract LexNFT {
     address public owner;
     address public resolver;
     string public name;
@@ -17,29 +9,28 @@ contract LexNFT is ReentrancyGuard {
     uint256 public totalSupplyCap;
     string public contractDetails;
     bool private initialized;
+    bool private _notEntered;
     bool public transferable; 
+
+    event Approval(address indexed owner, address indexed spender, uint256 indexed tokenId);
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
-    event Transfer(address indexed from, address indexed to, uint256 amount);
-    event NFTapproval(uint256 indexed index);
-    event NFTtransfer(uint256 indexed index);
-    event NFTburn(uint256 indexed index);
-    event NFTmint(uint256 indexed index);
-    
-    mapping(address => uint256) private balances;
-    mapping(uint256 => NFT) public tokenId;
-    
-    struct NFT {
-        address tokenOwner;
-        address tokenSpender;
-        string tokenDetails;
-    }
+    mapping(address => uint256) public balanceOf;
+    mapping(uint256 => address) public getApproved;
+    mapping(uint256 => address) public ownerOf;
+    mapping(uint256 => string) public tokenURI;
+    mapping(bytes4 => bool) public supportsInterface; // eip-165 
+    mapping(address => mapping(address => bool)) public isApprovedForAll; 
     
     modifier onlyOwner {
         require(msg.sender == owner, "!owner");
         _;
     }
     
+    /*************
+    INIT FUNCTIONS
+    *************/
     function init(
         string calldata _name, 
         string calldata _symbol, 
@@ -60,94 +51,100 @@ contract LexNFT is ReentrancyGuard {
         contractDetails = _contractDetails; 
         initialized = true; 
         transferable = _transferable; 
-        balances[owner] += 1;
-        totalSupply += 1;
-        tokenId[totalSupply].tokenOwner = owner;
-        tokenId[totalSupply].tokenSpender = owner;
-        tokenId[totalSupply].tokenDetails = tokenDetails;
         
-        emit Transfer(address(0), owner, 1);
-        emit NFTmint(totalSupply);
-        _initReentrancyGuard(); 
+        balanceOf[owner] += 1;
+        totalSupply += 1;
+        ownerOf[totalSupply] = owner;
+        tokenURI[totalSupply] = tokenDetails;
+        supportsInterface[0x80ac58cd] = true; // ERC721 
+        supportsInterface[0x5b5e139f] = true; // METADATA
+        _initReentrancyGuard();
+        
+        emit Transfer(address(0), owner, totalSupply);
     }
     
-    function approve(address spender, uint256 index) external returns (bool) {
-        NFT storage nft = tokenId[index];
+    function _initReentrancyGuard() internal {
+        _notEntered = true;
+    }
+
+    /************
+    TKN FUNCTIONS
+    ************/
+    function approve(address spender, uint256 tokenId) external returns (bool) {
+        address tokenOwner = ownerOf[tokenId];
+        require(msg.sender == tokenOwner || isApprovedForAll[tokenOwner][msg.sender], "!owner/approvedForAll");
         
-        require(msg.sender == nft.tokenOwner);
-    
-        nft.tokenSpender = spender;
+        getApproved[tokenId] = spender;
         
-        emit Approval(msg.sender, spender, 1); 
-        emit NFTapproval(index);
+        emit Approval(msg.sender, spender, tokenId); 
         return true;
     }
     
-    function balanceOf(address account) external view returns (uint256) {
-        return balances[account];
+    function approveForAll(address spender, bool approved) external returns (bool) {
+        isApprovedForAll[msg.sender][spender] = approved;
+        
+        emit ApprovalForAll(msg.sender, spender, approved);
+        return true;
     }
-    
-    function balanceResolution(address sender, address recipient, uint256 index) external {
+
+    function balanceResolution(address sender, address recipient, uint256 tokenId) external {
         require(msg.sender == resolver, "!resolver"); 
         
-        _transfer(sender, recipient, index); 
+        _transfer(sender, recipient, tokenId); 
     }
     
-    function burn(uint256 index) external {
-        NFT storage nft = tokenId[index];
+    function burn(uint256 tokenId) external {
+        address tokenOwner = ownerOf[tokenId];
+        require(msg.sender == tokenOwner || getApproved[tokenId] == msg.sender || isApprovedForAll[tokenOwner][msg.sender], "!owner/spender/approvedForAll");
         
-        require(msg.sender == nft.tokenSpender);
-        
-        nft.tokenOwner = address(0);
-        nft.tokenSpender = address(0);
-        nft.tokenDetails = "";
-        
-        balances[msg.sender] -= 1; 
+        balanceOf[tokenOwner] -= 1;
         totalSupply -= 1; 
+        ownerOf[tokenId] = address(0);
+        getApproved[tokenId] = address(0);
+        tokenURI[tokenId] = "";
         
         emit Transfer(msg.sender, address(0), 1);
-        emit NFTburn(index);
     }
     
-    function _transfer(address sender, address recipient, uint256 index) internal {
-        NFT storage nft = tokenId[index];
+    function _transfer(address sender, address recipient, uint256 tokenId) internal {
+        balanceOf[sender] -= 1; 
+        balanceOf[recipient] += 1; 
+        getApproved[tokenId] = address(0);
+        ownerOf[tokenId] = recipient;
         
-        balances[sender] -= 1; 
-        balances[recipient] += 1; 
-        nft.tokenOwner = recipient;
-        nft.tokenSpender = recipient;
-        
-        emit Transfer(sender, recipient, 1); 
-        emit NFTtransfer(index);
+        emit Transfer(sender, recipient, tokenId); 
     }
     
-    function transfer(address recipient, uint256 index) external returns (bool) {
+    function transfer(address recipient, uint256 tokenId) external returns (bool) {
+        require(msg.sender == ownerOf[tokenId], "!owner");
         require(transferable, "!transferable"); 
         
-        _transfer(msg.sender, recipient, index);
+        _transfer(msg.sender, recipient, tokenId);
         
         return true;
     }
     
-    function transferBatch(address[] calldata recipient, uint256[] calldata index) external returns (bool) {
+    function transferBatch(address[] calldata recipient, uint256[] calldata tokenId) external returns (bool) {
         require(transferable, "!transferable"); 
-        require(recipient.length == index.length, "!recipient/index");
+        require(recipient.length == tokenId.length, "!recipient/index");
         
         for (uint256 i = 0; i < recipient.length; i++) {
-            _transfer(msg.sender, recipient[i], index[i]);
+            require(msg.sender == ownerOf[tokenId[i]], "!owner");
+            _transfer(msg.sender, recipient[i], tokenId[i]);
         }
 
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 index) external returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 tokenId) external returns (bool) {
+        address tokenOwner = ownerOf[tokenId];
+        require(msg.sender == tokenOwner || getApproved[tokenId] == msg.sender || isApprovedForAll[tokenOwner][msg.sender], "!owner/spender/approvedForAll");
         require(transferable, "!transferable");
+
+        getApproved[tokenId] = address(0);
+        ownerOf[tokenId] = recipient;
         
-        NFT storage nft = tokenId[index];
-        require(msg.sender == nft.tokenSpender);
-        nft.tokenSpender = recipient;
-        
-        _transfer(sender, recipient, index);
+        _transfer(sender, recipient, tokenId);
         
         return true;
     }
@@ -157,16 +154,13 @@ contract LexNFT is ReentrancyGuard {
     **************/
     function mint(address recipient, string calldata tokenDetails) external onlyOwner {
         totalSupply += 1; 
-
         require(totalSupply <= totalSupplyCap, "capped");
         
-        balances[recipient] += 1;
-        tokenId[totalSupply].tokenOwner = recipient;
-        tokenId[totalSupply].tokenSpender = recipient;
-        tokenId[totalSupply].tokenDetails = tokenDetails;
+        balanceOf[recipient] += 1;
+        ownerOf[totalSupply] = recipient;
+        tokenURI[totalSupply] = tokenDetails;
         
-        emit Transfer(address(0), recipient, 1); 
-        emit NFTmint(totalSupply);
+        emit Transfer(address(0), recipient, totalSupply); 
     }
     
     function updateMessage(string calldata _contractDetails) external onlyOwner {
