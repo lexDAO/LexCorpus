@@ -120,7 +120,7 @@ contract RaidLocker is Context { // splittable digital deal lockers w/ embedded 
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    /** <$> RL <$> **/
+    /** <⚔️> RL <$> **/
     address public lexDAO;
     address public wETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // canonical ether token wrapper contract reference
     uint256 public lockerCount;
