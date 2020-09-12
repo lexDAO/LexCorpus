@@ -1,28 +1,22 @@
 /*
-██╗     ███████╗██╗  ██╗                         
-██║     ██╔════╝╚██╗██╔╝                         
-██║     █████╗   ╚███╔╝                          
-██║     ██╔══╝   ██╔██╗                          
-███████╗███████╗██╔╝ ██╗                         
-╚══════╝╚══════╝╚═╝  ╚═╝                         
- ██████╗ ██╗   ██╗██╗██╗     ██████╗             
-██╔════╝ ██║   ██║██║██║     ██╔══██╗            
-██║  ███╗██║   ██║██║██║     ██║  ██║            
-██║   ██║██║   ██║██║██║     ██║  ██║            
-╚██████╔╝╚██████╔╝██║███████╗██████╔╝            
- ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═════╝             
-██╗      ██████╗  ██████╗██╗  ██╗███████╗██████╗ 
-██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗
-██║     ██║   ██║██║     █████╔╝ █████╗  ██████╔╝
-██║     ██║   ██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗
-███████╗╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║
+██████╗  █████╗ ██╗██████╗                           
+██╔══██╗██╔══██╗██║██╔══██╗                          
+██████╔╝███████║██║██║  ██║                          
+██╔══██╗██╔══██║██║██║  ██║                          
+██║  ██║██║  ██║██║██████╔╝                          
+╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝                                                                             
+██╗      ██████╗  ██████╗██╗  ██╗███████╗██████╗     
+██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗    
+██║     ██║   ██║██║     █████╔╝ █████╗  ██████╔╝    
+██║     ██║   ██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗    
+███████╗╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║    
 ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 DEAR MSG.SENDER(S):
 
-/ LXGL is a project in beta.
+/ RL is a project in beta.
 // Please audit & use at your own risk.
-/// Entry into LXGL shall not create an attorney/client relationship.
-//// Likewise, LXGL should not be construed as legal advice or replacement for professional counsel.
+/// Entry into RL shall not create an attorney/client relationship.
+//// Likewise, RL should not be construed as legal advice or replacement for professional counsel.
 ///// STEAL THIS C0D3SL4W 
 
 ~presented by LexDAO | Raid Guild LLC
@@ -122,14 +116,16 @@ contract Context { // describes current contract execution context (metaTX suppo
     }
 }
 
-contract LexGuildLocker is Context { // splittable digital deal lockers w/ embedded arbitration tailored for guild work
-    using SafeMath for uint256;
+contract RaidLocker is Context { // splittable digital deal lockers w/ embedded arbitration tailored for guild raids
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
-    /** <$> LXGL <$> **/
-    address public wETH = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; // canonical ether token wrapper contract reference (kovan)
+    /** <$> RL <$> **/
+    address public lexDAO;
+    address public wETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // canonical ether token wrapper contract reference
     uint256 public lockerCount;
-    uint256 public constant MAX_DURATION = 63113904; // 2-year limit on locker 
+    uint256 public MAX_DURATION; // time limit on token lockup - default 63113904 (2-year)
+    uint256 public resolutionRate;
     mapping(uint256 => Locker) public lockers; 
 
     struct Locker {  
@@ -142,6 +138,7 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
         uint256[] batch;
         uint256 cap;
         uint256 released;
+	uint256 resolutionRate;
         uint256 termination;
         bytes32 details; 
     }
@@ -152,6 +149,13 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
     event Withdraw(uint256 indexed index, uint256 indexed remainder);
     event Lock(address indexed sender, uint256 indexed index, bytes32 indexed details);
     event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 index, uint256 resolutionFee, bytes32 details); 
+    event UpdateLockerSettings(address indexed lexDAO, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, bytes32 details);
+    
+    constructor (address _lexDAO, uint256 _MAX_DURATION, uint256 _resolutionRate) public {
+        lexDAO = _lexDAO;
+        MAX_DURATION = _MAX_DURATION;
+        resolutionRate = _resolutionRate;
+    }
 
     /***************
     LOCKER FUNCTIONS
@@ -187,6 +191,7 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
             batch,
             cap,
             0,
+	    resolutionRate,
             termination,
             details);
 
@@ -220,10 +225,10 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
     function release(uint256 index) external { // client transfers locker milestone batch to provider(s) 
     	Locker storage locker = lockers[index];
 	    
-	require(locker.locked == 0, "locked");
+	require(_msgSender() == locker.client, "!client");
 	require(locker.confirmed == 1, "!confirmed");
+	require(locker.locked == 0, "locked");
 	require(locker.cap > locker.released, "released");
-    	require(_msgSender() == locker.client, "!client"); 
         
         uint256[] memory milestone = locker.batch;
         
@@ -238,8 +243,8 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
     function withdraw(uint256 index) external { // withdraw locker remainder to client if termination time passes & no lock
     	Locker storage locker = lockers[index];
         
-        require(locker.locked == 0, "locked");
         require(locker.confirmed == 1, "!confirmed");
+        require(locker.locked == 0, "locked");
         require(locker.cap > locker.released, "released");
         require(now > locker.termination, "!terminated");
         
@@ -272,12 +277,12 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
         Locker storage locker = lockers[index];
         
         uint256 remainder = locker.cap.sub(locker.released); 
-	uint256 resolutionFee = remainder.div(20); // calculates dispute resolution fee (5% of remainder)
+	uint256 resolutionFee = remainder.div(locker.resolutionRate); // calculate dispute resolution fee
 	    
 	require(locker.locked == 1, "!locked"); 
 	require(locker.cap > locker.released, "released");
-	require(_msgSender() == locker.resolver, "!resolver");
 	require(_msgSender() != locker.client, "resolver == client");
+	require(_msgSender() == locker.resolver, "!resolver");
 	    
 	for (uint256 i = 0; i < locker.provider.length; i++) {
             require(msg.sender != locker.provider[i], "resolver == provider");
@@ -291,5 +296,18 @@ contract LexGuildLocker is Context { // splittable digital deal lockers w/ embed
 	locker.released = locker.released.add(remainder); 
 	    
 	emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, details);
+    }
+    
+    /**************
+    LEXDAO FUNCTION
+    **************/
+    function updateLockerSettings(address _lexDAO, uint256 _MAX_DURATION, uint256 _resolutionRate, bytes32 details) external { 
+        require(_msgSender() == lexDAO, "!lexDAO");
+        
+        lexDAO = _lexDAO;
+        MAX_DURATION = _MAX_DURATION;
+        resolutionRate = _resolutionRate;
+	    
+	emit UpdateLockerSettings(lexDAO, MAX_DURATION, resolutionRate, details);
     }
 }
