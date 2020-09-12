@@ -388,9 +388,9 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 	emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, resolution);
     }
     
-    /**************
-    GOVERN FUNCTION
-    **************/
+    /***************
+    GOVERN FUNCTIONS
+    ***************/
     function recoverTokenBalance(address token, address recipient, uint256 amount, uint256 index, string calldata details) external nonReentrant onlyGovernor { 
 	require(recoveryRoleActive == true, "!recoveryRoleActive");
 	
