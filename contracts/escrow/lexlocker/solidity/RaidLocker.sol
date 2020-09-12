@@ -12,10 +12,10 @@
 ███████╗╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║    
 ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 DEAR MSG.SENDER(S):
-/ RL is a project in beta.
+/ R_L is a project in beta.
 // Please audit & use at your own risk.
-/// Entry into RL shall not create an attorney/client relationship.
-//// Likewise, RL should not be construed as legal advice or replacement for professional counsel.
+/// Entry into R_L shall not create an attorney/client relationship.
+//// Likewise, R_L should not be construed as legal advice or replacement for professional counsel.
 ///// STEAL THIS C0D3SL4W 
 ~presented by LexDAO | Raid Guild LLC
 */
@@ -134,7 +134,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    /** <⚔️> RL <$> **/
+    /*$ <⚔️> R_L <⚔️> $*/
     address public governor;
     address public swiftArbToken;
     address public wETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // canonical ether token wrapper contract reference
