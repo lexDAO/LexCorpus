@@ -143,7 +143,18 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     uint256 public resolutionRate;
     uint256 public swiftArbTokenBalance;
     string public lockerStamp;
-    mapping(uint256 => Locker) public lockers;
+    bool public recoveryRoleActive;
+    
+    event RegisterLocker(address indexed client, address[] indexed provider, address indexed resolver, address token, uint8 swiftArb, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
+    event DepositLocker(address indexed client, address[] indexed provider, address indexed resolver, address token, uint8 swiftArb, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
+    event ConfirmLocker(uint256 indexed index, uint256 indexed sum);  
+    event Release(uint256 indexed index, uint256[] indexed milestone); 
+    event Withdraw(uint256 indexed index, uint256 indexed remainder);
+    event Lock(address indexed sender, uint256 indexed index, string indexed details);
+    event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 index, uint256 resolutionFee, string resolution); 
+    event UpdateLockerSettings(address indexed governor, address swiftArbToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftArbTokenBalance, string lockerStamp);
+    event RecoverTokenBalance(address indexed governor, address indexed recipient, address token, address indexed amount, string details);
+    event RenounceRecoveryRole(address indexed governor, string indexed details);
 
     struct Locker {  
         address client; 
@@ -161,14 +172,12 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         string details; 
     }
     
-    event RegisterLocker(address indexed client, address[] indexed provider, address indexed resolver, address token, uint8 swiftArb, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
-    event DepositLocker(address indexed client, address[] indexed provider, address indexed resolver, address token, uint8 swiftArb, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
-    event ConfirmLocker(uint256 indexed index, uint256 indexed sum);  
-    event Release(uint256 indexed index, uint256[] indexed milestone); 
-    event Withdraw(uint256 indexed index, uint256 indexed remainder);
-    event Lock(address indexed sender, uint256 indexed index, string indexed details);
-    event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 index, uint256 resolutionFee, string resolution); 
-    event UpdateLockerSettings(address indexed governor, address swiftArbToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftArbTokenBalance, string lockerStamp);
+    mapping(uint256 => Locker) public lockers;
+    
+    modifier onlyGovernor {
+        require(_msgSender() == governor, "!governor");
+        _;
+    }
     
     constructor (address _governor, address _swiftArbToken, uint256 _swiftArbTokenBalance, uint256 _MAX_DURATION, uint256 _resolutionRate, string memory _lockerStamp) public {
         governor = _governor;
@@ -382,9 +391,28 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     /**************
     GOVERN FUNCTION
     **************/
-    function updateLockerSettings(address _governor, address _swiftArbToken, uint256 _MAX_DURATION, uint256 _resolutionRate, uint256 _swiftArbTokenBalance, string calldata _lockerStamp) external { 
-        require(_msgSender() == governor, "!governor");
-        
+    function recoverTokenBalance(address token, address recipient, uint256 amount, string calldata details) external nonReentrant onlyGovernor { 
+	require(recoveryRoleActive == true, "!recoveryRoleActive");
+	
+	IERC20(token).safeTransfer(recipient, amount);
+       
+	emit RecoverTokenBalance(_msgSender(), recipient, token, amount, details);
+    }
+    
+    function renounceRecoveryRole(string calldata details) external onlyGovernor { 
+	recoveryRoleActive = false;
+       
+	emit RenounceRecoveryRole(_msgSender(), details);
+    }
+    
+    function updateLockerSettings(
+    	address _governor, 
+	address _swiftArbToken, 
+	uint256 _MAX_DURATION, 
+	uint256 _resolutionRate, 
+	uint256 _swiftArbTokenBalance, 
+	string calldata _lockerStamp
+    ) external onlyGovernor { 
         governor = _governor;
         swiftArbToken = _swiftArbToken;
         MAX_DURATION = _MAX_DURATION;
