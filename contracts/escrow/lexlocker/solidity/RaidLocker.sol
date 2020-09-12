@@ -220,7 +220,8 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             details);
 
         emit RegisterLocker(client, provider, resolver, token, swiftArb, batch, cap, index, termination, details); 
-        return index;
+        
+	return index;
     }
     
     function confirmLocker(uint256 index) payable external nonReentrant { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
@@ -293,7 +294,8 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             details);
 
         emit DepositLocker(_msgSender(), provider, resolver, token, swiftArb, batch, cap, index, termination, details); 
-        return index;
+        
+	return index;
     }
 
     function release(uint256 index) external nonReentrant { // client transfers locker milestone batch to provider(s) 
