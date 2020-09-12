@@ -383,7 +383,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(locker.resolver, resolutionFee);
 	    
-	locker.released = locker.released.add(remainder); 
+	locker.released = locker.cap; 
 	    
 	emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, resolution);
     }
@@ -391,12 +391,18 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     /**************
     GOVERN FUNCTION
     **************/
-    function recoverTokenBalance(address token, address recipient, uint256 amount, string calldata details) external nonReentrant onlyGovernor { 
+    function recoverTokenBalance(address token, address recipient, uint256 amount, uint256 index, string calldata details) external nonReentrant onlyGovernor { 
 	require(recoveryRoleActive == true, "!recoveryRoleActive");
+	
+	if (index != 0) {
+            Locker storage locker = lockers[index];
+	    require(amount == locker.cap.sub(locker.released), "!remainder");
+	    locker.released = locker.cap;
+        } 
 	
 	IERC20(token).safeTransfer(recipient, amount);
        
-	emit RecoverTokenBalance(_msgSender(), recipient, token, amount, details);
+	emit RecoverTokenBalance(_msgSender(), recipient, token, amount, index, details);
     }
     
     function renounceRecoveryRole(string calldata details) external onlyGovernor { 
