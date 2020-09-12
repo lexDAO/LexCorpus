@@ -105,7 +105,7 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
     }
 }
 
-contract Context { // describes current contract execution context (metaTX support) / openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
+contract Context { // describe current contract execution context (metaTX support) / openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
     function _msgSender() internal view returns (address payable) {
         return msg.sender;
     }
@@ -134,7 +134,7 @@ contract ReentrancyGuard { // call wrapper for reentrancy check
     }
 }
 
-contract RaidLocker is Context, ReentrancyGuard { // splittable digital deal lockers w/ embedded arbitration tailored for guild raids
+contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locker registry w/ ADR for guild dealing
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -191,7 +191,7 @@ contract RaidLocker is Context, ReentrancyGuard { // splittable digital deal loc
         address[] memory provider,
         address resolver,
         address token,
-        uint8 swiftArb,
+        uint8 swiftArb, // allow swiftArbToken balance holder to resolve
         uint256[] memory batch, 
         uint256 cap,
         uint256 milestones,
@@ -254,7 +254,7 @@ contract RaidLocker is Context, ReentrancyGuard { // splittable digital deal loc
         address[] memory provider,
         address resolver,
         address token,
-        uint8 swiftArb,
+        uint8 swiftArb, // allow swiftArbToken balance holder to resolve
         uint256[] memory batch, 
         uint256 cap,
         uint256 milestones,
