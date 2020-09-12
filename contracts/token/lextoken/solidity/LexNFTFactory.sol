@@ -58,6 +58,7 @@ contract LexNFT {
         tokenURI[totalSupply] = tokenDetails;
         supportsInterface[0x80ac58cd] = true; // ERC721 
         supportsInterface[0x5b5e139f] = true; // METADATA
+        supportsInterface[0x780e9d63] = true; // ENUMERABLE
         _initReentrancyGuard();
         
         emit Transfer(address(0), owner, totalSupply);
