@@ -7,7 +7,7 @@ contract LexNFT {
     string public symbol;
     uint256 public totalSupply;
     uint256 public totalSupplyCap;
-    string public contractDetails;
+    string public baseURI;
     bool private initialized;
     bool private _notEntered;
     bool public transferable; 
@@ -37,7 +37,7 @@ contract LexNFT {
         address _owner, 
         address _resolver, 
         uint256 _totalSupplyCap, 
-        string calldata _contractDetails,
+        string calldata _baseURI,
         string calldata tokenDetails,
         bool _transferable
     ) external {
@@ -48,7 +48,7 @@ contract LexNFT {
         owner = _owner; 
         resolver = _resolver;
         totalSupplyCap = _totalSupplyCap; 
-        contractDetails = _contractDetails; 
+        baseURI = _baseURI; 
         initialized = true; 
         transferable = _transferable; 
         
