@@ -378,7 +378,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     }
     
     /**************
-    LEXDAO FUNCTION
+    GOVERN FUNCTION
     **************/
     function updateLockerSettings(address _governor, address _swiftArbToken, uint256 _MAX_DURATION, uint256 _resolutionRate, uint256 _swiftArbTokenBalance, string calldata _lockerStamp) external { 
         require(_msgSender() == governor, "!governor");
