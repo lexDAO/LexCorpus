@@ -119,10 +119,6 @@ contract Context { // describe current contract execution context (metaTX suppor
 contract ReentrancyGuard { // call wrapper for reentrancy check
     bool private _notEntered;
 
-    function _initReentrancyGuard () internal {
-        _notEntered = true;
-    }
-
     modifier nonReentrant() {
         require(_notEntered, "ReentrancyGuard: reentrant call");
 
