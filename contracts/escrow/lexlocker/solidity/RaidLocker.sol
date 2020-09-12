@@ -105,7 +105,7 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
     }
 }
 
-contract Context { // describe current contract execution context (metaTX support) / openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
+contract Context { // describe current contract execution context (metaTX support) - see openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
     function _msgSender() internal view returns (address payable) {
         return msg.sender;
     }
