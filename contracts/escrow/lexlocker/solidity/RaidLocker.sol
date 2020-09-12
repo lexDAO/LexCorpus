@@ -142,7 +142,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     uint256 public MAX_DURATION; // time limit on token lockup - default 63113904 (2-year)
     uint256 public resolutionRate;
     uint256 public swiftArbTokenBalance;
-    string public lockerStamp;
+    string public lockerTerms;
     bool public recoveryRoleActive;
     
     event RegisterLocker(address indexed client, address[] indexed provider, address indexed resolver, address token, uint8 swiftArb, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
@@ -152,7 +152,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     event Withdraw(uint256 indexed index, uint256 indexed remainder);
     event Lock(address indexed sender, uint256 indexed index, string indexed details);
     event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 index, uint256 resolutionFee, string resolution); 
-    event UpdateLockerSettings(address indexed governor, address swiftArbToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftArbTokenBalance, string lockerStamp);
+    event UpdateLockerSettings(address indexed governor, address swiftArbToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftArbTokenBalance, string lockerTerms);
     event RecoverTokenBalance(address indexed governor, address indexed recipient, address token, address indexed amount, string details);
     event RenounceRecoveryRole(address indexed governor, string indexed details);
 
@@ -185,7 +185,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         swiftArbTokenBalance = _swiftArbTokenBalance;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
-        lockerStamp = _lockerStamp;
+        lockerTerms = _lockerTerms;
     }
 
     /***************
@@ -411,16 +411,16 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 	uint256 _MAX_DURATION, 
 	uint256 _resolutionRate, 
 	uint256 _swiftArbTokenBalance, 
-	string calldata _lockerStamp
+	string calldata _lockerTerms
     ) external onlyGovernor { 
         governor = _governor;
         swiftArbToken = _swiftArbToken;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         swiftArbTokenBalance = _swiftArbTokenBalance;
-        lockerStamp = _lockerStamp;
+        lockerTerms = _lockerTerms;
 	    
-	emit UpdateLockerSettings(governor, swiftArbToken, MAX_DURATION, resolutionRate, swiftArbTokenBalance, lockerStamp);
+	emit UpdateLockerSettings(governor, swiftArbToken, MAX_DURATION, resolutionRate, swiftArbTokenBalance, lockerTerms);
     }
     
     /**************
