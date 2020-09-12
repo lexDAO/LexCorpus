@@ -19,10 +19,12 @@ contract LexNFT {
     mapping(address => uint256) public balanceOf;
     mapping(uint256 => address) public getApproved;
     mapping(uint256 => address) public ownerOf;
+    mapping(uint256 => uint256) public tokenByIndex;
     mapping(uint256 => string) public tokenURI;
     mapping(bytes4 => bool) public supportsInterface; // eip-165 
+    mapping(address => mapping(uint256 => uint256)) public tokenOfOwnerByIndex;
     mapping(address => mapping(address => bool)) public isApprovedForAll; 
-    
+
     modifier onlyOwner {
         require(msg.sender == owner, "!owner");
         _;
@@ -55,7 +57,9 @@ contract LexNFT {
         balanceOf[owner] += 1;
         totalSupply += 1;
         ownerOf[totalSupply] = owner;
+        tokenByIndex[totalSupply] = totalSupply;
         tokenURI[totalSupply] = tokenDetails;
+        tokenOfOwnerByIndex[owner][totalSupply];
         supportsInterface[0x80ac58cd] = true; // ERC721 
         supportsInterface[0x5b5e139f] = true; // METADATA
         supportsInterface[0x780e9d63] = true; // ENUMERABLE
@@ -162,10 +166,6 @@ contract LexNFT {
         tokenURI[totalSupply] = tokenDetails;
         
         emit Transfer(address(0), recipient, totalSupply); 
-    }
-    
-    function updateMessage(string calldata _contractDetails) external onlyOwner {
-        contractDetails = _contractDetails;
     }
     
     function updateOwner(address payable _owner) external onlyOwner {
