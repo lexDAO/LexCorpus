@@ -150,7 +150,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     event ConfirmLocker(uint256 indexed index, uint256 indexed sum);  
     event Release(uint256 indexed index, uint256[] indexed milestone); 
     event Withdraw(uint256 indexed index, uint256 indexed remainder);
-    event AssignClientOracle(address indexed client, address indexed clientOracle, uint256 indexed index);
+    event AssignClientRoles(address indexed client, address indexed clientOracle, uint256 indexed index);
     event ClientUpdateResolver(address indexed client, address indexed updatedResolver, uint256 indexed index, string details);
     event ProviderUpdateResolver(address indexed provider, address indexed updatedResolver, uint256 indexed index, string details);
     event Lock(address indexed sender, uint256 indexed index, string indexed details);
@@ -379,7 +379,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         locker.client = client;
         locker.clientOracle = clientOracle;
         
-        emit AssignClientOracle(client, clientOracle, index);
+        emit AssignClientRoles(client, clientOracle, index);
     }
     
     // ***************
