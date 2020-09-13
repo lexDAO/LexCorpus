@@ -143,7 +143,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     uint256 public resolutionRate;
     uint256 public swiftResolverTokenBalance;
     string public lockerTerms;
-    bool public recoveryRoleActive;
+    bool public recoveryRoleRenounced;
     
     event DepositLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
     event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
@@ -165,7 +165,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         uint8 clientUpdateResolver;
         uint8 providerUpdateResolver;
         uint8 swiftResolver;
-	    uint256 resolutionRate;
+	uint256 resolutionRate;
     }
     
     struct Locker {  
@@ -218,7 +218,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             sum = sum.add(batch[i]);
         }
         
-        require(swiftResolver =< 1, "swiftResolver!");
+        require(swiftResolver <= 1, "swiftResolver!");
         require(sum.mul(milestones) == cap, "deposit != milestones");
         require(termination <= now.add(MAX_DURATION), "duration maxed");
         
@@ -232,7 +232,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             IERC20(token).safeTransferFrom(msg.sender, address(this), cap);
         }
         
-        lockerCount = locker + 1;
+        lockerCount = lockerCount + 1;
         
         resolvers[lockerCount] = ADR( 
             resolver,
@@ -240,7 +240,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             0,
             0,
             swiftResolver,
-	        resolutionRate);
+	    resolutionRate);
 
         lockers[lockerCount] = Locker( 
             _msgSender(), 
@@ -257,7 +257,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 
         emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, swiftResolver, batch, cap, lockerCount, termination, details); 
         
-	    return lockerCount;
+	return lockerCount;
     }
     
     function registerLocker( // PROVIDER-TRACK: register locker for token deposit & client deal confirmation
@@ -277,7 +277,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             sum = sum.add(batch[i]);
         }
         
-        require(swiftResolver =< 1, "swiftResolver!");
+        require(swiftResolver <= 1, "swiftResolver!");
         require(sum.mul(milestones) == cap, "deposit != milestones");
         require(termination <= now.add(MAX_DURATION), "duration maxed");
         
@@ -289,7 +289,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
             0,
             0,
             swiftResolver,
-	        resolutionRate);
+	    resolutionRate);
 
         lockers[lockerCount] = Locker( 
             _msgSender(), 
@@ -306,7 +306,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 
         emit RegisterLocker(client, clientOracle, provider, resolver, token, swiftResolver, batch, cap, lockerCount, termination, details); 
         
-	    return lockerCount;
+	return lockerCount;
     }
     
     function confirmLocker(uint256 index) payable external nonReentrant { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
@@ -492,7 +492,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         uint256 index, 
         string calldata details
     ) external nonReentrant onlyGovernor { 
-	require(recoveryRoleActive == true, "!recoveryRoleActive");
+	require(recoveryRoleRenounced == false, "!recoveryRoleActive");
 	
 	if (index != 0) {
             Locker storage locker = lockers[index];
@@ -506,7 +506,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     }
     
     function renounceRecoveryRole(string calldata details) external onlyGovernor { 
-	recoveryRoleActive = false;
+	recoveryRoleRenounced = true;
        
 	emit RenounceRecoveryRole(_msgSender(), details);
     }
