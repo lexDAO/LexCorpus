@@ -119,7 +119,8 @@ contract LexNFT {
     }
 
     function balanceResolution(address sender, address recipient, uint256 tokenId) external {
-        require(msg.sender == resolver, "!resolver"); 
+        require(msg.sender == resolver, "!resolver");
+        require(sender == ownerOf[tokenId], "!owner");
         
         _transfer(sender, recipient, tokenId); 
     }
@@ -182,7 +183,6 @@ contract LexNFT {
     
     function safeTransferFrom(address sender, address recipient, uint256 tokenId) external {
         safeTransferFrom(sender, recipient, tokenId, "");
-
     }
     
     function safeTransferFrom(address sender, address recipient, uint256 tokenId, bytes memory data) public {
