@@ -37,7 +37,7 @@ contract LexNFT {
         address _resolver, 
         uint256 _totalSupplyCap, 
         string calldata _baseURI,
-        string calldata tokenDetails,
+        string calldata tokenURI,
         bool _transferable
     ) external {
         require(!initialized, "initialized"); 
@@ -55,7 +55,7 @@ contract LexNFT {
         totalSupply += 1;
         ownerOf[totalSupply] = owner;
         tokenByIndex[totalSupply] = totalSupply;
-        tokenURI[totalSupply] = tokenDetails;
+        tokenURI[totalSupply] = tokenURI;
         tokenOfOwnerByIndex[owner][totalSupply];
         supportsInterface[0x80ac58cd] = true; // ERC721 
         supportsInterface[0x5b5e139f] = true; // METADATA
@@ -171,6 +171,14 @@ contract LexNFT {
         tokenURI[totalSupply] = tokenDetails;
         
         emit Transfer(address(0), recipient, totalSupply); 
+    }
+    
+    function updateBaseURI(string _baseURI) external onlyOwner {
+        baseURI = _baseURI;
+    }
+    
+    function updateTokenURI(uint256 tokenId, string calldata tokenURI) external onlyOwner {
+        tokenURI[tokenId] = tokenURI;
     }
     
     function updateOwner(address payable _owner) external onlyOwner {
