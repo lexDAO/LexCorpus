@@ -173,7 +173,7 @@ contract LexNFT {
         emit Transfer(address(0), recipient, totalSupply); 
     }
     
-    function updateBaseURI(string _baseURI) external onlyOwner {
+    function updateBaseURI(string calldata _baseURI) external onlyOwner {
         baseURI = _baseURI;
     }
     
