@@ -181,16 +181,16 @@ contract LexNFT {
         baseURI = _baseURI;
     }
     
-    function updateTokenURI(uint256 tokenId, string calldata tokenURI) external onlyOwner {
-        tokenURI[tokenId] = tokenURI;
-    }
-    
     function updateOwner(address payable _owner) external onlyOwner {
         owner = _owner;
     }
     
     function updateResolver(address _resolver) external onlyOwner {
         resolver = _resolver;
+    }
+    
+    function updateTokenURI(uint256 tokenId, string calldata tokenURI) external onlyOwner {
+        tokenURI[tokenId] = tokenURI;
     }
     
     function updateTransferability(bool _transferable) external onlyOwner {
