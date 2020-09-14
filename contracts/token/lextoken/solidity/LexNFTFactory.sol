@@ -29,10 +29,7 @@ contract LexNFT {
         require(msg.sender == owner, "!owner");
         _;
     }
-    
-    /*************
-    INIT FUNCTIONS
-    *************/
+
     function init(
         string calldata _name, 
         string calldata _symbol, 
@@ -67,35 +64,7 @@ contract LexNFT {
         
         emit Transfer(address(0), owner, totalSupply);
     }
-    
-    /***************
-    HELPER FUNCTIONS
-    ***************/
-    function _callOptionalReturn(address recipient, bytes memory data) internal {
-        require(isContract(recipient), "SafeERC20: call to non-contract");
-
-        (bool success, bytes memory returnData) = recipient.call(data);
-        require(success, "SafeERC20: low-level call failed");
-
-        if (returnData.length > 0) { // return data is optional
-            require(abi.decode(returnData, (bool)), "SafeERC20: erc20 operation did not succeed");
-        }
-    }
-    
-    function _initReentrancyGuard() internal {
-        _notEntered = true;
-    }
-    
-    function isContract(address account) internal view returns (bool) {
-        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-        // for accounts without code, i.e. `keccak256('')`
-        bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        assembly { codehash := extcodehash(account) }
-        return (codehash != accountHash && codehash != 0x0);
-    }
-    
+   
     /************
     TKN FUNCTIONS
     ************/
@@ -214,6 +183,34 @@ contract LexNFT {
     
     function updateTransferability(bool _transferable) external onlyOwner {
         transferable = _transferable;
+    }
+
+    /***************
+    HELPER FUNCTIONS
+    ***************/
+    function _callOptionalReturn(address recipient, bytes memory data) internal {
+        require(isContract(recipient), "SafeERC20: call to non-contract");
+
+        (bool success, bytes memory returnData) = recipient.call(data);
+        require(success, "SafeERC20: low-level call failed");
+
+        if (returnData.length > 0) { // return data is optional
+            require(abi.decode(returnData, (bool)), "SafeERC20: erc20 operation did not succeed");
+        }
+    }
+    
+    function _initReentrancyGuard() internal {
+        _notEntered = true;
+    }
+    
+    function isContract(address account) internal view returns (bool) {
+        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
+        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
+        // for accounts without code, i.e. `keccak256('')`
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        assembly { codehash := extcodehash(account) }
+        return (codehash != accountHash && codehash != 0x0);
     }
 }
 
