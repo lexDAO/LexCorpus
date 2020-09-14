@@ -22,8 +22,8 @@ contract LexNFT {
     mapping(uint256 => uint256) public tokenByIndex;
     mapping(uint256 => string) public tokenURI;
     mapping(bytes4 => bool) public supportsInterface; // eip-165 
+    mapping(address => mapping(address => bool)) public isApprovedForAll;
     mapping(address => mapping(uint256 => uint256)) public tokenOfOwnerByIndex;
-    mapping(address => mapping(address => bool)) public isApprovedForAll; 
 
     modifier onlyOwner {
         require(msg.sender == owner, "!owner");
