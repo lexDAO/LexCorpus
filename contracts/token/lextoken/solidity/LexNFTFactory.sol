@@ -3,11 +3,11 @@ pragma solidity 0.5.17;
 contract LexNFT {
     address public owner;
     address public resolver;
-    string public name;
-    string public symbol;
     uint256 public totalSupply;
     uint256 public totalSupplyCap;
     string public baseURI;
+    string public name;
+    string public symbol;
     bool private initialized;
     bool private _notEntered;
     bool public transferable; 
