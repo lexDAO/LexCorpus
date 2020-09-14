@@ -9,21 +9,18 @@ contract LexNFT {
     string public name;
     string public symbol;
     bool private initialized;
-    bool private _notEntered;
     bool public transferable; 
 
     event Approval(address indexed owner, address indexed spender, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-    
+
     mapping(address => uint256) public balanceOf;
     mapping(uint256 => address) public getApproved;
     mapping(uint256 => address) public ownerOf;
-    mapping(uint256 => uint256) public tokenByIndex;
     mapping(uint256 => string) public tokenURI;
     mapping(bytes4 => bool) public supportsInterface; // eip-165 
     mapping(address => mapping(address => bool)) public isApprovedForAll;
-    mapping(address => mapping(uint256 => uint256)) public tokenOfOwnerByIndex;
 
     modifier onlyOwner {
         require(msg.sender == owner, "!owner");
@@ -37,7 +34,7 @@ contract LexNFT {
         address _resolver, 
         uint256 _totalSupplyCap, 
         string calldata _baseURI,
-        string calldata tokenURI,
+        string calldata _tokenURI,
         bool _transferable
     ) external {
         require(!initialized, "initialized"); 
@@ -54,17 +51,13 @@ contract LexNFT {
         balanceOf[owner] += 1;
         totalSupply += 1;
         ownerOf[totalSupply] = owner;
-        tokenByIndex[totalSupply] = totalSupply;
-        tokenURI[totalSupply] = tokenURI;
-        tokenOfOwnerByIndex[owner][totalSupply];
+        tokenURI[totalSupply] = _tokenURI;
         supportsInterface[0x80ac58cd] = true; // ERC721 
         supportsInterface[0x5b5e139f] = true; // METADATA
-        supportsInterface[0x780e9d63] = true; // ENUMERABLE
-        _initReentrancyGuard();
         
         emit Transfer(address(0), owner, totalSupply);
     }
-   
+
     /************
     TKN FUNCTIONS
     ************/
@@ -94,7 +87,7 @@ contract LexNFT {
         _transfer(sender, recipient, tokenId); 
     }
     
-    function burn(uint256 tokenId) external {
+    function burn(uint256 tokenId) public {
         address tokenOwner = ownerOf[tokenId];
         require(msg.sender == tokenOwner || getApproved[tokenId] == msg.sender || isApprovedForAll[tokenOwner][msg.sender], "!owner/spender/approvedForAll");
         
@@ -154,15 +147,6 @@ contract LexNFT {
         return true;
     }
     
-    function safeTransferFrom(address sender, address recipient, uint256 tokenId) external {
-        safeTransferFrom(sender, recipient, tokenId, "");
-    }
-    
-    function safeTransferFrom(address sender, address recipient, uint256 tokenId, bytes memory data) public {
-        _callOptionalReturn(recipient, data);
-        transferFrom(sender, recipient, tokenId);
-    }
-    
     /**************
     OWNER FUNCTIONS
     **************/
@@ -189,40 +173,12 @@ contract LexNFT {
         resolver = _resolver;
     }
     
-    function updateTokenURI(uint256 tokenId, string calldata tokenURI) external onlyOwner {
-        tokenURI[tokenId] = tokenURI;
+    function updateTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyOwner {
+        tokenURI[tokenId] = _tokenURI;
     }
     
     function updateTransferability(bool _transferable) external onlyOwner {
         transferable = _transferable;
-    }
-
-    /***************
-    HELPER FUNCTIONS
-    ***************/
-    function _callOptionalReturn(address recipient, bytes memory data) internal {
-        require(isContract(recipient), "SafeERC20: call to non-contract");
-
-        (bool success, bytes memory returnData) = recipient.call(data);
-        require(success, "SafeERC20: low-level call failed");
-
-        if (returnData.length > 0) { // return data is optional
-            require(abi.decode(returnData, (bool)), "SafeERC20: erc20 operation did not succeed");
-        }
-    }
-    
-    function _initReentrancyGuard() internal {
-        _notEntered = true;
-    }
-    
-    function isContract(address account) internal view returns (bool) {
-        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-        // for accounts without code, i.e. `keccak256('')`
-        bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        assembly { codehash := extcodehash(account) }
-        return (codehash != accountHash && codehash != 0x0);
     }
 }
 
