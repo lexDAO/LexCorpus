@@ -104,7 +104,13 @@ contract LexNFT {
         getApproved[tokenId] = address(0);
         tokenURI[tokenId] = "";
         
-        emit Transfer(msg.sender, address(0), 1);
+        emit Transfer(msg.sender, address(0), tokenId);
+    }
+    
+    function burnBatch(uint256[] calldata tokenId) external {
+        for (uint256 i = 0; i < tokenId.length; i++) {
+            burn(tokenId[i]);
+        }
     }
     
     function _transfer(address sender, address recipient, uint256 tokenId) internal {
@@ -125,7 +131,7 @@ contract LexNFT {
         return true;
     }
     
-    function transferBatch(address[] calldata recipient, uint256[] calldata tokenId) external returns (bool) {
+    function transferBatch(address[] calldata recipient, uint256[] calldata tokenId) external {
         require(transferable, "!transferable"); 
         require(recipient.length == tokenId.length, "!recipient/index");
         
@@ -133,8 +139,6 @@ contract LexNFT {
             require(msg.sender == ownerOf[tokenId[i]], "!owner");
             _transfer(msg.sender, recipient[i], tokenId[i]);
         }
-
-        return true;
     }
 
     function transferFrom(address sender, address recipient, uint256 tokenId) public returns (bool) {
