@@ -1,6 +1,6 @@
 {
   "description": "The Goods for doing stuff.", 
   "external_url": "https://emojipedia.org/package/", 
-  "image": "https://ipfs.io/ipfs/QmPGZEX6VoSKkzWzgkq6hDGc33Xh94z8K2auZEVre67jP7", 
+  "image": "https://media3.giphy.com/media/69ocantqVQ1QaTmmRi/giphy.gif", 
   "name": "THE GOODS"
 }
