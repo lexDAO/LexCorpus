@@ -1,6 +1,6 @@
 {
-  "description": "Celebrating the launch of Uniswap Protocol: UNI token on Sep-14-2020 06:11:26 PM +UTC", 
-  "external_url": "https://etherscan.io/address/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984#code", 
-  "image": "https://ipfs.globalupload.io/QmTVwKwT4zYUJy5eBuxW6bmmg7zkz6WryChS81nw8PKATp", 
-  "name": "UNIted we DANCE"
+  "description": "RAMSES II PASSPORT MUG", 
+  "external_url": "https://etherscan.io/address/0xef0ff94b152c00ed4620b149ee934f2f4a526387#code", 
+  "image": "https://ipfs.globalupload.io/Qmesnn5dtRTFXqL2o9vUZ22TyYjJZJkM6seSiaccvn5Px6", 
+  "name": "ZEROED HAIR DAY"
 }
