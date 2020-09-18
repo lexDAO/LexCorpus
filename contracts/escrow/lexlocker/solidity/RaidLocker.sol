@@ -119,6 +119,10 @@ contract Context { // describe current contract execution context (metaTX suppor
 contract ReentrancyGuard { // call wrapper for reentrancy check
     bool private _notEntered;
 
+    function _initReentrancyGuard() internal {
+        _notEntered = true;
+    }
+
     modifier nonReentrant() {
         require(_notEntered, "ReentrancyGuard: reentrant call");
 
@@ -130,12 +134,12 @@ contract ReentrancyGuard { // call wrapper for reentrancy check
     }
 }
 
-contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locker registry w/ ADR for guild dealing
+contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker registry w/ ADR for digital dealing
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
     /*$ <⚔️> R_L <⚔️> $*/
-    address public governor;
+    address public dao;
     address public swiftResolverToken;
     address public wETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // canonical ether token wrapper contract reference
     uint256 public lockerCount;
@@ -145,25 +149,25 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     string public lockerTerms;
     bool public recoveryRoleRenounced;
     
-    event DepositLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
-    event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 index, uint256 termination, string details);
-    event ConfirmLocker(uint256 indexed index, uint256 indexed sum);  
-    event Release(uint256 indexed index, uint256[] indexed milestone); 
-    event Withdraw(uint256 indexed index, uint256 indexed remainder);
-    event AssignClientRoles(address indexed client, address indexed clientOracle, uint256 indexed index);
-    event ClientUpdateResolver(address indexed client, address indexed updatedResolver, uint256 indexed index, string details);
-    event ProviderUpdateResolver(address indexed provider, address indexed updatedResolver, uint256 indexed index, string details);
-    event Lock(address indexed sender, uint256 indexed index, string indexed details);
-    event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 index, uint256 resolutionFee, string resolution); 
-    event UpdateLockerSettings(address indexed governor, address swiftResolverToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
-    event RecoverTokenBalance(address indexed governor, address indexed recipient, address token, uint256 indexed amount, uint256 index, string details);
-    event RenounceRecoveryRole(address indexed governor, string indexed details);
+    event DepositLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details);
+    event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details);
+    event ConfirmLocker(uint256 indexed registry);  
+    event Release(uint256 indexed registry); 
+    event Withdraw(uint256 indexed registry, uint256 indexed remainder);
+    event AssignClientRoles(address indexed client, address indexed clientOracle, uint256 indexed registry);
+    event ClientProposeResolver(address indexed client, address indexed proposedResolver, uint256 indexed registry, string details);
+    event ProviderProposeResolver(address indexed provider, address indexed proposedResolver, uint256 indexed registry, string details);
+    event Lock(address indexed sender, uint256 indexed registry, string indexed details);
+    event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 registry, uint256 resolutionFee, string resolution); 
+    event UpdateLockerSettings(address indexed dao, address swiftResolverToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
+    event RecoverTokenBalance(address indexed recipient, address indexed token, uint256 indexed amount, uint256 registry, string details);
+    event RenounceRecoveryRole(string indexed details);
 
     struct ADR {  
+        address proposedResolver;
         address resolver;
-        address updatedResolver;
-        uint8 clientUpdateResolver;
-        uint8 providerUpdateResolver;
+        uint8 clientProposedResolver;
+        uint8 providerProposedResolver;
         uint8 swiftResolver;
 	uint256 resolutionRate;
     }
@@ -182,21 +186,22 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         string details; 
     }
     
-    mapping(uint256 => ADR) public resolvers;
+    mapping(uint256 => ADR) public adrs;
     mapping(uint256 => Locker) public lockers;
     
-    modifier onlyGovernor {
-        require(_msgSender() == governor, "!governor");
+    modifier onlydao {
+        require(_msgSender() == dao, "!dao");
         _;
     }
     
-    constructor (address _governor, address _swiftResolverToken, uint256 _swiftResolverTokenBalance, uint256 _MAX_DURATION, uint256 _resolutionRate, string memory _lockerTerms) public {
-        governor = _governor;
+    constructor (address _dao, address _swiftResolverToken, uint256 _swiftResolverTokenBalance, uint256 _MAX_DURATION, uint256 _resolutionRate, string memory _lockerTerms) public {
+        dao = _dao;
         swiftResolverToken = _swiftResolverToken;
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         lockerTerms = _lockerTerms;
+        _initReentrancyGuard();
     }
 
     /***************
@@ -234,7 +239,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         
         lockerCount = lockerCount + 1;
         
-        resolvers[lockerCount] = ADR( 
+        adrs[lockerCount] = ADR( 
             resolver,
             resolver,
             0,
@@ -283,7 +288,7 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         
         lockerCount = lockerCount + 1;
        
-        resolvers[lockerCount] = ADR( 
+        adrs[lockerCount] = ADR( 
             resolver,
             resolver,
             0,
@@ -309,8 +314,8 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 	return lockerCount;
     }
     
-    function confirmLocker(uint256 index) payable external nonReentrant { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
-        Locker storage locker = lockers[index];
+    function confirmLocker(uint256 registry) payable external nonReentrant { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
+        Locker storage locker = lockers[registry];
         
         require(locker.confirmed == 0, "confirmed");
         require(_msgSender() == locker.client, "!client");
@@ -329,29 +334,29 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         
         locker.confirmed = 1;
         
-        emit ConfirmLocker(index, sum); 
+        emit ConfirmLocker(registry); 
     }
     
-    function release(uint256 index) external nonReentrant { // client or oracle can release token batch up to cap to provider 
-    	Locker storage locker = lockers[index];
+    function release(uint256 registry) external nonReentrant { // client or oracle can release token batch up to cap to provider 
+    	Locker storage locker = lockers[registry];
 	    
 	require(locker.confirmed == 1, "!confirmed");
 	require(locker.locked == 0, "locked");
 	require(locker.cap > locker.released, "released");
 	require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         
-        uint256[] memory milestone = locker.batch;
+        uint256[] memory batch = locker.batch;
         
         for (uint256 i = 0; i < locker.provider.length; i++) {
-            IERC20(locker.token).safeTransfer(locker.provider[i], milestone[i]);
-            locker.released = locker.released.add(milestone[i]);
+            IERC20(locker.token).safeTransfer(locker.provider[i], batch[i]);
+            locker.released = locker.released.add(batch[i]);
         }
 
-	emit Release(index, milestone); 
+	emit Release(registry); 
     }
     
-    function withdraw(uint256 index) external nonReentrant { // withdraw locker remainder to client if termination time passes & no lock
-    	Locker storage locker = lockers[index];
+    function withdraw(uint256 registry) external nonReentrant { // withdraw locker remainder to client if termination time passes & no lock
+    	Locker storage locker = lockers[registry];
         
         require(locker.confirmed == 1, "!confirmed");
         require(locker.locked == 0, "locked");
@@ -365,28 +370,28 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         
         locker.released = locker.released.add(remainder); 
         
-	emit Withdraw(index, remainder); 
+	emit Withdraw(registry, remainder); 
     }
     
     // ***************
     // CLIENT FUNCTION
     // ***************
-    function assignClientRoles(address client, address clientOracle, uint256 index) external {
-        Locker storage locker = lockers[index];
+    function assignClientRoles(address client, address clientOracle, uint256 registry) external {
+        Locker storage locker = lockers[registry];
         
         require(_msgSender() == locker.client, "!client");
         
         locker.client = client;
         locker.clientOracle = clientOracle;
         
-        emit AssignClientRoles(client, clientOracle, index);
+        emit AssignClientRoles(client, clientOracle, registry);
     }
     
     // ***************
     // GETTER FUNCTION
     // ***************
-    function getProviderBatch(uint256 index) external view returns (address[] memory, uint256[] memory) {
-        Locker storage locker = lockers[index];
+    function getProviderBatch(uint256 registry) external view returns (address[] memory, uint256[] memory) {
+        Locker storage locker = lockers[registry];
         
         return (locker.provider, locker.batch);
     }
@@ -394,8 +399,8 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
     /************
     ADR FUNCTIONS
     ************/
-    function lock(uint256 index, string calldata details) external { // client or main (0) provider can lock remainder for resolution during locker period / update request details
-        Locker storage locker = lockers[index]; 
+    function lock(uint256 registry, string calldata details) external { // client or main (0) provider can lock remainder for resolution during locker period / update request details
+        Locker storage locker = lockers[registry]; 
         
         require(locker.confirmed == 1, "!confirmed");
         require(locker.cap > locker.released, "released");
@@ -404,12 +409,12 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 
 	locker.locked = 1; 
 	    
-	emit Lock(_msgSender(), index, details);
+	emit Lock(_msgSender(), registry, details);
     }
     
-    function resolve(uint256 index, uint256 clientAward, uint256[] calldata providerAward, string calldata resolution) external nonReentrant { // resolver splits locked deposit remainder between client & provider(s)
-        ADR storage adr = resolvers[index];
-        Locker storage locker = lockers[index];
+    function resolve(uint256 registry, uint256 clientAward, uint256[] calldata providerAward, string calldata resolution) external nonReentrant { // resolver splits locked deposit remainder between client & provider(s)
+        ADR storage adr = adrs[registry];
+        Locker storage locker = lockers[registry];
         
         uint256 remainder = locker.cap.sub(locker.released); 
 	uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate dispute resolution fee
@@ -435,51 +440,51 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
 	    
 	locker.released = locker.cap; 
 	    
-	emit Resolve(_msgSender(), clientAward, providerAward, index, resolutionFee, resolution);
+	emit Resolve(_msgSender(), clientAward, providerAward, registry, resolutionFee, resolution);
     }
     
-    function clientUpdateResolver(address updatedResolver, uint256 index, string calldata details) external { // client & main (0) provider can update resolver selection
-        ADR storage adr = resolvers[index];
-        Locker storage locker = lockers[index]; 
+    function clientProposeResolver(address proposedResolver, uint256 registry, string calldata details) external { // client & main (0) provider can update resolver selection
+        ADR storage adr = adrs[registry];
+        Locker storage locker = lockers[registry]; 
         
         require(locker.confirmed == 1, "!confirmed");
-        require(adr.clientUpdateResolver == 0, "pending");
+        require(adr.clientProposedResolver == 0, "pending");
 	require(locker.cap > locker.released, "released");
         require(_msgSender() == locker.client, "!client"); 
         
-        if (adr.updatedResolver == updatedResolver && adr.providerUpdateResolver == 1) {
-            adr.resolver = updatedResolver;
+        if (adr.proposedResolver == proposedResolver && adr.providerProposedResolver == 1) {
+            adr.resolver = proposedResolver;
         } else {
-            adr.clientUpdateResolver = 0;
-            adr.providerUpdateResolver = 0;
+            adr.clientProposedResolver = 0;
+            adr.providerProposedResolver = 0;
         }
 
-	adr.updatedResolver = updatedResolver; 
-	adr.clientUpdateResolver = 1;
+	adr.proposedResolver = proposedResolver; 
+	adr.clientProposedResolver = 1;
 	    
-	emit ClientUpdateResolver(_msgSender(), updatedResolver, index, details);
+	emit ClientProposeResolver(_msgSender(), proposedResolver, registry, details);
     }
     
-    function providerUpdateResolver(address updatedResolver, uint256 index, string calldata details) external { // client & main (0) provider can update resolver selection
-        ADR storage adr = resolvers[index];
-        Locker storage locker = lockers[index]; 
+    function providerProposeResolver(address proposedResolver, uint256 registry, string calldata details) external { // client & main (0) provider can update resolver selection
+        ADR storage adr = adrs[registry];
+        Locker storage locker = lockers[registry]; 
         
         require(locker.confirmed == 1, "!confirmed");
-        require(adr.providerUpdateResolver == 0, "pending");
+        require(adr.providerProposedResolver == 0, "pending");
 	require(locker.cap > locker.released, "released");
         require(_msgSender() == locker.provider[0], "!provider[0]"); 
 
-	if (adr.updatedResolver == updatedResolver && adr.clientUpdateResolver == 1) {
-            adr.resolver = updatedResolver;
+	if (adr.proposedResolver == proposedResolver && adr.clientProposedResolver == 1) {
+            adr.resolver = proposedResolver;
         } else {
-            adr.clientUpdateResolver = 0;
-            adr.providerUpdateResolver = 0;
+            adr.clientProposedResolver = 0;
+            adr.providerProposedResolver = 0;
         }
 	    
-	adr.updatedResolver = updatedResolver;
-	adr.providerUpdateResolver = 1;
+	adr.proposedResolver = proposedResolver;
+	adr.providerProposedResolver = 1;
 	    
-	emit ProviderUpdateResolver(_msgSender(), updatedResolver, index, details);
+	emit ProviderProposeResolver(_msgSender(), proposedResolver, registry, details);
     }
    
     /***************
@@ -489,43 +494,43 @@ contract RaidLocker is Context, ReentrancyGuard { // multi-pay / milestone locke
         address recipient, 
         address token, 
         uint256 amount, 
-        uint256 index, 
+        uint256 registry, 
         string calldata details
-    ) external nonReentrant onlyGovernor { 
+    ) external nonReentrant onlydao { 
 	require(recoveryRoleRenounced == false, "!recoveryRoleActive");
 	
-	if (index != 0) {
-            Locker storage locker = lockers[index];
+	if (registry != 0) {
+            Locker storage locker = lockers[registry];
 	    require(amount == locker.cap.sub(locker.released), "!remainder");
 	    locker.released = locker.cap;
         } 
 	
 	IERC20(token).safeTransfer(recipient, amount);
        
-	emit RecoverTokenBalance(_msgSender(), recipient, token, amount, index, details);
+	emit RecoverTokenBalance(recipient, token, amount, registry, details);
     }
     
-    function renounceRecoveryRole(string calldata details) external onlyGovernor { 
+    function renounceRecoveryRole(string calldata details) external onlydao { 
 	recoveryRoleRenounced = true;
        
-	emit RenounceRecoveryRole(_msgSender(), details);
+	emit RenounceRecoveryRole(details);
     }
     
     function updateLockerSettings(
-    	address _governor, 
+    	address _dao, 
 	address _swiftResolverToken, 
 	uint256 _MAX_DURATION, 
 	uint256 _resolutionRate, 
 	uint256 _swiftResolverTokenBalance, 
 	string calldata _lockerTerms
-    ) external onlyGovernor { 
-        governor = _governor;
+    ) external onlydao { 
+        dao = _dao;
         swiftResolverToken = _swiftResolverToken;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         lockerTerms = _lockerTerms;
 	    
-	emit UpdateLockerSettings(governor, swiftResolverToken, MAX_DURATION, resolutionRate, swiftResolverTokenBalance, lockerTerms);
+	emit UpdateLockerSettings(dao, swiftResolverToken, MAX_DURATION, resolutionRate, swiftResolverTokenBalance, lockerTerms);
     }
 }
