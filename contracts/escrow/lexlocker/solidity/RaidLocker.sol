@@ -149,8 +149,8 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     string public lockerTerms;
     bool public recoveryRoleRenounced;
     
-    event DepositLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details);
-    event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint8 swiftResolver, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details);
+    event DepositLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details, bool swiftResolver);
+    event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details, bool swiftResolver);
     event ConfirmLocker(uint256 indexed registry);  
     event Release(uint256 indexed registry); 
     event Withdraw(uint256 indexed registry, uint256 indexed remainder);
@@ -168,8 +168,8 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         address resolver;
         uint8 clientProposedResolver;
         uint8 providerProposedResolver;
-        uint8 swiftResolver;
 	uint256 resolutionRate;
+	bool swiftResolver;
     }
     
     struct Locker {  
@@ -189,17 +189,24 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     mapping(uint256 => ADR) public adrs;
     mapping(uint256 => Locker) public lockers;
     
-    modifier onlydao {
+    modifier onlyDao {
         require(_msgSender() == dao, "!dao");
         _;
     }
     
-    constructor (address _dao, address _swiftResolverToken, uint256 _swiftResolverTokenBalance, uint256 _MAX_DURATION, uint256 _resolutionRate, string memory _lockerTerms) public {
+    constructor (
+        address _dao, 
+        address _swiftResolverToken, 
+        uint256 _MAX_DURATION,
+        uint256 _resolutionRate, 
+        uint256 _swiftResolverTokenBalance, 
+        string memory _lockerTerms
+    ) public {
         dao = _dao;
         swiftResolverToken = _swiftResolverToken;
-        swiftResolverTokenBalance = _swiftResolverTokenBalance;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
+        swiftResolverTokenBalance = _swiftResolverTokenBalance;
         lockerTerms = _lockerTerms;
         _initReentrancyGuard();
     }
@@ -212,18 +219,18 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         address[] memory provider,
         address resolver,
         address token,
-        uint8 swiftResolver, // allow swiftResolverToken balance holder to resolve
         uint256[] memory batch, 
         uint256 cap,
         uint256 milestones,
         uint256 termination, // exact termination date in seconds since epoch
-        string memory details) payable public returns (uint256) {
+        string memory details,
+        bool swiftResolver // allow swiftResolverToken balance holder to resolve
+    ) payable public returns (uint256) {
         uint256 sum;
         for (uint256 i = 0; i < provider.length; i++) {
             sum = sum.add(batch[i]);
         }
         
-        require(swiftResolver <= 1, "swiftResolver!");
         require(sum.mul(milestones) == cap, "deposit != milestones");
         require(termination <= now.add(MAX_DURATION), "duration maxed");
         
@@ -244,8 +251,8 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             resolver,
             0,
             0,
-            swiftResolver,
-	    resolutionRate);
+	    resolutionRate,
+	    swiftResolver);
 
         lockers[lockerCount] = Locker( 
             _msgSender(), 
@@ -260,7 +267,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             termination,
             details);
 
-        emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, swiftResolver, batch, cap, lockerCount, termination, details); 
+        emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, batch, cap, lockerCount, termination, details, swiftResolver); 
         
 	return lockerCount;
     }
@@ -271,18 +278,18 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         address[] memory provider,
         address resolver,
         address token,
-        uint8 swiftResolver, // allow swiftResolverToken balance holder to resolve
         uint256[] memory batch, 
         uint256 cap,
         uint256 milestones,
         uint256 termination, // exact termination date in seconds since epoch
-        string memory details) public returns (uint256) {
+        string memory details,
+        bool swiftResolver // allow swiftResolverToken balance holder to resolve
+    ) public returns (uint256) {
         uint256 sum;
         for (uint256 i = 0; i < provider.length; i++) {
             sum = sum.add(batch[i]);
         }
         
-        require(swiftResolver <= 1, "swiftResolver!");
         require(sum.mul(milestones) == cap, "deposit != milestones");
         require(termination <= now.add(MAX_DURATION), "duration maxed");
         
@@ -293,8 +300,8 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             resolver,
             0,
             0,
-            swiftResolver,
-	    resolutionRate);
+	    resolutionRate,
+	    swiftResolver);
 
         lockers[lockerCount] = Locker( 
             _msgSender(), 
@@ -309,7 +316,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             termination,
             details);
 
-        emit RegisterLocker(client, clientOracle, provider, resolver, token, swiftResolver, batch, cap, lockerCount, termination, details); 
+        emit RegisterLocker(client, clientOracle, provider, resolver, token, batch, cap, lockerCount, termination, details, swiftResolver); 
         
 	return lockerCount;
     }
@@ -423,7 +430,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
 	require(locker.cap > locker.released, "released");
 	require(_msgSender() != locker.client && _msgSender() != locker.clientOracle, "resolver == client/clientOracle");
 	    
-	if (adr.swiftResolver == 0) {
+	if (adr.swiftResolver == false) {
             require(_msgSender() == adr.resolver, "!resolver");
         } else {
             require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
@@ -496,7 +503,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         uint256 amount, 
         uint256 registry, 
         string calldata details
-    ) external nonReentrant onlydao { 
+    ) external nonReentrant onlyDao { 
 	require(recoveryRoleRenounced == false, "!recoveryRoleActive");
 	
 	if (registry != 0) {
@@ -510,7 +517,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
 	emit RecoverTokenBalance(recipient, token, amount, registry, details);
     }
     
-    function renounceRecoveryRole(string calldata details) external onlydao { 
+    function renounceRecoveryRole(string calldata details) external onlyDao { 
 	recoveryRoleRenounced = true;
        
 	emit RenounceRecoveryRole(details);
@@ -523,7 +530,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
 	uint256 _resolutionRate, 
 	uint256 _swiftResolverTokenBalance, 
 	string calldata _lockerTerms
-    ) external onlydao { 
+    ) external onlyDao { 
         dao = _dao;
         swiftResolverToken = _swiftResolverToken;
         MAX_DURATION = _MAX_DURATION;
