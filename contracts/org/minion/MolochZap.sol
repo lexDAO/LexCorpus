@@ -233,8 +233,7 @@ contract MolochZap is Ownable {
     }
 
     event ProposeZap(address proposer, uint256 zapCount);
-    event CancelZap(address proposer, uint256 zapCount);
-    event WithdrawZap(address proposer, uint256 zapCount);
+    event WithdrawZap(address proposer, uint256 molochProposalId, uint256 zapCount);
 
     constructor(address _moloch, uint256 _zapRate) public {
         moloch = _moloch;
@@ -285,6 +284,6 @@ contract MolochZap is Ownable {
         IMoloch(moloch).withdrawBalance(wETH, zap.zapAmount); // withdraw funds from parent Moloch
         IERC20(wETH).transfer(zap.proposer, zap.zapAmount); // redirect funds to zap proposer
         
-        emit WithdrawZap(msg.sender, zapCount);
+        emit WithdrawZap(msg.sender, molochProposalId, zapCount);
     }
 }
