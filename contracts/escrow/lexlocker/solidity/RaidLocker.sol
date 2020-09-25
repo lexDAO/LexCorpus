@@ -241,7 +241,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             require(success, "!transfer");
             IWETH(wETH).transferFrom(_msgSender(), address(this), msg.value);
         } else {
-            IERC20(token).safeTransferFrom(msg.sender, address(this), cap);
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), cap);
         }
         
         lockerCount = lockerCount + 1;
@@ -336,7 +336,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             require(success, "!transfer");
             IWETH(wETH).transferFrom(_msgSender(), address(this), msg.value);
         } else {
-            IERC20(locker.token).safeTransferFrom(msg.sender, address(this), sum);
+            IERC20(locker.token).safeTransferFrom(_msgSender(), address(this), sum);
         }
         
         locker.confirmed = 1;
