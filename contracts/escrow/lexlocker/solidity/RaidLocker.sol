@@ -17,7 +17,7 @@ DEAR MSG.SENDER(S):
 /// Entry into R_L shall not create an attorney/client relationship.
 //// Likewise, R_L should not be construed as legal advice or replacement for professional counsel.
 ///// STEAL THIS C0D3SL4W 
-~presented by LexDAO | Raid Guild LLC
+~presented by LexDAO \+|+/ Raid Guild LLC
 */
 
 pragma solidity 0.5.17;
@@ -33,7 +33,7 @@ interface IERC20 { // brief interface for erc20 token tx
 interface IWETH { // brief interface for canonical ether token wrapper 
     function deposit() payable external;
     
-    function transfer(address dst, uint wad) external returns (bool);
+    function transferFrom(address src, address dst, uint wad) external returns (bool);
 }
 
 library Address { // helper for address type - see openzeppelin-contracts/blob/master/contracts/utils/Address.sol
@@ -239,7 +239,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             IWETH(wETH).deposit();
             (bool success, ) = wETH.call.value(msg.value)("");
             require(success, "!transfer");
-            IWETH(wETH).transfer(address(this), msg.value);
+            IWETH(wETH).transferFrom(_msgSender(), address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(msg.sender, address(this), cap);
         }
@@ -334,7 +334,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             IWETH(wETH).deposit();
             (bool success, ) = wETH.call.value(msg.value)("");
             require(success, "!transfer");
-            IWETH(wETH).transfer(address(this), msg.value);
+            IWETH(wETH).transferFrom(_msgSender(), address(this), msg.value);
         } else {
             IERC20(locker.token).safeTransferFrom(msg.sender, address(this), sum);
         }
