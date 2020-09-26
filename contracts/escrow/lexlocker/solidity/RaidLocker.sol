@@ -153,7 +153,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details, bool swiftResolver);
     event ConfirmLocker(uint256 indexed registry);  
     event Release(uint256 indexed registry); 
-    event Withdraw(uint256 indexed registry, uint256 indexed remainder);
+    event Withdraw(uint256 indexed registry);
     event AssignClientRoles(address indexed client, address indexed clientOracle, uint256 indexed registry);
     event ClientProposeResolver(address indexed client, address indexed proposedResolver, uint256 indexed registry, string details);
     event ProviderProposeResolver(address indexed provider, address indexed proposedResolver, uint256 indexed registry, string details);
@@ -377,7 +377,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         
         locker.released = locker.released.add(remainder); 
         
-	emit Withdraw(registry, remainder); 
+	emit Withdraw(registry); 
     }
     
     // ***************
