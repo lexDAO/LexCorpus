@@ -24,15 +24,7 @@ library SafeMath {
     }
 }
 
-contract ReentrancyGuard { 
-    bool private _notEntered; 
-    
-    function _initReentrancyGuard() internal {
-        _notEntered = true;
-    } 
-}
-
-contract LexTokenLite is ReentrancyGuard {
+contract LexToken {
     using SafeMath for uint256;
     
     address payable public owner;
@@ -93,7 +85,6 @@ contract LexTokenLite is ReentrancyGuard {
         
         emit Transfer(address(0), owner, ownerSupply);
         emit Transfer(address(0), address(this), saleSupply);
-        _initReentrancyGuard(); 
     }
     
     function() external payable { // SALE 
@@ -244,7 +235,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 contract CloneFactory {
-    function createClone(address payable target) internal returns (address payable result) {
+    function createClone(address payable target) internal returns (address payable result) { // adapted for payable lexToken
         bytes20 targetBytes = bytes20(target);
         assembly {
             let clone := mload(0x40)
@@ -256,7 +247,7 @@ contract CloneFactory {
     }
 }
 
-contract LexTokenLiteFactory is CloneFactory {
+contract LexTokenFactory is CloneFactory {
     address payable public lexDAO;
     address payable public template;
     bytes32 public message;
@@ -267,7 +258,7 @@ contract LexTokenLiteFactory is CloneFactory {
         message = _message;
     }
     
-    function LaunchLexTokenLite(
+    function LaunchLexToken(
         string memory _name, 
         string memory _symbol, 
         uint8 _decimals, 
@@ -281,9 +272,9 @@ contract LexTokenLiteFactory is CloneFactory {
         bool _forSale,
         bool _transferable
     ) payable public returns (address) {
-        LexTokenLite lexLite = LexTokenLite(createClone(template));
+        LexToken lex = LexToken(createClone(template));
         
-        lexLite.init(
+        lex.init(
             _name, 
             _symbol,
             _decimals, 
@@ -300,7 +291,7 @@ contract LexTokenLiteFactory is CloneFactory {
         (bool success, ) = lexDAO.call.value(msg.value)("");
         require(success, "!transfer");
 
-        return address(lexLite);
+        return address(lex);
     }
     
     function updateLexDAO(address payable _lexDAO) external {
