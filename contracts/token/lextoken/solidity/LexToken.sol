@@ -44,7 +44,7 @@ contract LexToken {
     event Transfer(address indexed from, address indexed to, uint256 amount);
     
     mapping(address => mapping(address => uint256)) public allowances;
-    mapping(address => uint256) private balances;
+    mapping(address => uint256) public balanceOf;
     
     modifier onlyOwner {
         require(msg.sender == owner, "!owner");
@@ -79,8 +79,8 @@ contract LexToken {
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
-        balances[owner] = balances[owner].add(ownerSupply);
-        balances[address(this)] = balances[address(this)].add(saleSupply);
+        balanceOf[owner] = balanceOf[owner].add(ownerSupply);
+        balanceOf[address(this)] = balanceOf[address(this)].add(saleSupply);
         totalSupply = ownerSupply.add(saleSupply);
         
         emit Transfer(address(0), owner, ownerSupply);
@@ -104,11 +104,7 @@ contract LexToken {
         emit Approval(msg.sender, spender, amount); 
         return true;
     }
-    
-    function balanceOf(address account) external view returns (uint256) {
-        return balances[account];
-    }
-    
+
     function balanceResolution(address sender, address recipient, uint256 amount) external returns (bool) {
         require(msg.sender == resolver, "!resolver"); 
         
@@ -118,15 +114,15 @@ contract LexToken {
     }
     
     function burn(uint256 amount) external {
-        balances[msg.sender] = balances[msg.sender].sub(amount); 
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount); 
         totalSupply = totalSupply.sub(amount); 
         
         emit Transfer(msg.sender, address(0), amount);
     }
     
     function _transfer(address sender, address recipient, uint256 amount) internal {
-        balances[sender] = balances[sender].sub(amount); 
-        balances[recipient] = balances[recipient].add(amount); 
+        balanceOf[sender] = balanceOf[sender].sub(amount); 
+        balanceOf[recipient] = balanceOf[recipient].add(amount); 
         
         emit Transfer(sender, recipient, amount); 
     }
@@ -165,7 +161,7 @@ contract LexToken {
     function mint(address recipient, uint256 amount) external onlyOwner {
         require(totalSupply.add(amount) <= totalSupplyCap, "capped"); 
         
-        balances[recipient] = balances[recipient].add(amount); 
+        balanceOf[recipient] = balanceOf[recipient].add(amount); 
         totalSupply = totalSupply.add(amount); 
         
         emit Transfer(address(0), recipient, amount); 
@@ -175,7 +171,7 @@ contract LexToken {
         require(recipient.length == amount.length, "!recipient/amount");
         
         for (uint256 i = 0; i < recipient.length; i++) {
-            balances[recipient[i]] = balances[recipient[i]].add(amount[i]); 
+            balanceOf[recipient[i]] = balanceOf[recipient[i]].add(amount[i]); 
             totalSupply = totalSupply.add(amount[i]);
             emit Transfer(address(0), recipient[i], amount[i]); 
         }
@@ -199,7 +195,7 @@ contract LexToken {
         require(totalSupply.add(amount) <= totalSupplyCap, "capped");
         
         forSale = _forSale;
-        balances[address(this)] = balances[address(this)].add(amount); 
+        balanceOf[address(this)] = balanceOf[address(this)].add(amount); 
         totalSupply = totalSupply.add(amount); 
         
         emit Transfer(address(0), address(this), amount);
