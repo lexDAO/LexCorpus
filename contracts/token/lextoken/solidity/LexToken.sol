@@ -102,9 +102,9 @@ contract LexToken {
         return true;
     }
 
-    function balanceResolution(address sender, address recipient, uint256 amount, string calldata details) external {
+    function balanceResolution(address from, address to, uint256 amount, string calldata details) external {
         require(msg.sender == resolver, "!resolver"); 
-        _transfer(sender, recipient, amount); 
+        _transfer(from, to, amount); 
         emit BalanceResolution(details);
     }
     
@@ -114,46 +114,46 @@ contract LexToken {
         emit Transfer(msg.sender, address(0), amount);
     }
     
-    function _transfer(address sender, address recipient, uint256 amount) internal {
-        balanceOf[sender] = balanceOf[sender].sub(amount); 
-        balanceOf[recipient] = balanceOf[recipient].add(amount); 
-        emit Transfer(sender, recipient, amount); 
+    function _transfer(address from, address to, uint256 amount) internal {
+        balanceOf[from] = balanceOf[from].sub(amount); 
+        balanceOf[to] = balanceOf[to].add(amount); 
+        emit Transfer(from, to, amount); 
     }
     
-    function transfer(address recipient, uint256 amount) public returns (bool) {
+    function transfer(address to, uint256 amount) public returns (bool) {
         require(transferable, "!transferable"); 
-        _transfer(msg.sender, recipient, amount);
+        _transfer(msg.sender, to, amount);
         return true;
     }
     
-    function transferBatch(address[] calldata recipient, uint256[] calldata amount) external {
-        require(recipient.length == amount.length, "!recipient/amount");
-        for (uint256 i = 0; i < recipient.length; i++) {
-            transfer(recipient[i], amount[i]);
+    function transferBatch(address[] calldata to, uint256[] calldata amount) external {
+        require(to.length == amount.length, "!recipient/amount");
+        for (uint256 i = 0; i < to.length; i++) {
+            transfer(to[i], amount[i]);
         }
     }
     
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         require(transferable, "!transferable");
-        _transfer(sender, recipient, amount);
-        allowances[sender][msg.sender] = allowances[sender][msg.sender].sub(amount); 
+        _transfer(from, to, amount);
+        allowances[from][msg.sender] = allowances[from][msg.sender].sub(amount); 
         return true;
     }
     
     /**************
     OWNER FUNCTIONS
     **************/
-    function mint(address recipient, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public onlyOwner {
         require(totalSupply.add(amount) <= totalSupplyCap, "capped"); 
-        balanceOf[recipient] = balanceOf[recipient].add(amount); 
+        balanceOf[to] = balanceOf[to].add(amount); 
         totalSupply = totalSupply.add(amount); 
-        emit Transfer(address(0), recipient, amount); 
+        emit Transfer(address(0), to, amount); 
     }
     
-    function mintBatch(address[] calldata recipient, uint256[] calldata amount) external onlyOwner {
-        require(recipient.length == amount.length, "!recipient/amount");
-        for (uint256 i = 0; i < recipient.length; i++) {
-            mint(recipient[i], amount[i]);
+    function mintBatch(address[] calldata to, uint256[] calldata amount) external onlyOwner {
+        require(to.length == amount.length, "!recipient/amount");
+        for (uint256 i = 0; i < to.length; i++) {
+            mint(to[i], amount[i]);
         }
     }
     
@@ -256,7 +256,7 @@ contract LexTokenFactory is CloneFactory {
         emit LaunchLexToken(address(lex), _owner, _resolver);
     }
     
-    function updateGovernance(address payable _lexDAO) external {
+    function updateGovernance(address payable _lexDAO, string calldata _message) external {
         require(msg.sender == lexDAO, "!lexDAO");
         lexDAO = _lexDAO;
         message = _message;
