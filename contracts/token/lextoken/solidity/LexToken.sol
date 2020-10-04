@@ -26,21 +26,22 @@ library SafeMath {
 
 contract LexToken {
     using SafeMath for uint256;
-    
     address payable public owner;
     address public resolver;
-    string public name;
-    string public symbol;
     uint8 public decimals;
     uint256 public saleRate;
     uint256 public totalSupply;
     uint256 public totalSupplyCap;
-    bytes32 public message;
+    string public name;
+    string public symbol;
+    string public message;
     bool public forSale;
     bool private initialized;
     bool public transferable; 
     
     event Approval(address indexed owner, address indexed spender, uint256 amount);
+    event BalanceResolution(string indexed details);
+    event LexTokenSold(address indexed purchaser);
     event Transfer(address indexed from, address indexed to, uint256 amount);
     
     mapping(address => mapping(address => uint256)) public allowances;
@@ -52,157 +53,128 @@ contract LexToken {
     }
     
     function init(
-        string calldata _name, 
-        string calldata _symbol, 
+        address payable _owner,
+        address _resolver,
         uint8 _decimals, 
-        address payable _owner, 
-        address _resolver, 
         uint256 ownerSupply, 
         uint256 _saleRate, 
         uint256 saleSupply, 
-        uint256 _totalSupplyCap, 
-        bytes32 _message, 
+        uint256 _totalSupplyCap,
+        string calldata _name, 
+        string calldata _symbol, 
+        string calldata _message, 
         bool _forSale, 
         bool _transferable
     ) external {
         require(!initialized, "initialized"); 
         require(ownerSupply.add(saleSupply) <= _totalSupplyCap, "capped");
-        
-        name = _name; 
-        symbol = _symbol; 
-        decimals = _decimals; 
         owner = _owner; 
         resolver = _resolver;
+        decimals = _decimals; 
         saleRate = _saleRate; 
         totalSupplyCap = _totalSupplyCap; 
+        name = _name; 
+        symbol = _symbol; 
         message = _message; 
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
-        balanceOf[owner] = balanceOf[owner].add(ownerSupply);
-        balanceOf[address(this)] = balanceOf[address(this)].add(saleSupply);
+        balanceOf[owner] = ownerSupply;
+        balanceOf[address(this)] = saleSupply;
         totalSupply = ownerSupply.add(saleSupply);
-        
         emit Transfer(address(0), owner, ownerSupply);
         emit Transfer(address(0), address(this), saleSupply);
     }
     
     function() external payable { // SALE 
         require(forSale, "!forSale");
-        
         (bool success, ) = owner.call.value(msg.value)("");
         require(success, "!transfer");
         uint256 amount = msg.value.mul(saleRate); 
         _transfer(address(this), msg.sender, amount);
+        emit LexTokenSold(msg.sender);
     } 
     
     function approve(address spender, uint256 amount) external returns (bool) {
         require(amount == 0 || allowances[msg.sender][spender] == 0, "!reset"); 
-        
         allowances[msg.sender][spender] = amount; 
-        
         emit Approval(msg.sender, spender, amount); 
         return true;
     }
 
-    function balanceResolution(address sender, address recipient, uint256 amount) external returns (bool) {
+    function balanceResolution(address sender, address recipient, uint256 amount, string calldata details) external {
         require(msg.sender == resolver, "!resolver"); 
-        
         _transfer(sender, recipient, amount); 
-        
-        return true;
+        emit BalanceResolution(details);
     }
     
     function burn(uint256 amount) external {
         balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount); 
         totalSupply = totalSupply.sub(amount); 
-        
         emit Transfer(msg.sender, address(0), amount);
     }
     
     function _transfer(address sender, address recipient, uint256 amount) internal {
         balanceOf[sender] = balanceOf[sender].sub(amount); 
         balanceOf[recipient] = balanceOf[recipient].add(amount); 
-        
         emit Transfer(sender, recipient, amount); 
     }
     
-    function transfer(address recipient, uint256 amount) external returns (bool) {
+    function transfer(address recipient, uint256 amount) public returns (bool) {
         require(transferable, "!transferable"); 
-        
         _transfer(msg.sender, recipient, amount);
-        
         return true;
     }
     
-    function transferBatch(address[] calldata recipient, uint256[] calldata amount) external returns (bool) {
-        require(transferable, "!transferable");
+    function transferBatch(address[] calldata recipient, uint256[] calldata amount) external {
         require(recipient.length == amount.length, "!recipient/amount");
-        
         for (uint256 i = 0; i < recipient.length; i++) {
-            _transfer(msg.sender, recipient[i], amount[i]);
+            transfer(recipient[i], amount[i]);
         }
-        
-        return true;
     }
     
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
         require(transferable, "!transferable");
-        
         _transfer(sender, recipient, amount);
         allowances[sender][msg.sender] = allowances[sender][msg.sender].sub(amount); 
-        
         return true;
     }
     
     /**************
     OWNER FUNCTIONS
     **************/
-    function mint(address recipient, uint256 amount) external onlyOwner {
+    function mint(address recipient, uint256 amount) public onlyOwner {
         require(totalSupply.add(amount) <= totalSupplyCap, "capped"); 
-        
         balanceOf[recipient] = balanceOf[recipient].add(amount); 
         totalSupply = totalSupply.add(amount); 
-        
         emit Transfer(address(0), recipient, amount); 
     }
     
     function mintBatch(address[] calldata recipient, uint256[] calldata amount) external onlyOwner {
         require(recipient.length == amount.length, "!recipient/amount");
-        
         for (uint256 i = 0; i < recipient.length; i++) {
             balanceOf[recipient[i]] = balanceOf[recipient[i]].add(amount[i]); 
             totalSupply = totalSupply.add(amount[i]);
             emit Transfer(address(0), recipient[i], amount[i]); 
         }
-        
         require(totalSupply <= totalSupplyCap, "capped");
     }
 
-    function updateMessage(bytes32 _message) external onlyOwner {
+    function updateMessage(string calldata _message) external onlyOwner {
         message = _message;
     }
     
-    function updateOwner(address payable _owner) external onlyOwner {
+    function updateGovernance(address payable _owner, address _resolver) external onlyOwner {
         owner = _owner;
-    }
-    
-    function updateResolver(address _resolver) external onlyOwner {
         resolver = _resolver;
     }
     
-    function updateSale(uint256 amount, bool _forSale) external onlyOwner {
-        require(totalSupply.add(amount) <= totalSupplyCap, "capped");
-        
-        forSale = _forSale;
-        balanceOf[address(this)] = balanceOf[address(this)].add(amount); 
-        totalSupply = totalSupply.add(amount); 
-        
-        emit Transfer(address(0), address(this), amount);
-    }
-    
-    function updateSaleRate(uint256 _saleRate) external onlyOwner {
+
+    function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyOwner {
         saleRate = _saleRate;
+        forSale = _forSale;
+        mint(address(this), amount);
+        emit Transfer(address(0), address(this), amount);
     }
     
     function updateTransferability(bool _transferable) external onlyOwner {
@@ -246,59 +218,62 @@ contract CloneFactory {
 contract LexTokenFactory is CloneFactory {
     address payable public lexDAO;
     address payable public template;
-    bytes32 public message;
+    string public message;
     
-    constructor (address payable _lexDAO, address payable _template, bytes32 _message) public {
+    event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver);
+    event UpdateLexDAO(address indexed lexDAO);
+    event UpdateMessage(string indexed message);
+    
+    constructor (address payable _lexDAO, address payable _template, string memory _message) public {
         lexDAO = _lexDAO;
         template = _template;
         message = _message;
     }
     
-    function LaunchLexToken(
+    function launchLexToken(
+        address payable _owner,
+        address _resolver,
+        uint8 _decimals, 
+        uint256 ownerSupply, 
+        uint256 _saleRate, 
+        uint256 saleSupply, 
+        uint256 _totalSupplyCap,
+        string memory _message,
         string memory _name, 
         string memory _symbol, 
-        uint8 _decimals, 
-        address payable _owner, 
-        address _resolver,
-        uint256 ownerSupply,
-        uint256 _saleRate,
-        uint256 saleSupply,
-        uint256 _totalSupplyCap,
-        bytes32 _message,
-        bool _forSale,
+        bool _forSale, 
         bool _transferable
-    ) payable public returns (address) {
+    ) payable public {
         LexToken lex = LexToken(createClone(template));
         
         lex.init(
-            _name, 
-            _symbol,
-            _decimals, 
-            _owner, 
+            _owner,
             _resolver,
+            _decimals, 
             ownerSupply, 
             _saleRate, 
             saleSupply, 
-            _totalSupplyCap, 
-            _message, 
+            _totalSupplyCap,
+            _message,
+            _name, 
+            _symbol, 
             _forSale, 
             _transferable);
         
         (bool success, ) = lexDAO.call.value(msg.value)("");
         require(success, "!transfer");
-
-        return address(lex);
+        emit LaunchLexToken(address(lex), _owner, _resolver);
     }
     
     function updateLexDAO(address payable _lexDAO) external {
         require(msg.sender == lexDAO, "!lexDAO");
-        
         lexDAO = _lexDAO;
+        emit UpdateLexDAO(lexDAO);
     }
     
-    function updateMessage(bytes32 _message) external {
+    function updateMessage(string calldata _message) external {
         require(msg.sender == lexDAO, "!lexDAO");
-        
         message = _message;
+        emit UpdateMessage(message);
     }
 }
