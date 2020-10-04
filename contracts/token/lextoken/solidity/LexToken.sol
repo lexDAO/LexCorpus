@@ -32,9 +32,9 @@ contract LexToken {
     uint256 public saleRate;
     uint256 public totalSupply;
     uint256 public totalSupplyCap;
+    string public message;
     string public name;
     string public symbol;
-    string public message;
     bool public forSale;
     bool private initialized;
     bool public transferable; 
@@ -60,9 +60,9 @@ contract LexToken {
         uint256 _saleRate, 
         uint256 saleSupply, 
         uint256 _totalSupplyCap,
-        string calldata _name, 
-        string calldata _symbol, 
         string calldata _message, 
+        string calldata _name, 
+        string calldata _symbol,  
         bool _forSale, 
         bool _transferable
     ) external {
@@ -73,9 +73,9 @@ contract LexToken {
         decimals = _decimals; 
         saleRate = _saleRate; 
         totalSupplyCap = _totalSupplyCap; 
-        name = _name; 
-        symbol = _symbol; 
         message = _message; 
+        name = _name; 
+        symbol = _symbol;  
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
