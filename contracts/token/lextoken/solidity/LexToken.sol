@@ -40,7 +40,6 @@ contract LexToken {
     
     event Approval(address indexed owner, address indexed spender, uint256 amount);
     event BalanceResolution(string indexed details);
-    event LexTokenSold(address indexed purchaser);
     event Transfer(address indexed from, address indexed to, uint256 amount);
     
     mapping(address => mapping(address => uint256)) public allowances;
@@ -91,7 +90,6 @@ contract LexToken {
         require(success, "!transfer");
         uint256 amount = msg.value.mul(saleRate); 
         _transfer(address(this), msg.sender, amount);
-        emit LexTokenSold(msg.sender);
     } 
     
     function approve(address spender, uint256 amount) external returns (bool) {
