@@ -124,7 +124,7 @@ contract LexToken {
     }
     
     function transferBatch(address[] calldata to, uint256[] calldata amount) external {
-        require(to.length == amount.length, "!recipient/amount");
+        require(to.length == amount.length, "!to/amount");
         for (uint256 i = 0; i < to.length; i++) {
             transfer(to[i], amount[i]);
         }
@@ -132,8 +132,8 @@ contract LexToken {
     
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         require(transferable, "!transferable");
-        _transfer(from, to, amount);
         allowances[from][msg.sender] = allowances[from][msg.sender].sub(amount); 
+        _transfer(from, to, amount);
         return true;
     }
     
@@ -148,7 +148,7 @@ contract LexToken {
     }
     
     function mintBatch(address[] calldata to, uint256[] calldata amount) external onlyOwner {
-        require(to.length == amount.length, "!recipient/amount");
+        require(to.length == amount.length, "!to/amount");
         for (uint256 i = 0; i < to.length; i++) {
             mint(to[i], amount[i]);
         }
@@ -209,7 +209,7 @@ contract LexTokenFactory is CloneFactory {
     address payable public template;
     string public message;
     
-    event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver);
+    event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver, bool forSale);
     event UpdateGovernance(address indexed lexDAO, string indexed message);
     
     constructor (address payable _lexDAO, address payable _template, string memory _message) public {
@@ -250,7 +250,7 @@ contract LexTokenFactory is CloneFactory {
         
         (bool success, ) = lexDAO.call.value(msg.value)("");
         require(success, "!transfer");
-        emit LaunchLexToken(address(lex), _owner, _resolver);
+        emit LaunchLexToken(address(lex), _owner, _resolver, _forSale);
     }
     
     function updateGovernance(address payable _lexDAO, string calldata _message) external {
