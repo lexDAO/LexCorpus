@@ -157,15 +157,12 @@ contract LexToken {
         }
     }
     
-    function updateGovernance(address payable _owner, address _resolver) external onlyOwner {
+    function updateGovernance(address payable _owner, address _resolver, string calldata _message) external onlyOwner {
         owner = _owner;
         resolver = _resolver;
-    }
-
-    function updateMessage(string calldata _message) external onlyOwner {
         message = _message;
     }
- 
+
     function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyOwner {
         saleRate = _saleRate;
         forSale = _forSale;
@@ -216,8 +213,7 @@ contract LexTokenFactory is CloneFactory {
     string public message;
     
     event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver);
-    event UpdateLexDAO(address indexed lexDAO);
-    event UpdateMessage(string indexed message);
+    event UpdateGovernance(address indexed lexDAO, string indexed message);
     
     constructor (address payable _lexDAO, address payable _template, string memory _message) public {
         lexDAO = _lexDAO;
@@ -260,15 +256,10 @@ contract LexTokenFactory is CloneFactory {
         emit LaunchLexToken(address(lex), _owner, _resolver);
     }
     
-    function updateLexDAO(address payable _lexDAO) external {
+    function updateGovernance(address payable _lexDAO) external {
         require(msg.sender == lexDAO, "!lexDAO");
         lexDAO = _lexDAO;
-        emit UpdateLexDAO(lexDAO);
-    }
-    
-    function updateMessage(string calldata _message) external {
-        require(msg.sender == lexDAO, "!lexDAO");
         message = _message;
-        emit UpdateMessage(message);
+        emit UpdateGovernance(lexDAO, message);
     }
 }
