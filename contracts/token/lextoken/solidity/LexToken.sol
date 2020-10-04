@@ -169,7 +169,6 @@ contract LexToken {
         resolver = _resolver;
     }
     
-
     function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyOwner {
         saleRate = _saleRate;
         forSale = _forSale;
