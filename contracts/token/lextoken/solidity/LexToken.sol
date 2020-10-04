@@ -159,16 +159,16 @@ contract LexToken {
         }
         require(totalSupply <= totalSupplyCap, "capped");
     }
-
-    function updateMessage(string calldata _message) external onlyOwner {
-        message = _message;
-    }
     
     function updateGovernance(address payable _owner, address _resolver) external onlyOwner {
         owner = _owner;
         resolver = _resolver;
     }
-    
+
+    function updateMessage(string calldata _message) external onlyOwner {
+        message = _message;
+    }
+ 
     function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyOwner {
         saleRate = _saleRate;
         forSale = _forSale;
