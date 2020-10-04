@@ -153,11 +153,8 @@ contract LexToken {
     function mintBatch(address[] calldata recipient, uint256[] calldata amount) external onlyOwner {
         require(recipient.length == amount.length, "!recipient/amount");
         for (uint256 i = 0; i < recipient.length; i++) {
-            balanceOf[recipient[i]] = balanceOf[recipient[i]].add(amount[i]); 
-            totalSupply = totalSupply.add(amount[i]);
-            emit Transfer(address(0), recipient[i], amount[i]); 
+            mint(recipient[i], amount[i]);
         }
-        require(totalSupply <= totalSupplyCap, "capped");
     }
     
     function updateGovernance(address payable _owner, address _resolver) external onlyOwner {
@@ -173,7 +170,6 @@ contract LexToken {
         saleRate = _saleRate;
         forSale = _forSale;
         mint(address(this), amount);
-        emit Transfer(address(0), address(this), amount);
     }
     
     function updateTransferability(bool _transferable) external onlyOwner {
