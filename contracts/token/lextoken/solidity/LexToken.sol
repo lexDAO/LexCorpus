@@ -31,19 +31,22 @@ contract LexToken {
     uint256 public saleRate;
     uint256 public totalSupply;
     uint256 public totalSupplyCap;
-    string public message;
+    bytes32 public DOMAIN_SEPARATOR; 
+    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    string public details;
     string public name;
     string public symbol;
     bool public forSale;
     bool private initialized;
     bool public transferable; 
     
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
-    event BalanceResolution(string indexed details);
+    event Approval(address indexed holder, address indexed spender, uint256 amount);
+    event BalanceResolution(string indexed resolution);
     event Transfer(address indexed from, address indexed to, uint256 amount);
     
     mapping(address => mapping(address => uint256)) public allowances;
     mapping(address => uint256) public balanceOf;
+    mapping (address => uint256) public nonces;
     
     modifier onlyOwner {
         require(msg.sender == owner, "!owner");
@@ -58,7 +61,7 @@ contract LexToken {
         uint256 _saleRate, 
         uint256 saleSupply, 
         uint256 _totalSupplyCap,
-        string calldata _message, 
+        string calldata _details, 
         string calldata _name, 
         string calldata _symbol,  
         bool _forSale, 
@@ -71,7 +74,7 @@ contract LexToken {
         decimals = _decimals; 
         saleRate = _saleRate; 
         totalSupplyCap = _totalSupplyCap; 
-        message = _message; 
+        details = _details; 
         name = _name; 
         symbol = _symbol;  
         forSale = _forSale; 
@@ -80,6 +83,18 @@ contract LexToken {
         balanceOf[owner] = ownerSupply;
         balanceOf[address(this)] = saleSupply;
         totalSupply = ownerSupply.add(saleSupply);
+        // permit pattern:
+        uint256 chainId;
+        assembly {chainId := chainid()}
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes(name)),
+                keccak256(bytes("1")),
+                chainId,
+                address(this)
+            )
+        );
         emit Transfer(address(0), owner, ownerSupply);
         emit Transfer(address(0), address(this), saleSupply);
     }
@@ -92,23 +107,54 @@ contract LexToken {
         _transfer(address(this), msg.sender, amount);
     } 
     
+    function _approve(address holder, address spender, uint256 amount) internal {
+        require(amount == 0 || allowances[holder][spender] == 0, "!reset"); 
+        allowances[holder][spender] = amount; 
+        emit Approval(holder, spender, amount); 
+    }
+    
     function approve(address spender, uint256 amount) external returns (bool) {
-        require(amount == 0 || allowances[msg.sender][spender] == 0, "!reset"); 
-        allowances[msg.sender][spender] = amount; 
-        emit Approval(msg.sender, spender, amount); 
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
-    function balanceResolution(address from, address to, uint256 amount, string calldata details) external {
+    function balanceResolution(address from, address to, uint256 amount, string calldata resolution) external { // resolve disputed or lost balances
         require(msg.sender == resolver, "!resolver"); 
         _transfer(from, to, amount); 
-        emit BalanceResolution(details);
+        emit BalanceResolution(resolution);
     }
     
     function burn(uint256 amount) external {
         balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount); 
         totalSupply = totalSupply.sub(amount); 
         emit Transfer(msg.sender, address(0), amount);
+    }
+    
+    function permit(address holder, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        require(deadline >= block.timestamp, "expired");
+        bytes32 hashStruct = keccak256(
+            abi.encode(
+                PERMIT_TYPEHASH,
+                holder,
+                spender,
+                amount,
+                nonces[holder]++,
+                deadline
+            )
+        );
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                DOMAIN_SEPARATOR,
+                hashStruct
+            )
+        );
+        address signer = ecrecover(hash, v, r, s);
+        require(
+            signer != address(0) && signer == holder,
+            "!signature"
+        );
+        _approve(holder, spender, amount);
     }
     
     function _transfer(address from, address to, uint256 amount) internal {
@@ -154,10 +200,10 @@ contract LexToken {
         }
     }
     
-    function updateGovernance(address payable _owner, address _resolver, string calldata _message) external onlyOwner {
+    function updateGovernance(address payable _owner, address _resolver, string calldata _details) external onlyOwner {
         owner = _owner;
         resolver = _resolver;
-        message = _message;
+        details = _details;
     }
 
     function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyOwner {
