@@ -86,15 +86,12 @@ contract LexToken {
         // permit pattern:
         uint256 chainId;
         assembly {chainId := chainid()}
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(name)),
-                keccak256(bytes("1")),
-                chainId,
-                address(this)
-            )
-        );
+        DOMAIN_SEPARATOR = keccak256(abi.encode(
+            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+            keccak256(bytes(name)),
+            keccak256(bytes("1")),
+            chainId,
+            address(this)));
         emit Transfer(address(0), owner, ownerSupply);
         emit Transfer(address(0), address(this), saleSupply);
     }
@@ -132,28 +129,16 @@ contract LexToken {
     
     function permit(address holder, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         require(deadline >= block.timestamp, "expired");
-        bytes32 hashStruct = keccak256(
-            abi.encode(
-                PERMIT_TYPEHASH,
-                holder,
-                spender,
-                amount,
-                nonces[holder]++,
-                deadline
-            )
-        );
-        bytes32 hash = keccak256(
-            abi.encodePacked(
-                '\x19\x01',
-                DOMAIN_SEPARATOR,
-                hashStruct
-            )
-        );
+        bytes32 hashStruct = keccak256(abi.encode(
+            PERMIT_TYPEHASH,
+            holder,
+            spender,
+            amount,
+            nonces[holder]++,
+            deadline));
+        bytes32 hash = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, hashStruct));
         address signer = ecrecover(hash, v, r, s);
-        require(
-            signer != address(0) && signer == holder,
-            "!signature"
-        );
+        require(signer != address(0) && signer == holder, "!signature");
         _approve(holder, spender, amount);
     }
     
