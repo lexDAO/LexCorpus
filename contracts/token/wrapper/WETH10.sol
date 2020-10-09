@@ -106,7 +106,7 @@ contract WETH10 {
                 hashStruct));
 
         address signer = ecrecover(hash, v, r, s);
-        require(signer != address(0) && signer == src, "!permit");
+        require(signer != address(0) && signer == src, "!signer");
 
         _approve(src, guy, wad);
     }
