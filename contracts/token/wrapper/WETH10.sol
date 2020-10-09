@@ -22,9 +22,7 @@ contract WETH10 {
         symbol = "WETH";
         decimals = 18;
         uint chainId;
-        assembly {
-            chainId := chainid()
-        }
+        assembly {chainId := chainid()}
 
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -32,9 +30,7 @@ contract WETH10 {
                 keccak256(bytes(name)),
                 keccak256(bytes("1")),
                 chainId,
-                address(this)
-            )
-        );
+                address(this)));
     }
 
     function() external payable {
@@ -45,6 +41,7 @@ contract WETH10 {
         emit Deposit(msg.sender, msg.value);
     }
     function withdraw(uint wad) external {
+        require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
         (bool success, ) = msg.sender.call.value(wad)("");
         require(success, "!withdraw");
