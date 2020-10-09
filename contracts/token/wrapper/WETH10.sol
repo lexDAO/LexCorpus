@@ -2,9 +2,9 @@
 pragma solidity 0.5.17;
 // Copyright (C) 2015, 2016, 2017 Dapphub / adapted by LexDAO 2020
 contract WETH10 {
-    string public name     = "Wrapped Ether";
-    string public symbol   = "WETH";
-    uint8  public decimals = 18;
+    string public name;
+    string public symbol;
+    uint8  public decimals;
     bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public DOMAIN_SEPARATOR;
 
