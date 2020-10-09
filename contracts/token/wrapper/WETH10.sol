@@ -5,7 +5,7 @@ contract WETH10 {
     string public name;
     string public symbol;
     uint8  public decimals;
-    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address src,address guy,uint wad,uint nonce,uint deadline)");
     bytes32 public DOMAIN_SEPARATOR;
 
     event  Approval(address indexed src, address indexed guy, uint wad);
