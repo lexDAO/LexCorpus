@@ -71,10 +71,10 @@ contract WETH10 {
         public
         returns (bool)
     {
-        require(balanceOf[src] >= wad);
+        require(balanceOf[src] >= wad, "!balance");
 
         if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
-            require(allowance[src][msg.sender] >= wad);
+            require(allowance[src][msg.sender] >= wad, "!allowance");
             allowance[src][msg.sender] -= wad;
         }
 
