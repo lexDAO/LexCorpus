@@ -23,7 +23,6 @@ contract WETH10 {
         decimals = 18;
         uint chainId;
         assembly {chainId := chainid()}
-
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint chainId,address verifyingContract)"),
