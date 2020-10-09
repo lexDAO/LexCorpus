@@ -42,7 +42,7 @@ contract WETH10 {
     }
     
     function withdraw(uint wad) external {
-        require(balanceOf[msg.sender] >= wad);
+        require(balanceOf[msg.sender] >= wad, "!balance");
         balanceOf[msg.sender] -= wad;
         (bool success, ) = msg.sender.call.value(wad)("");
         require(success, "!withdraw");
