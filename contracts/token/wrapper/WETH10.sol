@@ -15,7 +15,7 @@ contract WETH10 {
 
     mapping (address => uint)                       public  balanceOf;
     mapping (address => mapping (address => uint))  public  allowance;
-    mapping (address => uint)                       public nonces;
+    mapping (address => uint)                       public  nonces;
     
     constructor() public {
         name = "Wrapped Ether";
@@ -36,10 +36,12 @@ contract WETH10 {
     function() external payable {
         deposit();
     }
+    
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
     }
+    
     function withdraw(uint wad) external {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
@@ -56,16 +58,16 @@ contract WETH10 {
         allowance[src][guy] = wad;
         emit Approval(src, guy, wad);
     }
-
+    
     function approve(address guy, uint wad) external returns (bool) {
         _approve(msg.sender, guy, wad); 
         return true;
     }
-
+    
     function transfer(address dst, uint wad) external returns (bool) {
         return transferFrom(msg.sender, dst, wad);
     }
-
+    
     function transferFrom(address src, address dst, uint wad)
         public
         returns (bool)
@@ -96,23 +98,16 @@ contract WETH10 {
                 guy,
                 wad,
                 nonces[src]++,
-                deadline
-            )
-        );
+                deadline));
 
         bytes32 hash = keccak256(
             abi.encodePacked(
                 '\x19\x01',
                 DOMAIN_SEPARATOR,
-                hashStruct
-            )
-        );
+                hashStruct));
 
         address signer = ecrecover(hash, v, r, s);
-        require(
-            signer != address(0) && signer == src,
-            "!permit"
-        );
+        require(signer != address(0) && signer == src, "!permit");
 
         _approve(src, guy, wad);
     }
