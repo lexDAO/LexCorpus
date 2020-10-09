@@ -54,10 +54,14 @@ contract WETH10 {
     function totalSupply() external view returns (uint) {
         return address(this).balance;
     }
+    
+    function _approve(address src, address guy, uint wad) internal {
+        allowance[src][guy] = wad;
+        emit Approval(src, guy, wad);
+    }
 
-    function approve(address guy, uint wad) public returns (bool) {
-        allowance[msg.sender][guy] = wad;
-        emit Approval(msg.sender, guy, wad);
+    function approve(address guy, uint wad) external returns (bool) {
+        _approve(msg.sender, guy, wad); 
         return true;
     }
 
@@ -111,6 +115,6 @@ contract WETH10 {
             "!permit"
         );
 
-        approve(src, guy, wad);
+        _approve(src, guy, wad);
     }
 }
