@@ -27,7 +27,7 @@ library SafeMath {
 contract LexToken {
     using SafeMath for uint256;
     address payable public owner; // account controlling token rules & sale - see 'Owner Functions' - updateable by owner
-    address public resolver; // account acting as backup for lost tokens & arbitration of disputed token transfers - updateable by owner
+    address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by owner
     uint8 public decimals; // declares unit scaling factor - eip-20 - default is 18 to match ETH
     uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by owner
     uint256 public totalSupply; // tracks outstanding token mints
@@ -39,7 +39,7 @@ contract LexToken {
     string public symbol; // declares symbol of token - eip-20
     bool public forSale; // declares status of token sale - if `false`, ETH sent to token address will not return token per saleRate
     bool private initialized; // finalizes deployment details under eip-1167 proxy pattern
-    bool public transferable; // declares transferability of tokens - does not affect token sale - updateable by owner
+    bool public transferable; // declares transferability of token - does not affect token sale - updateable by owner
     
     event Approval(address indexed holder, address indexed spender, uint256 amount);
     event BalanceResolution(string indexed resolution);
