@@ -1,4 +1,5 @@
-pragma solidity 0.5.17;
+// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity 0.7.0;
 
 library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -25,20 +26,20 @@ library SafeMath {
 
 contract LexToken {
     using SafeMath for uint256;
-    address payable public owner;
-    address public resolver;
-    uint8 public decimals;
-    uint256 public saleRate;
-    uint256 public totalSupply;
-    uint256 public totalSupplyCap;
-    bytes32 public DOMAIN_SEPARATOR; 
-    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-    string public details;
-    string public name;
-    string public symbol;
-    bool public forSale;
-    bool private initialized;
-    bool public transferable; 
+    address payable public owner; // account controlling token rules & sale - see 'Owner Functions' - updateable by owner
+    address public resolver; // account acting as backup for lost tokens & arbitration of disputed token transfers - updateable by owner
+    uint8 public decimals; // declares unit scaling factor - eip-20 - default is 18 to match ETH
+    uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by owner
+    uint256 public totalSupply; // tracks outstanding token mints
+    uint256 public totalSupplyCap; // maximum of token mintable
+    bytes32 public DOMAIN_SEPARATOR; // eip-2612 permit() pattern - hash that uniquely identifies contract
+    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - identifies function signature is for
+    string public details; // can describe rules of token offering & redemption - updateable by owner
+    string public name; // declares name of token - eip-20
+    string public symbol; // declares symbol of token - eip-20
+    bool public forSale; // declares status of token sale - if `false`, ETH sent to token address will not return token per saleRate
+    bool private initialized; // finalizes deployment details under eip-1167 proxy pattern
+    bool public transferable; // declares transferability of tokens - does not affect token sale - updateable by owner
     
     event Approval(address indexed holder, address indexed spender, uint256 amount);
     event BalanceResolution(string indexed resolution);
@@ -83,7 +84,7 @@ contract LexToken {
         balanceOf[owner] = ownerSupply;
         balanceOf[address(this)] = saleSupply;
         totalSupply = ownerSupply.add(saleSupply);
-        // permit pattern:
+        // eip-2612 permit() pattern:
         uint256 chainId;
         assembly {chainId := chainid()}
         DOMAIN_SEPARATOR = keccak256(abi.encode(
@@ -96,9 +97,9 @@ contract LexToken {
         emit Transfer(address(0), address(this), saleSupply);
     }
     
-    function() external payable { // SALE 
+    receive() external payable { // SALE 
         require(forSale, "!forSale");
-        (bool success, ) = owner.call.value(msg.value)("");
+        (bool success, ) = owner.call{value: msg.value}("");
         require(success, "!transfer");
         uint256 amount = msg.value.mul(saleRate); 
         _transfer(address(this), msg.sender, amount);
@@ -128,7 +129,7 @@ contract LexToken {
     }
     
     function permit(address holder, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
-        require(deadline >= block.timestamp, "expired");
+        require(block.timestamp <= deadline, "expired");
         bytes32 hashStruct = keccak256(abi.encode(
             PERMIT_TYPEHASH,
             holder,
@@ -243,7 +244,7 @@ contract LexTokenFactory is CloneFactory {
     event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver, bool forSale);
     event UpdateGovernance(address indexed lexDAO, string indexed message);
     
-    constructor (address payable _lexDAO, address payable _template, string memory _message) public {
+    constructor(address payable _lexDAO, address payable _template, string memory _message) {
         lexDAO = _lexDAO;
         template = _template;
         message = _message;
@@ -279,7 +280,7 @@ contract LexTokenFactory is CloneFactory {
             _forSale, 
             _transferable);
         
-        (bool success, ) = lexDAO.call.value(msg.value)("");
+        (bool success, ) = lexDAO.call{value: msg.value}("");
         require(success, "!transfer");
         emit LaunchLexToken(address(lex), _owner, _resolver, _forSale);
     }
