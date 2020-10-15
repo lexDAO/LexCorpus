@@ -47,6 +47,7 @@ library SafeMath {
 
 contract LexToken {
     using SafeMath for uint256;
+    
     address payable public manager; // account managing token rules & sale - see 'Manager Functions' - updateable by manager
     address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by manager
     uint8   public decimals; // fixed unit scaling factor - default 18 to match ETH
@@ -156,8 +157,7 @@ contract LexToken {
                 value,
                 nonces[owner]++,
                 deadline));
-        bytes32 hash = keccak256(
-            abi.encodePacked(
+        bytes32 hash = keccak256(abi.encodePacked(
                 '\x19\x01',
                 DOMAIN_SEPARATOR,
                 hashStruct));
