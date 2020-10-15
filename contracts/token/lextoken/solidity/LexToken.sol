@@ -49,26 +49,26 @@ contract LexToken {
     using SafeMath for uint256;
     address payable public manager; // account managing token rules & sale - see 'Manager Functions' - updateable by manager
     address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by manager
-    uint8 public decimals; // declares fixed unit scaling factor - default 18 to match ETH
+    uint8   public decimals; // fixed unit scaling factor - default 18 to match ETH
     uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by manager
     uint256 public totalSupply; // tracks outstanding token mints
     uint256 public totalSupplyCap; // maximum of token mintable
-    bytes32 public DOMAIN_SEPARATOR; // eip-2612 permit() pattern - hash that uniquely identifies contract
-    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - identifies function for signature
-    string public details; // describe rules of token offering, redemption, etc. - updateable by manager
-    string public name; // declares fixed name of token
-    string public symbol; // declares fixed symbol of token
-    bool public forSale; // declares status of token sale - if `false`, ETH sent to token address will not return token per saleRate - updateable by manager
-    bool private initialized; // finalizes token deployment under eip-1167 proxy pattern
-    bool public transferable; // declares transferability of token - does not affect token sale - updateable by manager
+    bytes32 public DOMAIN_SEPARATOR; // eip-2612 permit() pattern - hash identifies contract
+    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - hash identifies function for signature
+    string  public details; // details token offering, redemption, etc. - updateable by manager
+    string  public name; // fixed token name
+    string  public symbol; // fixed token symbol
+    bool    public forSale; // status of token sale - e.g., if `false`, ETH sent to token address will not return token per saleRate - updateable by manager
+    bool    private initialized; // finalized token deployment under eip-1167 proxy pattern
+    bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
     
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
     event BalanceResolution(string indexed resolution);
-    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event Transfer(address indexed from, address indexed to, uint256 value);
     
     mapping(address => mapping(address => uint256)) public allowances;
     mapping(address => uint256) public balanceOf;
-    mapping (address => uint256) public nonces;
+    mapping(address => uint256) public nonces;
     
     modifier onlyManager {
         require(msg.sender == manager, "!manager");
@@ -83,14 +83,13 @@ contract LexToken {
         uint256 _saleRate, 
         uint256 saleSupply, 
         uint256 _totalSupplyCap,
-        string calldata _details, 
-        string calldata _name, 
-        string calldata _symbol,  
+        string memory _details, 
+        string memory _name, 
+        string memory _symbol,  
         bool _forSale, 
         bool _transferable
     ) external {
         require(!initialized, "initialized"); 
-        require(managerSupply.add(saleSupply) <= _totalSupplyCap, "capped");
         manager = _manager; 
         resolver = _resolver;
         decimals = _decimals; 
@@ -102,9 +101,8 @@ contract LexToken {
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
-        balanceOf[manager] = managerSupply;
-        balanceOf[address(this)] = saleSupply;
-        totalSupply = managerSupply.add(saleSupply);
+        _mint(manager, managerSupply);
+        _mint(address(this), saleSupply);
         // eip-2612 permit() pattern:
         uint256 chainId;
         assembly {chainId := chainid()}
@@ -114,43 +112,41 @@ contract LexToken {
             keccak256(bytes("1")),
             chainId,
             address(this)));
-        emit Transfer(address(0), manager, managerSupply);
-        emit Transfer(address(0), address(this), saleSupply);
     }
     
     receive() external payable { // SALE 
         require(forSale, "!forSale");
         (bool success, ) = manager.call{value: msg.value}("");
         require(success, "!transfer");
-        uint256 amount = msg.value.mul(saleRate); 
-        _transfer(address(this), msg.sender, amount);
+        uint256 value = msg.value.mul(saleRate); 
+        _transfer(address(this), msg.sender, value);
     } 
     
-    function _approve(address owner, address spender, uint256 amount) internal {
-        require(amount == 0 || allowances[owner][spender] == 0, "!reset"); 
-        allowances[owner][spender] = amount; 
-        emit Approval(owner, spender, amount); 
+    function _approve(address owner, address spender, uint256 value) internal {
+        require(value == 0 || allowances[owner][spender] == 0, "!reset"); 
+        allowances[owner][spender] = value; 
+        emit Approval(owner, spender, value); 
     }
     
-    function approve(address spender, uint256 amount) external returns (bool) {
-        _approve(msg.sender, spender, amount);
+    function approve(address spender, uint256 value) external returns (bool) {
+        _approve(msg.sender, spender, value);
         return true;
     }
 
-    function balanceResolution(address from, address to, uint256 amount, string calldata resolution) external { // resolve disputed or lost balances
+    function balanceResolution(address from, address to, uint256 value, string memory resolution) external { // resolve disputed or lost balances
         require(msg.sender == resolver, "!resolver"); 
-        _transfer(from, to, amount); 
+        _transfer(from, to, value); 
         emit BalanceResolution(resolution);
     }
     
-    function burn(uint256 amount) external {
-        balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount); 
-        totalSupply = totalSupply.sub(amount); 
-        emit Transfer(msg.sender, address(0), amount);
+    function burn(uint256 value) external {
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(value); 
+        totalSupply = totalSupply.sub(value); 
+        emit Transfer(msg.sender, address(0), value);
     }
     
     // Adapted from https://github.com/albertocuestacanada/ERC20Permit/blob/master/contracts/ERC20Permit.sol
-    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function permit(address owner, address spender, uint256 deadline, uint256 value, uint8 v, bytes32 r, bytes32 s) external {
         require(block.timestamp <= deadline, "expired");
         bytes32 hashStruct = keccak256(
             abi.encode(
@@ -170,66 +166,64 @@ contract LexToken {
         _approve(owner, spender, value);
     }
     
-    function _transfer(address from, address to, uint256 amount) internal {
-        balanceOf[from] = balanceOf[from].sub(amount); 
-        balanceOf[to] = balanceOf[to].add(amount); 
-        emit Transfer(from, to, amount); 
+    function _transfer(address from, address to, uint256 value) internal {
+        balanceOf[from] = balanceOf[from].sub(value); 
+        balanceOf[to] = balanceOf[to].add(value); 
+        emit Transfer(from, to, value); 
     }
     
-    function transfer(address to, uint256 amount) external returns (bool) {
+    function transfer(address to, uint256 value) external returns (bool) {
         require(transferable, "!transferable"); 
-        balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount); 
-        balanceOf[to] = balanceOf[to].add(amount); 
-        emit Transfer(msg.sender, to, amount); 
+        _transfer(msg.sender, to, value);
         return true;
     }
     
-    function transferBatch(address[] calldata to, uint256[] calldata amount) external {
-        require(to.length == amount.length, "!to/amount");
+    function transferBatch(address[] memory to, uint256[] memory value) external {
+        require(to.length == value.length, "!to/value");
         require(transferable, "!transferable");
         for (uint256 i = 0; i < to.length; i++) {
-            _transfer(msg.sender, to[i], amount[i]);
+            _transfer(msg.sender, to[i], value[i]);
         }
     }
     
-    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+    function transferFrom(address from, address to, uint256 value) external returns (bool) {
         require(transferable, "!transferable");
-        allowances[from][msg.sender] = allowances[from][msg.sender].sub(amount); 
-        _transfer(from, to, amount);
+        allowances[from][msg.sender] = allowances[from][msg.sender].sub(value); 
+        _transfer(from, to, value);
         return true;
     }
     
     /****************
     MANAGER FUNCTIONS
     ****************/
-    function _mint(address to, uint256 amount) internal {
-        require(totalSupply.add(amount) <= totalSupplyCap, "capped"); 
-        balanceOf[to] = balanceOf[to].add(amount); 
-        totalSupply = totalSupply.add(amount); 
-        emit Transfer(address(0), to, amount); 
+    function _mint(address to, uint256 value) internal {
+        require(totalSupply.add(value) <= totalSupplyCap, "capped"); 
+        balanceOf[to] = balanceOf[to].add(value); 
+        totalSupply = totalSupply.add(value); 
+        emit Transfer(address(0), to, value); 
     }
     
-    function mint(address to, uint256 amount) external onlyManager {
-        _mint(to, amount);
+    function mint(address to, uint256 value) external onlyManager {
+        _mint(to, value);
     }
     
-    function mintBatch(address[] calldata to, uint256[] calldata amount) external onlyManager {
-        require(to.length == amount.length, "!to/amount");
+    function mintBatch(address[] memory to, uint256[] memory value) external onlyManager {
+        require(to.length == value.length, "!to/value");
         for (uint256 i = 0; i < to.length; i++) {
-            _mint(to[i], amount[i]); 
+            _mint(to[i], value[i]); 
         }
     }
     
-    function updateGovernance(address payable _manager, address _resolver, string calldata _details) external onlyManager {
+    function updateGovernance(address payable _manager, address _resolver, string memory _details) external onlyManager {
         manager = _manager;
         resolver = _resolver;
         details = _details;
     }
 
-    function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyManager {
+    function updateSale(uint256 _saleRate, uint256 saleSupply, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
-        _mint(address(this), amount);
+        _mint(address(this), saleSupply);
     }
     
     function updateTransferability(bool _transferable) external onlyManager {
@@ -258,7 +252,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 contract CloneFactory {
-    function createClone(address payable target) internal returns (address payable result) { // adapted for payable lexToken
+    function createClone(address payable target) internal returns (address payable result) { // eip-1167 proxy pattern adapted for payable lexToken
         bytes20 targetBytes = bytes20(target);
         assembly {
             let clone := mload(0x40)
@@ -270,17 +264,25 @@ contract CloneFactory {
     }
 }
 
+interface IERC20Transfer { // brief interface for erc20 token transfer
+    function transfer(address recipient, uint256 value) external returns (bool);
+}
+
 contract LexTokenFactory is CloneFactory {
     address payable public lexDAO;
-    address payable public template;
-    string public details;
+    address public lexDAOtoken;
+    address payable immutable public template;
+    uint256 public userReward;
+    string  public details;
     
-    event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver, bool forSale);
-    event UpdateGovernance(address indexed lexDAO, string indexed details);
+    event LaunchLexToken(address indexed lexToken, address indexed manager, address indexed resolver, bool forSale);
+    event UpdateGovernance(address indexed lexDAO, address indexed lexDAOtoken, uint256 indexed userReward, string details);
     
-    constructor(address payable _lexDAO, address payable _template, string memory _details) {
+    constructor(address payable _lexDAO, address _lexDAOtoken, address payable _template, uint256 _userReward, string memory _details) {
         lexDAO = _lexDAO;
+        lexDAOtoken = _lexDAOtoken;
         template = _template;
+        userReward = _userReward;
         details = _details;
     }
     
@@ -297,7 +299,7 @@ contract LexTokenFactory is CloneFactory {
         string memory _symbol, 
         bool _forSale, 
         bool _transferable
-    ) payable public {
+    ) external payable {
         LexToken lex = LexToken(createClone(template));
         
         lex.init(
@@ -316,13 +318,16 @@ contract LexTokenFactory is CloneFactory {
         
         (bool success, ) = lexDAO.call{value: msg.value}("");
         require(success, "!transfer");
+        IERC20Transfer(lexDAOtoken).transfer(msg.sender, userReward);
         emit LaunchLexToken(address(lex), _manager, _resolver, _forSale);
     }
     
-    function updateGovernance(address payable _lexDAO, string calldata _details) external {
+    function updateGovernance(address payable _lexDAO, address _lexDAOtoken, uint256 _userReward, string memory _details) external {
         require(msg.sender == lexDAO, "!lexDAO");
         lexDAO = _lexDAO;
+        lexDAOtoken = _lexDAOtoken;
+        userReward = _userReward;
         details = _details;
-        emit UpdateGovernance(lexDAO, details);
+        emit UpdateGovernance(_lexDAO, _lexDAOtoken, _userReward, _details);
     }
 }
