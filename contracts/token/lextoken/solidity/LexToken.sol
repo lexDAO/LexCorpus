@@ -1,4 +1,4 @@
-/**
+/*
 ██╗     ███████╗██╗  ██╗                    
 ██║     ██╔════╝╚██╗██╔╝                    
 ██║     █████╗   ╚███╔╝                     
@@ -18,7 +18,7 @@ DEAR MSG.SENDER(S):
 //// Likewise, LexToken should not be construed as legal advice or replacement for professional counsel.
 ///// STEAL THIS C0D3SL4W 
 ////// presented by LexDAO LLC
-**/
+*/
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.0;
 
