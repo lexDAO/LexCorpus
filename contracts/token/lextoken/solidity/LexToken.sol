@@ -55,7 +55,7 @@ contract LexToken {
     uint256 public totalSupply; // tracks outstanding token mints
     uint256 public totalSupplyCap; // maximum of token mintable
     bytes32 public DOMAIN_SEPARATOR; // eip-2612 permit() pattern - hash identifies contract
-    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - hash identifies function for signature
+    bytes32 constant public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - hash identifies function for signature
     string  public details; // details token offering, redemption, etc. - updateable by manager
     string  public name; // fixed token name
     string  public symbol; // fixed token symbol
