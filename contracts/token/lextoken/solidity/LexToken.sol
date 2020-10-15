@@ -1,3 +1,24 @@
+/*
+██╗     ███████╗██╗  ██╗                    
+██║     ██╔════╝╚██╗██╔╝                    
+██║     █████╗   ╚███╔╝                     
+██║     ██╔══╝   ██╔██╗                     
+███████╗███████╗██╔╝ ██╗                    
+╚══════╝╚══════╝╚═╝  ╚═╝                    
+████████╗ ██████╗ ██╗  ██╗███████╗███╗   ██╗
+╚══██╔══╝██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║
+   ██║   ██║   ██║█████╔╝ █████╗  ██╔██╗ ██║
+   ██║   ██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║
+   ██║   ╚██████╔╝██║  ██╗███████╗██║ ╚████║
+   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+DEAR MSG.SENDER(S):
+/ LexToken is a project in beta.
+// Please audit and use at your own risk.
+/// Entry into LexToken shall not create an attorney/client relationship.
+//// Likewise, LexToken should not be construed as legal advice or replacement for professional counsel.
+///// STEAL THIS C0D3SL4W 
+////// presented by LexDAO LLC
+*/
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.0;
 
@@ -26,22 +47,22 @@ library SafeMath {
 
 contract LexToken {
     using SafeMath for uint256;
-    address payable public owner; // account controlling token rules & sale - see 'Owner Functions' - updateable by owner
-    address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by owner
-    uint8 public decimals; // declares unit scaling factor - eip-20 - default is 18 to match ETH
-    uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by owner
+    address payable public manager; // account managing token rules & sale - see 'Manager Functions' - updateable by manager
+    address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by manager
+    uint8 public decimals; // declares fixed unit scaling factor - default 18 to match ETH
+    uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by manager
     uint256 public totalSupply; // tracks outstanding token mints
     uint256 public totalSupplyCap; // maximum of token mintable
     bytes32 public DOMAIN_SEPARATOR; // eip-2612 permit() pattern - hash that uniquely identifies contract
-    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - identifies function signature is for
-    string public details; // can describe rules of token offering & redemption - updateable by owner
-    string public name; // declares name of token - eip-20
-    string public symbol; // declares symbol of token - eip-20
-    bool public forSale; // declares status of token sale - if `false`, ETH sent to token address will not return token per saleRate
-    bool private initialized; // finalizes deployment details under eip-1167 proxy pattern
-    bool public transferable; // declares transferability of token - does not affect token sale - updateable by owner
+    bytes32 public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - identifies function for signature
+    string public details; // describe rules of token offering, redemption, etc. - updateable by manager
+    string public name; // declares fixed name of token
+    string public symbol; // declares fixed symbol of token
+    bool public forSale; // declares status of token sale - if `false`, ETH sent to token address will not return token per saleRate - updateable by manager
+    bool private initialized; // finalizes token deployment under eip-1167 proxy pattern
+    bool public transferable; // declares transferability of token - does not affect token sale - updateable by manager
     
-    event Approval(address indexed holder, address indexed spender, uint256 amount);
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
     event BalanceResolution(string indexed resolution);
     event Transfer(address indexed from, address indexed to, uint256 amount);
     
@@ -49,16 +70,16 @@ contract LexToken {
     mapping(address => uint256) public balanceOf;
     mapping (address => uint256) public nonces;
     
-    modifier onlyOwner {
-        require(msg.sender == owner, "!owner");
+    modifier onlyManager {
+        require(msg.sender == manager, "!manager");
         _;
     }
     
     function init(
-        address payable _owner,
+        address payable _manager,
         address _resolver,
         uint8 _decimals, 
-        uint256 ownerSupply, 
+        uint256 managerSupply, 
         uint256 _saleRate, 
         uint256 saleSupply, 
         uint256 _totalSupplyCap,
@@ -69,8 +90,8 @@ contract LexToken {
         bool _transferable
     ) external {
         require(!initialized, "initialized"); 
-        require(ownerSupply.add(saleSupply) <= _totalSupplyCap, "capped");
-        owner = _owner; 
+        require(managerSupply.add(saleSupply) <= _totalSupplyCap, "capped");
+        manager = _manager; 
         resolver = _resolver;
         decimals = _decimals; 
         saleRate = _saleRate; 
@@ -81,9 +102,9 @@ contract LexToken {
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
-        balanceOf[owner] = ownerSupply;
+        balanceOf[manager] = managerSupply;
         balanceOf[address(this)] = saleSupply;
-        totalSupply = ownerSupply.add(saleSupply);
+        totalSupply = managerSupply.add(saleSupply);
         // eip-2612 permit() pattern:
         uint256 chainId;
         assembly {chainId := chainid()}
@@ -93,22 +114,22 @@ contract LexToken {
             keccak256(bytes("1")),
             chainId,
             address(this)));
-        emit Transfer(address(0), owner, ownerSupply);
+        emit Transfer(address(0), manager, managerSupply);
         emit Transfer(address(0), address(this), saleSupply);
     }
     
     receive() external payable { // SALE 
         require(forSale, "!forSale");
-        (bool success, ) = owner.call{value: msg.value}("");
+        (bool success, ) = manager.call{value: msg.value}("");
         require(success, "!transfer");
         uint256 amount = msg.value.mul(saleRate); 
         _transfer(address(this), msg.sender, amount);
     } 
     
-    function _approve(address holder, address spender, uint256 amount) internal {
-        require(amount == 0 || allowances[holder][spender] == 0, "!reset"); 
-        allowances[holder][spender] = amount; 
-        emit Approval(holder, spender, amount); 
+    function _approve(address owner, address spender, uint256 amount) internal {
+        require(amount == 0 || allowances[owner][spender] == 0, "!reset"); 
+        allowances[owner][spender] = amount; 
+        emit Approval(owner, spender, amount); 
     }
     
     function approve(address spender, uint256 amount) external returns (bool) {
@@ -128,19 +149,25 @@ contract LexToken {
         emit Transfer(msg.sender, address(0), amount);
     }
     
-    function permit(address holder, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    // Adapted from https://github.com/albertocuestacanada/ERC20Permit/blob/master/contracts/ERC20Permit.sol
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         require(block.timestamp <= deadline, "expired");
-        bytes32 hashStruct = keccak256(abi.encode(
-            PERMIT_TYPEHASH,
-            holder,
-            spender,
-            amount,
-            nonces[holder]++,
-            deadline));
-        bytes32 hash = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, hashStruct));
+        bytes32 hashStruct = keccak256(
+            abi.encode(
+                PERMIT_TYPEHASH,
+                owner,
+                spender,
+                value,
+                nonces[owner]++,
+                deadline));
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                DOMAIN_SEPARATOR,
+                hashStruct));
         address signer = ecrecover(hash, v, r, s);
-        require(signer != address(0) && signer == holder, "!signature");
-        _approve(holder, spender, amount);
+        require(signer != address(0) && signer == owner, "!signer");
+        _approve(owner, spender, value);
     }
     
     function _transfer(address from, address to, uint256 amount) internal {
@@ -169,36 +196,36 @@ contract LexToken {
         return true;
     }
     
-    /**************
-    OWNER FUNCTIONS
-    **************/
-    function mint(address to, uint256 amount) public onlyOwner {
+    /****************
+    MANAGER FUNCTIONS
+    ****************/
+    function mint(address to, uint256 amount) public onlyManager {
         require(totalSupply.add(amount) <= totalSupplyCap, "capped"); 
         balanceOf[to] = balanceOf[to].add(amount); 
         totalSupply = totalSupply.add(amount); 
         emit Transfer(address(0), to, amount); 
     }
     
-    function mintBatch(address[] calldata to, uint256[] calldata amount) external onlyOwner {
+    function mintBatch(address[] calldata to, uint256[] calldata amount) external onlyManager {
         require(to.length == amount.length, "!to/amount");
         for (uint256 i = 0; i < to.length; i++) {
             mint(to[i], amount[i]);
         }
     }
     
-    function updateGovernance(address payable _owner, address _resolver, string calldata _details) external onlyOwner {
-        owner = _owner;
+    function updateGovernance(address payable _manager, address _resolver, string calldata _details) external onlyManager {
+        manager = _manager;
         resolver = _resolver;
         details = _details;
     }
 
-    function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyOwner {
+    function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
         mint(address(this), amount);
     }
     
-    function updateTransferability(bool _transferable) external onlyOwner {
+    function updateTransferability(bool _transferable) external onlyManager {
         transferable = _transferable;
     }
 }
@@ -239,26 +266,26 @@ contract CloneFactory {
 contract LexTokenFactory is CloneFactory {
     address payable public lexDAO;
     address payable public template;
-    string public message;
+    string public details;
     
     event LaunchLexToken(address indexed lexToken, address indexed owner, address indexed resolver, bool forSale);
-    event UpdateGovernance(address indexed lexDAO, string indexed message);
+    event UpdateGovernance(address indexed lexDAO, string indexed details);
     
-    constructor(address payable _lexDAO, address payable _template, string memory _message) {
+    constructor(address payable _lexDAO, address payable _template, string memory _details) {
         lexDAO = _lexDAO;
         template = _template;
-        message = _message;
+        details = _details;
     }
     
     function launchLexToken(
-        address payable _owner,
+        address payable _manager,
         address _resolver,
         uint8 _decimals, 
-        uint256 ownerSupply, 
+        uint256 managerSupply, 
         uint256 _saleRate, 
         uint256 saleSupply, 
         uint256 _totalSupplyCap,
-        string memory _message,
+        string memory _details,
         string memory _name, 
         string memory _symbol, 
         bool _forSale, 
@@ -267,14 +294,14 @@ contract LexTokenFactory is CloneFactory {
         LexToken lex = LexToken(createClone(template));
         
         lex.init(
-            _owner,
+            _manager,
             _resolver,
             _decimals, 
-            ownerSupply, 
+            managerSupply, 
             _saleRate, 
             saleSupply, 
             _totalSupplyCap,
-            _message,
+            _details,
             _name, 
             _symbol, 
             _forSale, 
@@ -282,13 +309,13 @@ contract LexTokenFactory is CloneFactory {
         
         (bool success, ) = lexDAO.call{value: msg.value}("");
         require(success, "!transfer");
-        emit LaunchLexToken(address(lex), _owner, _resolver, _forSale);
+        emit LaunchLexToken(address(lex), _manager, _resolver, _forSale);
     }
     
-    function updateGovernance(address payable _lexDAO, string calldata _message) external {
+    function updateGovernance(address payable _lexDAO, string calldata _details) external {
         require(msg.sender == lexDAO, "!lexDAO");
         lexDAO = _lexDAO;
-        message = _message;
-        emit UpdateGovernance(lexDAO, message);
+        details = _details;
+        emit UpdateGovernance(lexDAO, details);
     }
 }
