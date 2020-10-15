@@ -176,16 +176,19 @@ contract LexToken {
         emit Transfer(from, to, amount); 
     }
     
-    function transfer(address to, uint256 amount) public returns (bool) {
+    function transfer(address to, uint256 amount) external returns (bool) {
         require(transferable, "!transferable"); 
-        _transfer(msg.sender, to, amount);
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount); 
+        balanceOf[to] = balanceOf[to].add(amount); 
+        emit Transfer(msg.sender, to, amount); 
         return true;
     }
     
     function transferBatch(address[] calldata to, uint256[] calldata amount) external {
         require(to.length == amount.length, "!to/amount");
+        require(transferable, "!transferable");
         for (uint256 i = 0; i < to.length; i++) {
-            transfer(to[i], amount[i]);
+            _transfer(msg.sender, to[i], amount[i]);
         }
     }
     
@@ -199,17 +202,21 @@ contract LexToken {
     /****************
     MANAGER FUNCTIONS
     ****************/
-    function mint(address to, uint256 amount) public onlyManager {
+    function _mint(address to, uint256 amount) internal {
         require(totalSupply.add(amount) <= totalSupplyCap, "capped"); 
         balanceOf[to] = balanceOf[to].add(amount); 
         totalSupply = totalSupply.add(amount); 
         emit Transfer(address(0), to, amount); 
     }
     
+    function mint(address to, uint256 amount) external onlyManager {
+        _mint(to, amount);
+    }
+    
     function mintBatch(address[] calldata to, uint256[] calldata amount) external onlyManager {
         require(to.length == amount.length, "!to/amount");
         for (uint256 i = 0; i < to.length; i++) {
-            mint(to[i], amount[i]);
+            _mint(to[i], amount[i]); 
         }
     }
     
@@ -222,7 +229,7 @@ contract LexToken {
     function updateSale(uint256 amount, uint256 _saleRate, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
-        mint(address(this), amount);
+        _mint(address(this), amount);
     }
     
     function updateTransferability(bool _transferable) external onlyManager {
