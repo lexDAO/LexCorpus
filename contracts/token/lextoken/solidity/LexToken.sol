@@ -60,7 +60,7 @@ contract LexToken {
     string  public name; // fixed token name
     string  public symbol; // fixed token symbol
     bool    public forSale; // status of token sale - e.g., if `false`, ETH sent to token address will not return token per saleRate - updateable by manager
-    bool    private initialized; // finalized token deployment under eip-1167 proxy pattern
+    bool    private initialized; // internally tracks token deployment under eip-1167 proxy pattern
     bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
     
     event Approval(address indexed owner, address indexed spender, uint256 value);
