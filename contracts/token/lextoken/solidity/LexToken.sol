@@ -119,7 +119,7 @@ contract LexToken {
     receive() external payable { // SALE 
         require(forSale, "!forSale");
         (bool success, ) = manager.call{value: msg.value}("");
-        require(success, "!transfer");
+        require(success, "!ethCall");
         uint256 value = msg.value.mul(saleRate); 
         _transfer(address(this), msg.sender, value);
     } 
@@ -317,7 +317,7 @@ contract LexTokenFactory is CloneFactory {
             _transferable);
         
         (bool success, ) = lexDAO.call{value: msg.value}("");
-        require(success, "!transfer");
+        require(success, "!ethCall");
         IERC20Transfer(lexDAOtoken).transfer(msg.sender, userReward);
         emit LaunchLexToken(address(lex), _manager, _resolver, _forSale);
     }
