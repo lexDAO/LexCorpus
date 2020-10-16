@@ -148,7 +148,7 @@ contract LexToken {
     }
     
     // Adapted from https://github.com/albertocuestacanada/ERC20Permit/blob/master/contracts/ERC20Permit.sol
-    function permit(address owner, address spender, uint256 deadline, uint256 value, uint8 v, bytes32 r, bytes32 s) external {
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         require(block.timestamp <= deadline, "expired");
         bytes32 hashStruct = keccak256(abi.encode(
                 PERMIT_TYPEHASH,
