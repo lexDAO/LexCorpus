@@ -130,7 +130,7 @@ contract LexToken {
     }
     
     function approve(address spender, uint256 value) external returns (bool) {
-        require(value == 0 || allowances[owner][spender] == 0, "!reset"); 
+        require(value == 0 || allowances[msg.sender][spender] == 0, "!reset"); 
         _approve(msg.sender, spender, value);
         return true;
     }
@@ -188,7 +188,7 @@ contract LexToken {
     
     function transferFrom(address from, address to, uint256 value) external returns (bool) {
         require(transferable, "!transferable");
-        _approve(from, msg.sender, allowances[from][msg.sender].sub(value);
+        _approve(from, msg.sender, allowances[from][msg.sender].sub(value));
         _transfer(from, to, value);
         return true;
     }
