@@ -241,7 +241,7 @@ contract Mystic is ReentrancyGuard {
         require(_proposalDeposit >= _processingReward, "_processingReward > _proposalDeposit");
         
         for (uint256 i = 0; i < _summoner.length; i++) {
-            registerMember(_summoner[i], _summonerShares[i]);
+            registerMember(_summoner[i], _summonerShares[i], 0);
             mintGuildToken(_summoner[i], _summonerShares[i]);
             totalShares = totalShares.add(_summonerShares[i]);
         }
@@ -524,7 +524,7 @@ contract Mystic is ReentrancyGuard {
 
             // if the applicant is a new member, create a new record for them
             } else {
-                registerMember(proposal.applicant, proposal.sharesRequested);
+                registerMember(proposal.applicant, proposal.sharesRequested, proposal.lootRequested);
             }
 
             // mint new guild token, shares & loot 
@@ -875,7 +875,7 @@ contract Mystic is ReentrancyGuard {
         return (balance / totalSharesAndLoot) * shares;
     }
     
-    function registerMember(address newMember, uint256 shares) internal {
+    function registerMember(address newMember, uint256 shares, uint256 loot) internal {
         // if new member is already taken by a member's delegateKey, reset it to their member address
         if (members[memberAddressByDelegateKey[newMember]].exists == 1) {
             address memberToOverride = memberAddressByDelegateKey[newMember];
@@ -887,7 +887,7 @@ contract Mystic is ReentrancyGuard {
             delegateKey : newMember,
             exists : 1, // 'true'
             shares : shares,
-            loot : 0,
+            loot : loot,
             highestIndexYesVote : 0,
             jailed : 0
         });
@@ -937,7 +937,7 @@ contract Mystic is ReentrancyGuard {
 
         // if the sender is a new member, create a new record for them
         } else {
-            registerMember(msg.sender, amount);
+            registerMember(msg.sender, amount, 0);
         }
 
         // mint new guild token & shares 
