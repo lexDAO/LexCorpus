@@ -76,7 +76,7 @@ contract LexToken {
         _;
     }
     
-    constructor(
+    init(
         address payable _manager,
         address _resolver,
         uint8 _decimals, 
@@ -89,7 +89,7 @@ contract LexToken {
         string memory _symbol,  
         bool _forSale, 
         bool _transferable
-    ) {
+    ) external {
         require(!initialized, "initialized"); 
         manager = _manager; 
         resolver = _resolver;
