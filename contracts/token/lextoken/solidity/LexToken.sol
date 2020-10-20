@@ -91,7 +91,6 @@ contract LexToken {
         bool _transferable
     ) {
         require(!initialized, "initialized"); 
-        // token initialization:
         manager = _manager; 
         resolver = _resolver;
         decimals = _decimals; 
