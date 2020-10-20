@@ -279,7 +279,7 @@ contract LexTokenFactory is CloneFactory {
     uint256 public userReward;
     string  public details;
     
-    event LaunchLexToken(address indexed lexToken, address indexed manager, address indexed resolver, bool forSale);
+    event LaunchLexToken(address indexed lexToken, address indexed manager, address indexed resolver, uint256 saleRate, bool forSale);
     event UpdateGovernance(address indexed lexDAO, address indexed lexDAOtoken, uint256 indexed userReward, string details);
     
     constructor(address payable _lexDAO, address _lexDAOtoken, address payable _template, uint256 _userReward, string memory _details) {
@@ -323,7 +323,7 @@ contract LexTokenFactory is CloneFactory {
         (bool success, ) = lexDAO.call{value: msg.value}("");
         require(success, "!ethCall");
         IERC20Transfer(lexDAOtoken).transfer(msg.sender, userReward);
-        emit LaunchLexToken(address(lex), _manager, _resolver, _forSale);
+        emit LaunchLexToken(address(lex), _manager, _resolver, _saleRate, _forSale);
     }
     
     function updateGovernance(address payable _lexDAO, address _lexDAOtoken, uint256 _userReward, string memory _details) external {
