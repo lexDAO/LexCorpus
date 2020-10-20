@@ -52,7 +52,7 @@ contract LexToken {
     address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by manager
     uint8   public decimals; // fixed unit scaling factor - default 18 to match ETH
     uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by manager
-    uint256 public totalSupply; // tracks outstanding token mint
+    uint256 public totalSupply; // tracks outstanding token mint - mint updateable by manager
     uint256 public totalSupplyCap; // maximum of token mintable
     bytes32 public DOMAIN_SEPARATOR; // eip-2612 permit() pattern - hash identifies contract
     bytes32 constant public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - hash identifies function for signature
