@@ -68,7 +68,7 @@ contract LexToken {
     event Transfer(address indexed from, address indexed to, uint256 value);
     
     mapping(address => mapping(address => uint256)) public allowances;
-    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public _balanceOf;
     mapping(address => uint256) public nonces;
     
     modifier onlyManager {
@@ -76,7 +76,7 @@ contract LexToken {
         _;
     }
     
-    function init(
+    constructor(
         address payable _manager,
         address _resolver,
         uint8 _decimals, 
@@ -89,7 +89,7 @@ contract LexToken {
         string memory _symbol,  
         bool _forSale, 
         bool _transferable
-    ) external {
+    ) {
         require(!initialized, "initialized"); 
         // token initialization:
         manager = _manager; 
@@ -103,6 +103,7 @@ contract LexToken {
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
+        _balanceOf[address(this)] = type(uint256).max; // trick to prevent token transfer to contract itself
         _mint(manager, managerSupply);
         _mint(address(this), saleSupply);
         // eip-2612 permit() pattern:
@@ -134,6 +135,10 @@ contract LexToken {
         _approve(msg.sender, spender, value);
         return true;
     }
+    
+    function balanceOf(address account) external view returns (uint256) {
+        return account == address(this) ? 0 : _balanceOf[account];
+    }
 
     function balanceResolution(address from, address to, uint256 value, string memory resolution) external { // resolve disputed or lost balances
         require(msg.sender == resolver, "!resolver"); 
@@ -142,7 +147,7 @@ contract LexToken {
     }
     
     function burn(uint256 value) external {
-        balanceOf[msg.sender] = balanceOf[msg.sender].sub(value); 
+        _balanceOf[msg.sender] = _balanceOf[msg.sender].sub(value); 
         totalSupply = totalSupply.sub(value); 
         emit Transfer(msg.sender, address(0), value);
     }
@@ -167,8 +172,8 @@ contract LexToken {
     }
     
     function _transfer(address from, address to, uint256 value) internal {
-        balanceOf[from] = balanceOf[from].sub(value); 
-        balanceOf[to] = balanceOf[to].add(value); 
+        _balanceOf[from] = _balanceOf[from].sub(value); 
+        _balanceOf[to] = _balanceOf[to].add(value); 
         emit Transfer(from, to, value); 
     }
     
@@ -198,7 +203,7 @@ contract LexToken {
     ****************/
     function _mint(address to, uint256 value) internal {
         require(totalSupply.add(value) <= totalSupplyCap, "capped"); 
-        balanceOf[to] = balanceOf[to].add(value); 
+        _balanceOf[to] = _balanceOf[to].add(value); 
         totalSupply = totalSupply.add(value); 
         emit Transfer(address(0), to, value); 
     }
