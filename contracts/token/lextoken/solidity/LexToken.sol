@@ -68,7 +68,7 @@ contract LexToken {
     event Transfer(address indexed from, address indexed to, uint256 value);
     
     mapping(address => mapping(address => uint256)) public allowances;
-    mapping(address => uint256) public _balanceOf;
+    mapping(address => uint256) private _balanceOf;
     mapping(address => uint256) public nonces;
     
     modifier onlyManager {
