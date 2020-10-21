@@ -22,6 +22,10 @@ DEAR MSG.SENDER(S):
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.0;
 
+interface IERC20Transfer { // brief interface for erc20 token transfer
+    function transfer(address recipient, uint256 value) external returns (bool);
+}
+
 library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
@@ -76,7 +80,7 @@ contract LexToken {
         _;
     }
     
-    init(
+    function init(
         address payable _manager,
         address _resolver,
         uint8 _decimals, 
@@ -120,8 +124,7 @@ contract LexToken {
         require(forSale, "!forSale");
         (bool success, ) = manager.call{value: msg.value}("");
         require(success, "!ethCall");
-        uint256 value = msg.value.mul(saleRate); 
-        _transfer(address(this), msg.sender, value);
+        _transfer(address(this), msg.sender, msg.value.mul(saleRate));
     } 
     
     function _approve(address owner, address spender, uint256 value) internal {
@@ -233,6 +236,10 @@ contract LexToken {
     function updateTransferability(bool _transferable) external onlyManager {
         transferable = _transferable;
     }
+    
+    function withdrawToken(address token, address withrawTo, uint256 value) external onlyManager { // withdraw token sent to lextoken contract
+        IERC20Transfer(token).transfer(withrawTo, value);
+    }
 }
 
 /*
@@ -266,10 +273,6 @@ contract CloneFactory {
             result := create(0, clone, 0x37)
         }
     }
-}
-
-interface IERC20Transfer { // brief interface for erc20 token transfer
-    function transfer(address recipient, uint256 value) external returns (bool);
 }
 
 contract LexTokenFactory is CloneFactory {
