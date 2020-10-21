@@ -313,7 +313,7 @@ contract LexTokenFactory is CloneFactory {
         string memory _symbol, 
         bool _forSale, 
         bool _transferable
-    ) public payable {
+    ) payable public {
         LexToken lex = LexToken(createClone(template));
         
         lex.init(
