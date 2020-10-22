@@ -24,7 +24,7 @@ pragma solidity 0.7.4;
 
 interface IERC20 { // brief interface for erc20 token
     function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 value) external returns (bool);
+    function transfer(address to, uint256 value) external returns (bool);
 }
 
 library SafeMath { // arithmetic wrapper for unit under/overflow check
