@@ -1,16 +1,17 @@
 /*
-███╗   ███╗ ██████╗ ██╗      
-████╗ ████║██╔═══██╗██║    
-██╔████╔██║██║   ██║██║    
-██║╚██╔╝██║██║   ██║██║    
-██║ ╚═╝ ██║╚██████╔╝███████╗
 ███████╗ █████╗ ██████╗                              
 ╚══███╔╝██╔══██╗██╔══██╗                             
   ███╔╝ ███████║██████╔╝                             
  ███╔╝  ██╔══██║██╔═══╝                              
 ███████╗██║  ██║██║
+
+███╗   ███╗ ██████╗ ██╗      
+████╗ ████║██╔═══██╗██║    
+██╔████╔██║██║   ██║██║    
+██║╚██╔╝██║██║   ██║██║    
+██║ ╚═╝ ██║╚██████╔╝███████╗
 DEAR MSG.SENDER(S):
-/ MolZap (⚡👹⚡) is a project in beta.
+/ ZapMol (⚡👹⚡) is a project in beta.
 // Please audit and use at your own risk.
 /// STEAL THIS C0D3SL4W 
 //// presented by LexDAO LLC
@@ -18,12 +19,12 @@ DEAR MSG.SENDER(S):
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.4;
 
-interface IERC20ApproveTransfer { // brief interface for erc20 token tx
+interface IERC20ApproveTransfer { // interface for erc20 approve/transfer
     function approve(address spender, uint256 amount) external returns (bool);
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
-interface IMoloch { // brief interface for txs to moloch dao
+interface IMolochProposal { // interface for moloch dao proposal
     function cancelProposal(uint256 proposalId) external;
     
     function submitProposal(
@@ -57,14 +58,31 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
     }
 }
 
-contract MolZap {
+contract ReentrancyGuard { // call wrapper for reentrancy check
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _status;
+
+    constructor() {
+        _status = _NOT_ENTERED;
+    }
+
+    modifier nonReentrant() {
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        _status = _ENTERED;
+        _;
+        _status = _NOT_ENTERED;
+    }
+}
+
+contract ZapMol is ReentrancyGuard {
     using SafeMath for uint256;
     
-    address public manager; // manages moloch zap settings
-    address public moloch; // parent moloch for zap proposals 
-    address public wETH; // ether token wrapper contract reference for proposals
-    uint256 public zapRate; // rate to convert ether into zap proposal shares (e.g., `10` will submit proposal for 10 shares per 1 ETH sent)
-    string public ZAP_DETAILS; // general zap proposal details 
+    address public manager; // account that manages moloch zap proposal settings (e.g., moloch via adminion)
+    address public moloch; // parent moloch dao for zap proposals 
+    address public wETH; // ether token wrapper contract reference for zap proposals
+    uint256 public zapRate; // rate to convert ether into zap proposal share request (e.g., `10` = 10 shares per 1 ETH sent)
+    string public ZAP_DETAILS; // general zap proposal details to attach
 
     mapping(uint256 => Zap) public zaps; // proposalId => Zap
     
@@ -75,7 +93,7 @@ contract MolZap {
 
     event ProposeZap(address indexed proposer, uint256 proposalId);
     event WithdrawZapProposal(address indexed proposer, uint256 proposalId);
-    event UpdateMolZap(address indexed manager, address indexed moloch, address indexed wETH, uint256 zapRate, string ZAP_DETAILS);
+    event UpdateZapMol(address indexed manager, address indexed moloch, address indexed wETH, uint256 zapRate, string ZAP_DETAILS);
 
     constructor(
         address _manager, 
@@ -92,11 +110,11 @@ contract MolZap {
         IERC20ApproveTransfer(wETH).approve(moloch, uint256(-1));
     }
     
-    receive() external payable { // msg.sender ether submits share proposal to moloch per zap rate (adjusted for wei conversion to normal moloch amounts)
+    receive() external payable nonReentrant { // caller submits share proposal to moloch per zap rate and msg.value (adjusted for wei conversion to normal moloch amounts)
         (bool success, ) = wETH.call{value: msg.value}("");
-        require(success, "MolZap::transfer failed");
+        require(success, "ZapMol::receive failed");
         
-        uint256 proposalId = IMoloch(moloch).submitProposal(
+        uint256 proposalId = IMolochProposal(moloch).submitProposal(
             msg.sender,
             msg.value.mul(zapRate).div(10**18),
             0,
@@ -112,37 +130,37 @@ contract MolZap {
         emit ProposeZap(msg.sender, proposalId);
     }
     
-    function cancelZapProposal(uint256 proposalId) external { // zap proposer can cancel zap & withdraw proposal funds 
+    function cancelZapProposal(uint256 proposalId) external nonReentrant { // zap proposer can cancel zap & withdraw proposal funds 
         Zap storage zap = zaps[proposalId];
-        require(msg.sender == zap.proposer, "MolZap::!proposer");
+        require(msg.sender == zap.proposer, "ZapMol::!proposer");
         uint256 zapAmount = zap.zapAmount;
         
-        IMoloch(moloch).cancelProposal(proposalId); // cancel zap proposal in parent moloch
-        IMoloch(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from moloch
+        IMolochProposal(moloch).cancelProposal(proposalId); // cancel zap proposal in parent moloch
+        IMolochProposal(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from moloch
         IERC20ApproveTransfer(wETH).transfer(msg.sender, zapAmount); // redirect funds to zap proposer
         
         emit WithdrawZapProposal(msg.sender, proposalId);
     }
     
-    function drawZapProposal(uint256 proposalId) external { // if proposal fails, withdraw back to proposer
+    function drawZapProposal(uint256 proposalId) external nonReentrant { // if proposal fails, withdraw back to proposer
         Zap storage zap = zaps[proposalId];
-        require(msg.sender == zap.proposer, "MolZap::!proposer");
+        require(msg.sender == zap.proposer, "ZapMol::!proposer");
         uint256 zapAmount = zap.zapAmount;
         
-        IMoloch(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from parent moloch
+        IMolochProposal(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from parent moloch
         IERC20ApproveTransfer(wETH).transfer(msg.sender, zapAmount); // redirect funds to zap proposer
         
         emit WithdrawZapProposal(msg.sender, proposalId);
     }
     
-    function updateMolZap( // manager (e.g., moloch via adminion) adjusts zap proposal settings
+    function updateZapMol( // manager adjusts zap proposal settings
         address _manager, 
         address _moloch, 
         address _wETH, 
         uint256 _zapRate, 
         string calldata _ZAP_DETAILS
-    ) external { 
-        require(msg.sender == manager, "MolZap::!manager");
+    ) external nonReentrant { 
+        require(msg.sender == manager, "ZapMol::!manager");
        
         manager = _manager;
         moloch = _moloch;
@@ -150,6 +168,6 @@ contract MolZap {
         zapRate = _zapRate;
         ZAP_DETAILS = _ZAP_DETAILS;
         
-        emit UpdateMolZap(_manager, _moloch, _wETH, _zapRate, _ZAP_DETAILS);
+        emit UpdateZapMol(_manager, _moloch, _wETH, _zapRate, _ZAP_DETAILS);
     }
 }
