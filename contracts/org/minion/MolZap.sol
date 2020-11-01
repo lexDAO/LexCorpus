@@ -94,13 +94,12 @@ contract MolZap {
     }
     
     receive() external payable { // msg.sender ether submits share proposal to moloch per zap rate (adjusted for wei conversion to normal moloch amounts)
-        uint256 sharesRequested = msg.value.mul(zapRate).div(10**18); 
         (bool success, ) = wETH.call{value: msg.value}("");
-        require(success, "MolochZap::transfer failed");
+        require(success, "MolZap::transfer failed");
         
         uint256 proposalId = IMoloch(moloch).submitProposal(
             msg.sender,
-            sharesRequested,
+            msg.value.mul(zapRate).div(10**18),
             0,
             msg.value,
             wETH,
@@ -116,7 +115,7 @@ contract MolZap {
     
     function cancelZapProposal(uint256 proposalId) external { // zap proposer can cancel zap & withdraw proposal funds 
         Zap storage zap = zaps[proposalId];
-        require(msg.sender == zap.proposer, "MolochZap::!proposer");
+        require(msg.sender == zap.proposer, "MolZap::!proposer");
         uint256 zapAmount = zap.zapAmount;
         
         IMoloch(moloch).cancelProposal(proposalId); // cancel zap proposal in parent moloch
@@ -128,7 +127,7 @@ contract MolZap {
     
     function drawZapProposal(uint256 proposalId) external { // if proposal fails, withdraw back to proposer
         Zap storage zap = zaps[proposalId];
-        require(msg.sender == zap.proposer, "MolochZap::!proposer");
+        require(msg.sender == zap.proposer, "MolZap::!proposer");
         uint256 zapAmount = zap.zapAmount;
         
         IMoloch(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from parent moloch
@@ -137,14 +136,14 @@ contract MolZap {
         emit WithdrawZapProposal(msg.sender, proposalId);
     }
     
-    function updateMolZap( // manager (e.g., moloch via adminion) adjust zap proposal settings
+    function updateMolZap( // manager (e.g., moloch via adminion) adjusts zap proposal settings
         address _manager, 
         address _moloch, 
         address _wETH, 
         uint256 _zapRate, 
         string calldata _ZAP_DETAILS
     ) external { 
-        require(msg.sender == manager, "MolochZap::!manager");
+        require(msg.sender == manager, "MolZap::!manager");
        
         manager = _manager;
         moloch = _moloch;
