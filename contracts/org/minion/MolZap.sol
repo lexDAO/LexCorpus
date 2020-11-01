@@ -25,8 +25,6 @@ interface IERC20ApproveTransfer { // brief interface for erc20 token tx
 }
 
 interface IMoloch { // brief interface for txs to moloch dao
-    function proposals(uint256 proposalId) external view;
-    
     function cancelProposal(uint256 proposalId) external;
     
     function submitProposal(
