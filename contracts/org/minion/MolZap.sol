@@ -58,18 +58,7 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
     }
 }
 
-abstract contract Context { // metaTx support - see https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/GSN/Context.sol
-    function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
-}
-
-contract MolZap is Context {
+contract MolZap {
     using SafeMath for uint256;
     
     address public manager; // manages moloch zap settings
@@ -110,7 +99,7 @@ contract MolZap is Context {
         require(success, "MolochZap::transfer failed");
         
         uint256 proposalId = IMoloch(moloch).submitProposal(
-            _msgSender(),
+            msg.sender,
             sharesRequested,
             0,
             msg.value,
@@ -120,32 +109,32 @@ contract MolZap is Context {
             ZAP_DETAILS
         );
         
-        zaps[proposalId] = Zap(_msgSender(), msg.value);
+        zaps[proposalId] = Zap(msg.sender, msg.value);
 
-        emit ProposeZap(_msgSender(), proposalId);
+        emit ProposeZap(msg.sender, proposalId);
     }
     
     function cancelZapProposal(uint256 proposalId) external { // zap proposer can cancel zap & withdraw proposal funds 
         Zap storage zap = zaps[proposalId];
-        require(_msgSender() == zap.proposer, "MolochZap::!proposer");
+        require(msg.sender == zap.proposer, "MolochZap::!proposer");
         uint256 zapAmount = zap.zapAmount;
         
         IMoloch(moloch).cancelProposal(proposalId); // cancel zap proposal in parent moloch
         IMoloch(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from moloch
-        IERC20ApproveTransfer(wETH).transfer(_msgSender(), zapAmount); // redirect funds to zap proposer
+        IERC20ApproveTransfer(wETH).transfer(msg.sender, zapAmount); // redirect funds to zap proposer
         
-        emit WithdrawZapProposal(_msgSender(), proposalId);
+        emit WithdrawZapProposal(msg.sender, proposalId);
     }
     
     function drawZapProposal(uint256 proposalId) external { // if proposal fails, withdraw back to proposer
         Zap storage zap = zaps[proposalId];
-        require(_msgSender() == zap.proposer, "MolochZap::!proposer");
+        require(msg.sender == zap.proposer, "MolochZap::!proposer");
         uint256 zapAmount = zap.zapAmount;
         
         IMoloch(moloch).withdrawBalance(wETH, zapAmount); // withdraw zap funds from parent moloch
-        IERC20ApproveTransfer(wETH).transfer(_msgSender(), zapAmount); // redirect funds to zap proposer
+        IERC20ApproveTransfer(wETH).transfer(msg.sender, zapAmount); // redirect funds to zap proposer
         
-        emit WithdrawZapProposal(_msgSender(), proposalId);
+        emit WithdrawZapProposal(msg.sender, proposalId);
     }
     
     function updateMolZap( // manager (e.g., moloch via adminion) adjust zap proposal settings
@@ -155,7 +144,7 @@ contract MolZap is Context {
         uint256 _zapRate, 
         string calldata _ZAP_DETAILS
     ) external { 
-        require(_msgSender() == manager, "MolochZap::!manager");
+        require(msg.sender == manager, "MolochZap::!manager");
        
         manager = _manager;
         moloch = _moloch;
