@@ -110,7 +110,7 @@ contract Context { // describes current contract execution context (metaTX suppo
     }
 }
 
-contract LexLocker is Context { // swift arbitration protocol with dispute locker
+contract LexResolver is Context { // swift arbitration protocol with dispute locker
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
