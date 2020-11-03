@@ -125,30 +125,31 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    /*$ <⚖️️> LXL <⚔️> $*/
+    /*$<⚖️️> LXL <⚔️>$*/
     address public dao;
     address public swiftResolverToken;
-    address public wETH; // canonical ether token wrapper contract reference
-    uint256 public lockerCount;
+    address public wETH; // ether token wrapper contract reference
+    uint256 public lockerCount; // lockers counted into LXL registry
     uint256 public MAX_DURATION; // time limit on token lockup - default 63113904 (2-year)
     uint256 public resolutionRate;
     uint256 public swiftResolverTokenBalance;
     string public lockerTerms;
     bool public recoveryRoleRenounced;
     
-    event DepositLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details, bool swiftResolver);
-    event RegisterLocker(address indexed client, address clientOracle, address[] indexed provider, address indexed resolver, address token, uint256[] batch, uint256 cap, uint256 registry, uint256 termination, string details, bool swiftResolver);
-    event ConfirmLocker(uint256 indexed registry);  
-    event Release(uint256 indexed registry); 
-    event Withdraw(uint256 indexed registry);
-    event AssignClientRoles(address indexed client, address indexed clientOracle, uint256 indexed registry);
-    event ClientProposeResolver(address indexed client, address indexed proposedResolver, uint256 indexed registry, string details);
-    event ProviderProposeResolver(address indexed provider, address indexed proposedResolver, uint256 indexed registry, string details);
-    event Lock(address indexed sender, uint256 indexed registry, string indexed details);
-    event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 registry, uint256 resolutionFee, string resolution); 
+    event DepositLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
+    event RegisterLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
+    event ConfirmLocker(uint256 indexed registration); 
+    event TimeLocker(address indexed beneficiary, address token, uint256 amount, uint256 indexed termination, string details);
+    event Release(uint256 indexed milestone, uint256 indexed registration); 
+    event Withdraw(uint256 indexed registration);
+    event AssignClientOracle(address indexed clientOracle, uint256 indexed registration);
+    event ClientProposeResolver(address indexed proposedResolver, uint256 indexed registration, string details);
+    event ProviderProposeResolver(address indexed proposedResolver, uint256 indexed registration, string details);
+    event Lock(address indexed caller, uint256 indexed registration, string indexed details);
+    event Resolve(uint256 indexed clientAward, uint256 indexed providerAward, uint256 indexed registration, uint256 resolutionFee, string resolution); 
     event UpdateLockerSettings(address indexed dao, address indexed swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
-    event RecoverTokenBalance(address indexed recipient, address indexed token, uint256 indexed amount, uint256 registry, string details);
-    event RenounceRecoveryRole(string indexed details);
+    event RecoverTokenBalance(address indexed recipient, address indexed token, uint256 indexed amount, uint256 registration, string details);
+    event RenounceRecoveryRole(string details);
 
     struct ADR {  
         address proposedResolver;
@@ -162,13 +163,15 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
     struct Locker {  
         address client; 
         address clientOracle;
-        address[] provider;
+        address provider;
         address token;
         uint8 confirmed;
         uint8 locked;
-        uint256[] batch;
-        uint256 cap;
+        uint256[] amount;
+        uint256 lastMilestone;
+        uint256 milestones;
         uint256 released;
+        uint256 sum;
         uint256 termination;
         string details; 
     }
@@ -181,7 +184,7 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
         _;
     }
     
-    constructor (
+    constructor(
         address _dao, 
         address _swiftResolverToken, 
         address _wETH,
@@ -204,246 +207,288 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
     ***************/
     function depositLocker( // CLIENT-TRACK: register locker w/ token deposit & provider deal confirmation via deal performance
         address clientOracle,
-        address[] memory provider,
+        address provider,
         address resolver,
         address token,
-        uint256[] memory batch, 
-        uint256 cap,
-        uint256 milestones,
+        uint256[] memory amount, 
         uint256 termination, // exact termination date in seconds since epoch
         string memory details,
         bool swiftResolver // allow swiftResolverToken balance holder to resolve
     ) external nonReentrant payable returns (uint256) {
         uint256 sum;
-        for (uint256 i = 0; i < provider.length; i++) {
-            sum = sum.add(batch[i]);
+        for (uint256 i = 0; i < amount.length; i++) {
+            sum = sum.add(amount[i]);
         }
-        
-        require(sum.mul(milestones) == cap, "deposit != milestones");
+ 
         require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
         if (msg.value > 0) {
-            require(token == wETH && msg.value == cap, "!ethBalance");
+            require(token == wETH && msg.value == sum, "!ethBalance");
             (bool success, ) = wETH.call{value: msg.value}("");
             require(success, "!ethCall");
             IERC20(wETH).safeTransfer(address(this), msg.value);
         } else {
-            IERC20(token).safeTransferFrom(_msgSender(), address(this), cap);
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), sum);
         }
         
         lockerCount++;
+        uint256 registration = lockerCount;
         
-        adrs[lockerCount] = ADR( 
-            resolver,
+        adrs[registration] = ADR( 
+            address(0),
             resolver,
             0,
             0,
 	        resolutionRate,
 	        swiftResolver);
 
-        lockers[lockerCount] = Locker( 
+        lockers[registration] = Locker( 
             _msgSender(), 
             clientOracle,
             provider,
             token,
             1,
             0,
-            batch,
-            cap,
+            amount,
             0,
+            amount.length,
+            0,
+            sum,
             termination,
             details);
 
-        emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, batch, cap, lockerCount, termination, details, swiftResolver); 
+        emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, amount, registration, sum, termination, details, swiftResolver); 
         
-	    return lockerCount;
+	    return registration;
     }
     
     function registerLocker( // PROVIDER-TRACK: register locker for token deposit & client deal confirmation
         address client,
         address clientOracle,
-        address[] memory provider,
+        address provider,
         address resolver,
         address token,
-        uint256[] memory batch, 
-        uint256 cap,
-        uint256 milestones,
+        uint256[] memory amount, 
         uint256 termination, // exact termination date in seconds since epoch
         string memory details,
         bool swiftResolver // allow swiftResolverToken balance holder to resolve
     ) external nonReentrant returns (uint256) {
         uint256 sum;
-        for (uint256 i = 0; i < provider.length; i++) {
-            sum = sum.add(batch[i]);
+        for (uint256 i = 0; i < amount.length; i++) {
+            sum = sum.add(amount[i]);
         }
-        
-        require(sum.mul(milestones) == cap, "deposit != milestones");
+ 
         require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
-        lockerCount = lockerCount + 1;
+        lockerCount++;
+        uint256 registration = lockerCount;
        
-        adrs[lockerCount] = ADR( 
-            resolver,
+        adrs[registration] = ADR( 
+            address(0),
             resolver,
             0,
             0,
 	        resolutionRate,
 	        swiftResolver);
 
-        lockers[lockerCount] = Locker( 
-            _msgSender(), 
+        lockers[registration] = Locker( 
+            client, 
             clientOracle,
             provider,
             token,
+            1,
             0,
+            amount,
             0,
-            batch,
-            cap,
+            amount.length,
             0,
+            sum,
             termination,
             details);
 
-        emit RegisterLocker(client, clientOracle, provider, resolver, token, batch, cap, lockerCount, termination, details, swiftResolver); 
+        emit RegisterLocker(client, clientOracle, provider, resolver, token, amount, registration, sum, termination, details, swiftResolver); 
         
-	    return lockerCount;
+	    return registration;
     }
     
-    function confirmLocker(uint256 registry) external nonReentrant payable { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
-        Locker storage locker = lockers[registry];
+    function confirmLocker(uint256 registration) external nonReentrant payable { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
+        Locker storage locker = lockers[registration];
         
         require(locker.confirmed == 0, "confirmed");
         require(_msgSender() == locker.client, "!client");
         
         address token = locker.token;
-        uint256 cap = locker.cap;
+        uint256 sum = locker.sum;
         
         if (msg.value > 0) {
-            require(token == wETH && msg.value == cap, "!ethBalance");
+            require(token == wETH && msg.value == sum, "!ethBalance");
             (bool success, ) = wETH.call{value: msg.value}("");
             require(success, "!ethCall");
             IERC20(wETH).safeTransfer(address(this), msg.value);
         } else {
-            IERC20(token).safeTransferFrom(_msgSender(), address(this), cap);
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), sum);
         }
         
         locker.confirmed = 1;
         
-        emit ConfirmLocker(registry); 
+        emit ConfirmLocker(registration); 
     }
     
-    function release(uint256 registry) external nonReentrant { // client or oracle can release token batch up to cap to provider 
-    	Locker storage locker = lockers[registry];
+    function timeLocker( // register timed locker w/ token deposit for beneficiary
+        address beneficiary,
+        address token,
+        uint256[] calldata amount, 
+        uint256 termination, // exact termination date in seconds since epoch
+        string calldata details
+    ) external nonReentrant payable returns (uint256) {
+        uint256 sum;
+        for (uint256 i = 0; i < amount.length; i++) {
+            sum = sum.add(amount[i]);
+        }
+        
+        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed"); 
+        
+        if (msg.value > 0) {
+            require(token == wETH && msg.value == sum, "!ethBalance");
+            (bool success, ) = wETH.call{value: msg.value}("");
+            require(success, "!ethCall");
+            IERC20(wETH).safeTransfer(address(this), msg.value);
+        } else {
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), sum);
+        }
+        
+        lockerCount++;
+        uint256 registration = lockerCount;
+       
+        lockers[registration] = Locker( 
+            beneficiary, 
+            address(0),
+            address(0),
+            token,
+            1,
+            0,
+            amount,
+            0,
+            1,
+            0,
+            sum,
+            termination,
+            details);
+
+        emit TimeLocker(beneficiary, token, sum, termination, details); 
+        
+	    return registration;
+    }
+    
+    function release(uint256 registration) external nonReentrant { // client or oracle can release milestone payment to provider 
+    	Locker storage locker = lockers[registration];
 	    
 	    require(locker.confirmed == 1, "!confirmed");
 	    require(locker.locked == 0, "locked");
-	    require(locker.cap > locker.released, "released");
+	    require(locker.sum > locker.released, "released");
 	    require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         
-        uint256[] memory batch = locker.batch;
+        uint256 milestone = locker.lastMilestone;
+        uint256 payment = locker.amount[milestone];
+        locker.lastMilestone++;
         
-        for (uint256 i = 0; i < locker.provider.length; i++) {
-            IERC20(locker.token).safeTransfer(locker.provider[i], batch[i]);
-            locker.released = locker.released.add(batch[i]);
-        }
+        IERC20(locker.token).safeTransfer(locker.provider, payment);
+        locker.released = locker.released.add(payment);
 
-	    emit Release(registry); 
+	    emit Release(milestone, registration); 
     }
     
-    function withdraw(uint256 registry) external nonReentrant { // withdraw locker remainder to client if termination time passes & no lock
-    	Locker storage locker = lockers[registry];
+    function withdraw(uint256 registration) external nonReentrant { // withdraw locker remainder to client if termination time passes & no lock
+    	Locker storage locker = lockers[registration];
         
         require(locker.confirmed == 1, "!confirmed");
         require(locker.locked == 0, "locked");
-        require(locker.cap > locker.released, "released");
+        require(locker.sum > locker.released, "released");
         require(block.timestamp > locker.termination, "!terminated");
         require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         
-        uint256 remainder = locker.cap.sub(locker.released); 
+        uint256 remainder = locker.sum.sub(locker.released); 
         
         IERC20(locker.token).safeTransfer(locker.client, remainder);
         
-        locker.released = locker.released.add(remainder); 
+        locker.released = locker.sum; 
         
-	    emit Withdraw(registry); 
+	    emit Withdraw(registration); 
     }
     
     // ***************
     // CLIENT FUNCTION
     // ***************
-    function assignClientRoles(address client, address clientOracle, uint256 registry) external nonReentrant {
-        Locker storage locker = lockers[registry];
+    function assignClientOracle(address clientOracle, uint256 registration) external nonReentrant {
+        Locker storage locker = lockers[registration];
         
         require(_msgSender() == locker.client, "!client");
         
-        locker.client = client;
         locker.clientOracle = clientOracle;
         
-        emit AssignClientRoles(client, clientOracle, registry);
+        emit AssignClientOracle(clientOracle, registration);
     }
     
     // ***************
     // GETTER FUNCTION
     // ***************
-    function getProviderBatch(uint256 registry) external view returns (address[] memory, uint256[] memory) {
-        Locker storage locker = lockers[registry];
+    function getProviderAmount(uint256 registration) external view returns (address, uint256[] memory) {
+        Locker storage locker = lockers[registration];
         
-        return (locker.provider, locker.batch);
+        return (locker.provider, locker.amount);
     }
     
     /************
     ADR FUNCTIONS
     ************/
-    function lock(uint256 registry, string calldata details) external nonReentrant { // client or main (0) provider can lock remainder for resolution during locker period / update request details
-        Locker storage locker = lockers[registry]; 
+    function lock(uint256 registration, string calldata details) external nonReentrant { // client or provider can lock remainder for resolution during locker period / update request details
+        Locker storage locker = lockers[registration]; 
         
         require(locker.confirmed == 1, "!confirmed");
-        require(locker.cap > locker.released, "released");
+        require(locker.sum > locker.released, "released");
         require(block.timestamp < locker.termination, "terminated"); 
-        require(_msgSender() == locker.client || _msgSender() == locker.provider[0], "!party"); 
+        require(_msgSender() == locker.client || _msgSender() == locker.provider, "!party"); 
 
 	    locker.locked = 1; 
 	    
-	    emit Lock(_msgSender(), registry, details);
+	    emit Lock(_msgSender(), registration, details);
     }
     
-    function resolve(uint256 registry, uint256 clientAward, uint256[] calldata providerAward, string calldata resolution) external nonReentrant { // resolver splits locked deposit remainder between client & provider(s)
-        ADR storage adr = adrs[registry];
-        Locker storage locker = lockers[registry];
+    function resolve(uint256 registration, uint256 clientAward, uint256 providerAward, string calldata resolution) external nonReentrant { // resolver splits locked deposit remainder between client & provider
+        ADR storage adr = adrs[registration];
+        Locker storage locker = lockers[registration];
         
-        uint256 remainder = locker.cap.sub(locker.released); 
+        uint256 remainder = locker.sum.sub(locker.released); 
 	    uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate dispute resolution fee
 	    
 	    require(locker.locked == 1, "!locked"); 
-	    require(locker.cap > locker.released, "released");
-	    require(_msgSender() != locker.client && _msgSender() != locker.clientOracle, "resolver == client/clientOracle");
+	    require(locker.sum > locker.released, "released");
+	    require(_msgSender() != locker.client && _msgSender() != locker.clientOracle && _msgSender() != locker.provider, "resolver == client/clientOracle/provider");
 	    
-	    if (adr.swiftResolver == false) {
+	    if (!adr.swiftResolver) {
             require(_msgSender() == adr.resolver, "!resolver");
         } else {
             require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
         }
 
-	    for (uint256 i = 0; i < locker.provider.length; i++) {
-            require(_msgSender() != locker.provider[i], "resolver == provider");
-            require(clientAward.add(providerAward[i]) == remainder.sub(resolutionFee), "resolution != remainder");
-            IERC20(locker.token).safeTransfer(locker.provider[i], providerAward[i]);
-        }
-  
+        require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "resolution != remainder");
+        
+        IERC20(locker.token).safeTransfer(locker.provider, providerAward);
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
 	    
-	    locker.released = locker.cap; 
+	    locker.released = locker.sum; 
 	    
-	    emit Resolve(_msgSender(), clientAward, providerAward, registry, resolutionFee, resolution);
+	    emit Resolve(clientAward, providerAward, registration, resolutionFee, resolution);
     }
     
-    function clientProposeResolver(address proposedResolver, uint256 registry, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
-        ADR storage adr = adrs[registry];
-        Locker storage locker = lockers[registry]; 
+    function clientProposeResolver(address proposedResolver, uint256 registration, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
+        ADR storage adr = adrs[registration];
+        Locker storage locker = lockers[registration]; 
         
         require(locker.confirmed == 1, "!confirmed");
         require(adr.clientProposedResolver == 0, "pending");
-	    require(locker.cap > locker.released, "released");
+	    require(locker.sum > locker.released, "released");
         require(_msgSender() == locker.client, "!client"); 
         
         if (adr.proposedResolver == proposedResolver && adr.providerProposedResolver == 1) {
@@ -456,17 +501,17 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
 	    adr.proposedResolver = proposedResolver; 
 	    adr.clientProposedResolver = 1;
 	    
-	    emit ClientProposeResolver(_msgSender(), proposedResolver, registry, details);
+	    emit ClientProposeResolver(proposedResolver, registration, details);
     }
     
-    function providerProposeResolver(address proposedResolver, uint256 registry, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
-        ADR storage adr = adrs[registry];
-        Locker storage locker = lockers[registry]; 
+    function providerProposeResolver(address proposedResolver, uint256 registration, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
+        ADR storage adr = adrs[registration];
+        Locker storage locker = lockers[registration]; 
         
         require(locker.confirmed == 1, "!confirmed");
         require(adr.providerProposedResolver == 0, "pending");
-	    require(locker.cap > locker.released, "released");
-        require(_msgSender() == locker.provider[0], "!provider[0]"); 
+	    require(locker.sum > locker.released, "released");
+        require(_msgSender() == locker.provider, "!provider"); 
 
 	    if (adr.proposedResolver == proposedResolver && adr.clientProposedResolver == 1) {
             adr.resolver = proposedResolver;
@@ -478,7 +523,7 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
 	    adr.proposedResolver = proposedResolver;
 	    adr.providerProposedResolver = 1;
 	    
-	    emit ProviderProposeResolver(_msgSender(), proposedResolver, registry, details);
+	    emit ProviderProposeResolver(proposedResolver, registration, details);
     }
    
     /***************
@@ -488,25 +533,25 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
         address recipient, 
         address token, 
         uint256 amount, 
-        uint256 registry, 
+        uint256 registration, 
         string calldata details
     ) external nonReentrant onlyDAO { 
-	    require(recoveryRoleRenounced == false, "!recoveryRoleActive");
+	    require(!recoveryRoleRenounced, "!recoveryRoleActive");
 	
-	    if (registry != 0) {
-            Locker storage locker = lockers[registry];
-	        require(amount == locker.cap.sub(locker.released), "!remainder");
-	        locker.released = locker.cap;
+	    if (registration != 0) {
+            Locker storage locker = lockers[registration];
+	        require(amount == locker.sum.sub(locker.released), "!remainder");
+	        locker.released = locker.sum;
         } 
 	
 	    IERC20(token).safeTransfer(recipient, amount);
        
-	    emit RecoverTokenBalance(recipient, token, amount, registry, details);
+	    emit RecoverTokenBalance(recipient, token, amount, registration, details);
     }
     
     function renounceRecoveryRole(string calldata details) external onlyDAO { 
 	    recoveryRoleRenounced = true;
-       
+    
 	    emit RenounceRecoveryRole(details);
     }
     
