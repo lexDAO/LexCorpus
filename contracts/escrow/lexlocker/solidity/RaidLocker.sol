@@ -1,10 +1,10 @@
 /*
-██████╗  █████╗ ██╗██████╗                           
-██╔══██╗██╔══██╗██║██╔══██╗                          
-██████╔╝███████║██║██║  ██║                          
-██╔══██╗██╔══██║██║██║  ██║                          
-██║  ██║██║  ██║██║██████╔╝                          
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝                                                                             
+██╗     ███████╗██╗  ██╗    
+██║     ██╔════╝╚██╗██╔╝    
+██║     █████╗   ╚███╔╝     
+██║     ██╔══╝   ██╔██╗     
+███████╗███████╗██╔╝ ██╗    
+╚══════╝╚══════╝╚═╝  ╚═╝                                                                             
 ██╗      ██████╗  ██████╗██╗  ██╗███████╗██████╗     
 ██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗    
 ██║     ██║   ██║██║     █████╔╝ █████╗  ██████╔╝    
@@ -12,35 +12,24 @@
 ███████╗╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║    
 ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 DEAR MSG.SENDER(S):
-/ R_L is a project in beta.
+/ LXL is a project in beta.
 // Please audit & use at your own risk.
-/// Entry into R_L shall not create an attorney/client relationship.
-//// Likewise, R_L should not be construed as legal advice or replacement for professional counsel.
+/// Entry into LXL shall not create an attorney/client relationship.
+//// Likewise, LXL should not be construed as legal advice or replacement for professional counsel.
 ///// STEAL THIS C0D3SL4W 
-~presented by LexDAO \+|+/ Raid Guild LLC
+~presented by LexDAO LLC \+|+/ 
 */
-
-pragma solidity 0.5.17;
+// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity 0.7.4;
 
 interface IERC20 { // brief interface for erc20 token tx
     function balanceOf(address account) external view returns (uint256);
-    
     function transfer(address recipient, uint256 amount) external returns (bool);
-
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-}
-
-interface IWETH { // brief interface for canonical ether token wrapper 
-    function deposit() payable external;
-    
-    function transferFrom(address src, address dst, uint wad) external returns (bool);
 }
 
 library Address { // helper for address type - see openzeppelin-contracts/blob/master/contracts/utils/Address.sol
     function isContract(address account) internal view returns (bool) {
-        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-        // for accounts without code, i.e. `keccak256('')`
         bytes32 codehash;
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         assembly { codehash := extcodehash(account) }
@@ -50,18 +39,17 @@ library Address { // helper for address type - see openzeppelin-contracts/blob/m
 
 library SafeERC20 { // wrapper around erc20 token tx for non-standard contract - see openzeppelin-contracts/blob/master/contracts/token/ERC20/SafeERC20.sol
     using Address for address;
-
+    
     function safeTransfer(IERC20 token, address to, uint256 value) internal {
         _callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
-
+    
     function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
         _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
-
-   function _callOptionalReturn(IERC20 token, bytes memory data) private {
+    
+    function _callOptionalReturn(IERC20 token, bytes memory data) private {
         require(address(token).isContract(), "SafeERC20: call to non-contract");
-
         (bool success, bytes memory returnData) = address(token).call(data);
         require(success, "SafeERC20: low-level call failed");
 
@@ -96,7 +84,7 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
 
         return c;
     }
-
+    
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b > 0);
         uint256 c = a / b;
@@ -116,32 +104,31 @@ contract Context { // describe current contract execution context (metaTX suppor
     }
 }
 
-contract ReentrancyGuard { // call wrapper for reentrancy check
-    bool private _notEntered;
+contract ReentrancyGuard { // call wrapper for reentrancy check - see https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/ReentrancyGuard.sol
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _status;
 
-    function _initReentrancyGuard() internal {
-        _notEntered = true;
+    constructor() {
+        _status = _NOT_ENTERED;
     }
 
     modifier nonReentrant() {
-        require(_notEntered, "ReentrancyGuard: reentrant call");
-
-        _notEntered = false;
-
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        _status = _ENTERED;
         _;
-
-        _notEntered = true;
+        _status = _NOT_ENTERED;
     }
 }
 
-contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker registry w/ ADR for digital dealing
+contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/ ADR for digital dealing
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    /*$ <⚔️> R_L <⚔️> $*/
+    /*$ <⚖️️> LXL <⚔️> $*/
     address public dao;
     address public swiftResolverToken;
-    address public wETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // canonical ether token wrapper contract reference
+    address public wETH; // canonical ether token wrapper contract reference
     uint256 public lockerCount;
     uint256 public MAX_DURATION; // time limit on token lockup - default 63113904 (2-year)
     uint256 public resolutionRate;
@@ -159,7 +146,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     event ProviderProposeResolver(address indexed provider, address indexed proposedResolver, uint256 indexed registry, string details);
     event Lock(address indexed sender, uint256 indexed registry, string indexed details);
     event Resolve(address indexed resolver, uint256 indexed clientAward, uint256[] indexed providerAward, uint256 registry, uint256 resolutionFee, string resolution); 
-    event UpdateLockerSettings(address indexed dao, address swiftResolverToken, uint256 indexed MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
+    event UpdateLockerSettings(address indexed dao, address indexed swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
     event RecoverTokenBalance(address indexed recipient, address indexed token, uint256 indexed amount, uint256 registry, string details);
     event RenounceRecoveryRole(string indexed details);
 
@@ -168,8 +155,8 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         address resolver;
         uint8 clientProposedResolver;
         uint8 providerProposedResolver;
-	uint256 resolutionRate;
-	bool swiftResolver;
+	    uint256 resolutionRate;
+	    bool swiftResolver;
     }
     
     struct Locker {  
@@ -189,7 +176,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     mapping(uint256 => ADR) public adrs;
     mapping(uint256 => Locker) public lockers;
     
-    modifier onlyDao {
+    modifier onlyDAO {
         require(_msgSender() == dao, "!dao");
         _;
     }
@@ -197,18 +184,19 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     constructor (
         address _dao, 
         address _swiftResolverToken, 
+        address _wETH,
         uint256 _MAX_DURATION,
         uint256 _resolutionRate, 
         uint256 _swiftResolverTokenBalance, 
         string memory _lockerTerms
-    ) public {
+    ) {
         dao = _dao;
         swiftResolverToken = _swiftResolverToken;
+        wETH = _wETH;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         lockerTerms = _lockerTerms;
-        _initReentrancyGuard();
     }
 
     /***************
@@ -225,34 +213,33 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         uint256 termination, // exact termination date in seconds since epoch
         string memory details,
         bool swiftResolver // allow swiftResolverToken balance holder to resolve
-    ) payable public returns (uint256) {
+    ) external nonReentrant payable returns (uint256) {
         uint256 sum;
         for (uint256 i = 0; i < provider.length; i++) {
             sum = sum.add(batch[i]);
         }
         
         require(sum.mul(milestones) == cap, "deposit != milestones");
-        require(termination <= now.add(MAX_DURATION), "duration maxed");
+        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
-        if (token == wETH && msg.value > 0) {
-            require(msg.value == cap, "!ETH");
-            IWETH(wETH).deposit();
-            (bool success, ) = wETH.call.value(msg.value)("");
-            require(success, "!transfer");
-            IWETH(wETH).transferFrom(_msgSender(), address(this), msg.value);
+        if (msg.value > 0) {
+            require(token == wETH && msg.value == cap, "!ethBalance");
+            (bool success, ) = wETH.call{value: msg.value}("");
+            require(success, "!ethCall");
+            IERC20(wETH).safeTransfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(_msgSender(), address(this), cap);
         }
         
-        lockerCount = lockerCount + 1;
+        lockerCount++;
         
         adrs[lockerCount] = ADR( 
             resolver,
             resolver,
             0,
             0,
-	    resolutionRate,
-	    swiftResolver);
+	        resolutionRate,
+	        swiftResolver);
 
         lockers[lockerCount] = Locker( 
             _msgSender(), 
@@ -269,7 +256,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
 
         emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, batch, cap, lockerCount, termination, details, swiftResolver); 
         
-	return lockerCount;
+	    return lockerCount;
     }
     
     function registerLocker( // PROVIDER-TRACK: register locker for token deposit & client deal confirmation
@@ -284,14 +271,14 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         uint256 termination, // exact termination date in seconds since epoch
         string memory details,
         bool swiftResolver // allow swiftResolverToken balance holder to resolve
-    ) public returns (uint256) {
+    ) external nonReentrant returns (uint256) {
         uint256 sum;
         for (uint256 i = 0; i < provider.length; i++) {
             sum = sum.add(batch[i]);
         }
         
         require(sum.mul(milestones) == cap, "deposit != milestones");
-        require(termination <= now.add(MAX_DURATION), "duration maxed");
+        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
         lockerCount = lockerCount + 1;
        
@@ -300,8 +287,8 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             resolver,
             0,
             0,
-	    resolutionRate,
-	    swiftResolver);
+	        resolutionRate,
+	        swiftResolver);
 
         lockers[lockerCount] = Locker( 
             _msgSender(), 
@@ -318,25 +305,25 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
 
         emit RegisterLocker(client, clientOracle, provider, resolver, token, batch, cap, lockerCount, termination, details, swiftResolver); 
         
-	return lockerCount;
+	    return lockerCount;
     }
     
-    function confirmLocker(uint256 registry) payable external nonReentrant { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
+    function confirmLocker(uint256 registry) external nonReentrant payable { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
         Locker storage locker = lockers[registry];
         
         require(locker.confirmed == 0, "confirmed");
         require(_msgSender() == locker.client, "!client");
         
-        uint256 sum = locker.cap;
+        address token = locker.token;
+        uint256 cap = locker.cap;
         
-        if (locker.token == wETH && msg.value > 0) {
-            require(msg.value == sum, "!ETH");
-            IWETH(wETH).deposit();
-            (bool success, ) = wETH.call.value(msg.value)("");
-            require(success, "!transfer");
-            IWETH(wETH).transferFrom(_msgSender(), address(this), msg.value);
+        if (msg.value > 0) {
+            require(token == wETH && msg.value == cap, "!ethBalance");
+            (bool success, ) = wETH.call{value: msg.value}("");
+            require(success, "!ethCall");
+            IERC20(wETH).safeTransfer(address(this), msg.value);
         } else {
-            IERC20(locker.token).safeTransferFrom(_msgSender(), address(this), sum);
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), cap);
         }
         
         locker.confirmed = 1;
@@ -347,10 +334,10 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     function release(uint256 registry) external nonReentrant { // client or oracle can release token batch up to cap to provider 
     	Locker storage locker = lockers[registry];
 	    
-	require(locker.confirmed == 1, "!confirmed");
-	require(locker.locked == 0, "locked");
-	require(locker.cap > locker.released, "released");
-	require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
+	    require(locker.confirmed == 1, "!confirmed");
+	    require(locker.locked == 0, "locked");
+	    require(locker.cap > locker.released, "released");
+	    require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         
         uint256[] memory batch = locker.batch;
         
@@ -359,7 +346,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             locker.released = locker.released.add(batch[i]);
         }
 
-	emit Release(registry); 
+	    emit Release(registry); 
     }
     
     function withdraw(uint256 registry) external nonReentrant { // withdraw locker remainder to client if termination time passes & no lock
@@ -368,7 +355,7 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         require(locker.confirmed == 1, "!confirmed");
         require(locker.locked == 0, "locked");
         require(locker.cap > locker.released, "released");
-        require(now > locker.termination, "!terminated");
+        require(block.timestamp > locker.termination, "!terminated");
         require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         
         uint256 remainder = locker.cap.sub(locker.released); 
@@ -377,13 +364,13 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         
         locker.released = locker.released.add(remainder); 
         
-	emit Withdraw(registry); 
+	    emit Withdraw(registry); 
     }
     
     // ***************
     // CLIENT FUNCTION
     // ***************
-    function assignClientRoles(address client, address clientOracle, uint256 registry) external {
+    function assignClientRoles(address client, address clientOracle, uint256 registry) external nonReentrant {
         Locker storage locker = lockers[registry];
         
         require(_msgSender() == locker.client, "!client");
@@ -406,17 +393,17 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
     /************
     ADR FUNCTIONS
     ************/
-    function lock(uint256 registry, string calldata details) external { // client or main (0) provider can lock remainder for resolution during locker period / update request details
+    function lock(uint256 registry, string calldata details) external nonReentrant { // client or main (0) provider can lock remainder for resolution during locker period / update request details
         Locker storage locker = lockers[registry]; 
         
         require(locker.confirmed == 1, "!confirmed");
         require(locker.cap > locker.released, "released");
-        require(now < locker.termination, "terminated"); 
+        require(block.timestamp < locker.termination, "terminated"); 
         require(_msgSender() == locker.client || _msgSender() == locker.provider[0], "!party"); 
 
-	locker.locked = 1; 
+	    locker.locked = 1; 
 	    
-	emit Lock(_msgSender(), registry, details);
+	    emit Lock(_msgSender(), registry, details);
     }
     
     function resolve(uint256 registry, uint256 clientAward, uint256[] calldata providerAward, string calldata resolution) external nonReentrant { // resolver splits locked deposit remainder between client & provider(s)
@@ -424,19 +411,19 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         Locker storage locker = lockers[registry];
         
         uint256 remainder = locker.cap.sub(locker.released); 
-	uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate dispute resolution fee
+	    uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate dispute resolution fee
 	    
-	require(locker.locked == 1, "!locked"); 
-	require(locker.cap > locker.released, "released");
-	require(_msgSender() != locker.client && _msgSender() != locker.clientOracle, "resolver == client/clientOracle");
+	    require(locker.locked == 1, "!locked"); 
+	    require(locker.cap > locker.released, "released");
+	    require(_msgSender() != locker.client && _msgSender() != locker.clientOracle, "resolver == client/clientOracle");
 	    
-	if (adr.swiftResolver == false) {
+	    if (adr.swiftResolver == false) {
             require(_msgSender() == adr.resolver, "!resolver");
         } else {
             require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
         }
 
-	for (uint256 i = 0; i < locker.provider.length; i++) {
+	    for (uint256 i = 0; i < locker.provider.length; i++) {
             require(_msgSender() != locker.provider[i], "resolver == provider");
             require(clientAward.add(providerAward[i]) == remainder.sub(resolutionFee), "resolution != remainder");
             IERC20(locker.token).safeTransfer(locker.provider[i], providerAward[i]);
@@ -445,18 +432,18 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
 	    
-	locker.released = locker.cap; 
+	    locker.released = locker.cap; 
 	    
-	emit Resolve(_msgSender(), clientAward, providerAward, registry, resolutionFee, resolution);
+	    emit Resolve(_msgSender(), clientAward, providerAward, registry, resolutionFee, resolution);
     }
     
-    function clientProposeResolver(address proposedResolver, uint256 registry, string calldata details) external { // client & main (0) provider can update resolver selection
+    function clientProposeResolver(address proposedResolver, uint256 registry, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
         ADR storage adr = adrs[registry];
         Locker storage locker = lockers[registry]; 
         
         require(locker.confirmed == 1, "!confirmed");
         require(adr.clientProposedResolver == 0, "pending");
-	require(locker.cap > locker.released, "released");
+	    require(locker.cap > locker.released, "released");
         require(_msgSender() == locker.client, "!client"); 
         
         if (adr.proposedResolver == proposedResolver && adr.providerProposedResolver == 1) {
@@ -466,32 +453,32 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
             adr.providerProposedResolver = 0;
         }
 
-	adr.proposedResolver = proposedResolver; 
-	adr.clientProposedResolver = 1;
+	    adr.proposedResolver = proposedResolver; 
+	    adr.clientProposedResolver = 1;
 	    
-	emit ClientProposeResolver(_msgSender(), proposedResolver, registry, details);
+	    emit ClientProposeResolver(_msgSender(), proposedResolver, registry, details);
     }
     
-    function providerProposeResolver(address proposedResolver, uint256 registry, string calldata details) external { // client & main (0) provider can update resolver selection
+    function providerProposeResolver(address proposedResolver, uint256 registry, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
         ADR storage adr = adrs[registry];
         Locker storage locker = lockers[registry]; 
         
         require(locker.confirmed == 1, "!confirmed");
         require(adr.providerProposedResolver == 0, "pending");
-	require(locker.cap > locker.released, "released");
+	    require(locker.cap > locker.released, "released");
         require(_msgSender() == locker.provider[0], "!provider[0]"); 
 
-	if (adr.proposedResolver == proposedResolver && adr.clientProposedResolver == 1) {
+	    if (adr.proposedResolver == proposedResolver && adr.clientProposedResolver == 1) {
             adr.resolver = proposedResolver;
         } else {
             adr.clientProposedResolver = 0;
             adr.providerProposedResolver = 0;
         }
 	    
-	adr.proposedResolver = proposedResolver;
-	adr.providerProposedResolver = 1;
+	    adr.proposedResolver = proposedResolver;
+	    adr.providerProposedResolver = 1;
 	    
-	emit ProviderProposeResolver(_msgSender(), proposedResolver, registry, details);
+	    emit ProviderProposeResolver(_msgSender(), proposedResolver, registry, details);
     }
    
     /***************
@@ -503,41 +490,43 @@ contract RaidLocker is Context, ReentrancyGuard { // batch / milestone locker re
         uint256 amount, 
         uint256 registry, 
         string calldata details
-    ) external nonReentrant onlyDao { 
-	require(recoveryRoleRenounced == false, "!recoveryRoleActive");
+    ) external nonReentrant onlyDAO { 
+	    require(recoveryRoleRenounced == false, "!recoveryRoleActive");
 	
-	if (registry != 0) {
+	    if (registry != 0) {
             Locker storage locker = lockers[registry];
-	    require(amount == locker.cap.sub(locker.released), "!remainder");
-	    locker.released = locker.cap;
+	        require(amount == locker.cap.sub(locker.released), "!remainder");
+	        locker.released = locker.cap;
         } 
 	
-	IERC20(token).safeTransfer(recipient, amount);
+	    IERC20(token).safeTransfer(recipient, amount);
        
-	emit RecoverTokenBalance(recipient, token, amount, registry, details);
+	    emit RecoverTokenBalance(recipient, token, amount, registry, details);
     }
     
-    function renounceRecoveryRole(string calldata details) external onlyDao { 
-	recoveryRoleRenounced = true;
+    function renounceRecoveryRole(string calldata details) external onlyDAO { 
+	    recoveryRoleRenounced = true;
        
-	emit RenounceRecoveryRole(details);
+	    emit RenounceRecoveryRole(details);
     }
     
     function updateLockerSettings(
     	address _dao, 
-	address _swiftResolverToken, 
-	uint256 _MAX_DURATION, 
-	uint256 _resolutionRate, 
-	uint256 _swiftResolverTokenBalance, 
-	string calldata _lockerTerms
-    ) external onlyDao { 
+	    address _swiftResolverToken,
+	    address _wETH,
+	    uint256 _MAX_DURATION, 
+	    uint256 _resolutionRate, 
+	    uint256 _swiftResolverTokenBalance, 
+	    string calldata _lockerTerms
+    ) external nonReentrant onlyDAO { 
         dao = _dao;
         swiftResolverToken = _swiftResolverToken;
+        wETH = _wETH;
         MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         lockerTerms = _lockerTerms;
 	    
-	emit UpdateLockerSettings(dao, swiftResolverToken, MAX_DURATION, resolutionRate, swiftResolverTokenBalance, lockerTerms);
+	    emit UpdateLockerSettings(_dao, _swiftResolverToken, _wETH, _MAX_DURATION, _resolutionRate, _swiftResolverTokenBalance, _lockerTerms);
     }
 }
