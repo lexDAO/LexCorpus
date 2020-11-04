@@ -520,7 +520,7 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    require(locker.sum > locker.released, "released");
         require(_msgSender() == locker.client, "!client"); 
         
-        if (adr.proposedResolver == proposedResolver && adr.providerProposedResolver == 1) {
+        if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
         } else {
             adr.clientProposedResolver = 0;
@@ -542,7 +542,7 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    require(locker.sum > locker.released, "released");
         require(_msgSender() == locker.provider, "!provider"); 
 
-	    if (adr.proposedResolver == proposedResolver && adr.clientProposedResolver == 1) {
+	    if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
         } else {
             adr.clientProposedResolver = 0;
