@@ -74,17 +74,6 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
         return c;
     }
     
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b);
-
-        return c;
-    }
-    
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b > 0);
         uint256 c = a / b;
@@ -121,25 +110,26 @@ contract ReentrancyGuard { // call wrapper for reentrancy check - see https://gi
     }
 }
 
-contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/ ADR for digital dealing
+contract LexLocker is Context, ReentrancyGuard { // milestone token locker registry w/ ADR for digital dealing
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
     /*$<⚖️️> LXL <⚔️>$*/
-    address public dao;
-    address public swiftResolverToken;
+    address public dao; // account managing LXL settings
+    address public swiftResolverToken; // token required to participate as swift resolver
     address public wETH; // ether token wrapper contract reference
     uint256 public lockerCount; // lockers counted into LXL registry
     uint256 public MAX_DURATION; // time limit on token lockup - default 63113904 (2-year)
-    uint256 public resolutionRate;
-    uint256 public swiftResolverTokenBalance;
-    string public lockerTerms;
-    bool public recoveryRoleRenounced;
+    uint256 public resolutionRate; // rate to determine resolution fee for disputed locker (e.g., 20 = 5% of remainder)
+    uint256 public swiftResolverTokenBalance; // balance required in swiftResolverToken to participate as swift resolver
+    string public lockerTerms; // general terms wrapping LXL
+    bool public recoveryRoleRenounced; // tracks status of dao burning admin role over deposited tokens
     
     event DepositLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
     event RegisterLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
     event ConfirmLocker(uint256 indexed registration); 
-    event TimeLocker(address indexed beneficiary, address token, uint256 amount, uint256 indexed termination, string details);
+    event ResolverLocker(address indexed depositor, address indexed counterparty, address indexed resolver, address token, uint256 deposit, string details, bool swiftResolver); 
+    event TimeLocker(address indexed depositor, address indexed beneficiary, address token, uint256 deposit, uint256 indexed termination, string details);
     event Release(uint256 indexed milestone, uint256 indexed registration); 
     event Withdraw(uint256 indexed registration);
     event AssignClientOracle(address indexed clientOracle, uint256 indexed registration);
@@ -176,8 +166,8 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
         string details; 
     }
     
-    mapping(uint256 => ADR) public adrs;
-    mapping(uint256 => Locker) public lockers;
+    mapping(uint256 => ADR) public adrs; // tracks ADR details for registered LXL
+    mapping(uint256 => Locker) public lockers; // tracks registered LXL details
     
     modifier onlyDAO {
         require(_msgSender() == dao, "!dao");
@@ -205,8 +195,8 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
     /***************
     LOCKER FUNCTIONS
     ***************/
-    function depositLocker( // CLIENT-TRACK: register locker w/ token deposit & provider deal confirmation via deal performance
-        address clientOracle,
+    function depositLocker( // CLIENT-TRACK: register locker w/ token deposit & provider deal confirmation via performance
+        address clientOracle, // client can set additional account to manage release of milestone amounts
         address provider,
         address resolver,
         address token,
@@ -334,31 +324,70 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
         emit ConfirmLocker(registration); 
     }
     
-    function timeLocker( // register timed locker w/ token deposit for beneficiary
-        address beneficiary,
+    function resolverLocker( // register locker w/ token deposit for resolution (e.g., interpreting performance of agreement, occurrence of wagered event)
+        address counterparty,
+        address resolver,
         address token,
-        uint256[] calldata amount, 
-        uint256 termination, // exact termination date in seconds since epoch
-        string calldata details
+        uint256 deposit, 
+        string memory details,
+        bool swiftResolver // allow swiftResolverToken balance holder to resolve
     ) external nonReentrant payable returns (uint256) {
-        uint256 sum;
-        for (uint256 i = 0; i < amount.length; i++) {
-            sum = sum.add(amount[i]);
-        }
-        
-        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed"); 
-        
         if (msg.value > 0) {
-            require(token == wETH && msg.value == sum, "!ethBalance");
+            require(token == wETH && msg.value == deposit, "!ethBalance");
             (bool success, ) = wETH.call{value: msg.value}("");
             require(success, "!ethCall");
             IERC20(wETH).safeTransfer(address(this), msg.value);
         } else {
-            IERC20(token).safeTransferFrom(_msgSender(), address(this), sum);
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), deposit);
         }
         
         lockerCount++;
         uint256 registration = lockerCount;
+        uint256[] memory amount = new uint256[](1);
+        amount[0] = deposit;
+     
+        lockers[registration] = Locker( 
+            _msgSender(), 
+            address(0),
+            counterparty,
+            token,
+            1,
+            1,
+            amount,
+            0,
+            1,
+            0,
+            deposit,
+            block.timestamp.add(MAX_DURATION),
+            details);
+
+        emit ResolverLocker(_msgSender(), counterparty, resolver, token, deposit, details, swiftResolver); 
+        
+	    return registration;
+    }
+    
+    function timeLocker( // register timed locker w/ token deposit for beneficiary
+        address beneficiary, // account that can call withdraw after termination to claim deposited token amount
+        address token,
+        uint256 deposit, // sum to lock until termination
+        uint256 termination, // exact termination date in seconds since epoch
+        string calldata details
+    ) external nonReentrant payable returns (uint256) {
+        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed"); 
+        
+        if (msg.value > 0) {
+            require(token == wETH && msg.value == deposit, "!ethBalance");
+            (bool success, ) = wETH.call{value: msg.value}("");
+            require(success, "!ethCall");
+            IERC20(wETH).safeTransfer(address(this), msg.value);
+        } else {
+            IERC20(token).safeTransferFrom(_msgSender(), address(this), deposit);
+        }
+        
+        lockerCount++;
+        uint256 registration = lockerCount;
+        uint256[] memory amount = new uint256[](1);
+        amount[0] = deposit;
        
         lockers[registration] = Locker( 
             beneficiary, 
@@ -371,11 +400,11 @@ contract LexLocker is Context, ReentrancyGuard { // milestone locker registry w/
             0,
             1,
             0,
-            sum,
+            deposit,
             termination,
             details);
 
-        emit TimeLocker(beneficiary, token, sum, termination, details); 
+        emit TimeLocker(_msgSender(), beneficiary, token, deposit, termination, details); 
         
 	    return registration;
     }
