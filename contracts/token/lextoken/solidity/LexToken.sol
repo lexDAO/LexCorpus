@@ -239,12 +239,12 @@ contract LexToken {
         emit UpdateTransferability(_transferable);
     }
     
-    function withdrawToken(address[] calldata token, address withrawTo, uint256[] calldata value, bool max) external onlyManager { // withdraw token sent to lextoken contract
+    function withdrawToken(address[] calldata token, address withdrawTo, uint256[] calldata value, bool max) external onlyManager { // withdraw token sent to lextoken contract
         require(token.length == value.length, "!token/value");
         for (uint256 i = 0; i < token.length; i++) {
             uint256 withdrawalValue = value[i];
             if (max) {withdrawalValue = IERC20(token[i]).balanceOf(address(this));}
-            IERC20(token[i]).transfer(withrawTo, withdrawalValue);
+            IERC20(token[i]).transfer(withdrawTo, withdrawalValue);
         }
     }
 }
