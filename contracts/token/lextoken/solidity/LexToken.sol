@@ -54,7 +54,6 @@ contract LexToken {
     using SafeMath for uint256;
     
     address payable public manager; // account managing token rules & sale - see 'Manager Functions' - updateable by manager
-    address public resolver; // account acting as backup for lost token & arbitration of disputed token transfers - updateable by manager
     uint8   public decimals; // fixed unit scaling factor - default 18 to match ETH
     uint256 public saleRate; // rate of token purchase when sending ETH to contract - e.g., 10 saleRate returns 10 token per 1 ETH - updateable by manager
     uint256 public totalSupply; // tracks outstanding token mint - mint updateable by manager
@@ -86,7 +85,6 @@ contract LexToken {
     
     function init(
         address payable _manager,
-        address _resolver,
         uint8 _decimals, 
         uint256 _managerSupply, 
         uint256 _saleRate, 
@@ -100,7 +98,6 @@ contract LexToken {
     ) external {
         require(!initialized, "initialized"); 
         manager = _manager; 
-        resolver = _resolver;
         decimals = _decimals; 
         saleRate = _saleRate; 
         totalSupplyCap = _totalSupplyCap; 
