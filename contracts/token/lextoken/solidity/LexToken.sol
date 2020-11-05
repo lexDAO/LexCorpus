@@ -243,7 +243,7 @@ contract LexToken {
             _mint(address(this), _saleSupply);
         }
 
-         emit UpdateSale(_saleRate, _saleSupply, burnTokens, _forSale);
+        emit UpdateSale(_saleRate, _saleSupply, burnTokens, _forSale);
     }
     
     function updateTransferability(bool _transferable) external onlyManager {
