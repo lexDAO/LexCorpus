@@ -69,10 +69,10 @@ contract LexToken {
     bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
     
     event Approval(address indexed owner, address indexed spender, uint256 value);
-    event BalanceResolution(string resolution);
+    event Redeem(string details);
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event UpdateGovernance(address indexed manager, address indexed resolver, string details);
-    event UpdateSale(uint256 saleRate, bool forSale);
+    event UpdateGovernance(address indexed manager, string details);
+    event UpdateSale(uint256 saleRate, uint256 saleSupply, bool burnTokens, bool forSale);
     event UpdateTransferability(bool transferable);
     
     mapping(address => mapping(address => uint256)) public allowances;
@@ -141,16 +141,14 @@ contract LexToken {
         return true;
     }
     
-    function balanceResolution(address from, address to, uint256 value, string calldata resolution) external { // resolve disputed or lost balances
-        require(msg.sender == resolver, "!resolver"); 
-        _transfer(from, to, value); 
-        emit BalanceResolution(resolution);
-    }
-    
-    function burn(uint256 value) external {
+    function _burn(uint256 value) internal {
         balanceOf[msg.sender] = balanceOf[msg.sender].sub(value); 
         totalSupply = totalSupply.sub(value); 
         emit Transfer(msg.sender, address(0), value);
+    }
+    
+    function burn(uint256 value) external {
+        _burn(value);
     }
     
     // Adapted from https://github.com/albertocuestacanada/ERC20Permit/blob/master/contracts/ERC20Permit.sol
@@ -176,6 +174,13 @@ contract LexToken {
         balanceOf[from] = balanceOf[from].sub(value); 
         balanceOf[to] = balanceOf[to].add(value); 
         emit Transfer(from, to, value); 
+    }
+    
+    function redeem(uint256 value, string calldata _details) external {
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(value); 
+        totalSupply = totalSupply.sub(value); 
+        emit Redeem(_details);
+        emit Transfer(msg.sender, address(0), value);
     }
     
     function transfer(address to, uint256 value) external returns (bool) {
@@ -220,18 +225,25 @@ contract LexToken {
         }
     }
     
-    function updateGovernance(address payable _manager, address _resolver, string calldata _details) external onlyManager {
+    function updateGovernance(address payable _manager, string calldata _details) external onlyManager {
         manager = _manager;
-        resolver = _resolver;
         details = _details;
-        emit UpdateGovernance(_manager, _resolver, _details);
+        emit UpdateGovernance(_manager, _details);
     }
 
-    function updateSale(uint256 _saleRate, uint256 _saleSupply, bool _forSale) external onlyManager {
+    function updateSale(uint256 _saleRate, uint256 _saleSupply, bool burnTokens, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
-        _mint(address(this), _saleSupply);
-        emit UpdateSale(_saleRate, _forSale);
+
+         if (_saleSupply != 0 && !burnTokens) {
+             _mint(address(this), _saleSupply);
+         }
+
+         if (_saleSupply != 0 && burnTokens) {
+             _burn(_saleSupply);
+         }
+
+         emit UpdateSale(_saleRate, _saleSupply, burnTokens, _forSale);
     }
     
     function updateTransferability(bool _transferable) external onlyManager {
@@ -239,12 +251,12 @@ contract LexToken {
         emit UpdateTransferability(_transferable);
     }
     
-    function withdrawToken(address[] calldata token, address withdrawTo, uint256[] calldata value, bool max) external onlyManager { // withdraw token sent to lextoken contract
-        require(token.length == value.length, "!token/value");
+    function withdrawToken(address[] calldata token, address[] calldata withdrawTo, uint256[] calldata value, bool max) external onlyManager { // withdraw token sent to lextoken contract
+        require(token.length == withdrawTo.length && token.length == value.length, "!token/withdrawTo/value");
         for (uint256 i = 0; i < token.length; i++) {
             uint256 withdrawalValue = value[i];
             if (max) {withdrawalValue = IERC20(token[i]).balanceOf(address(this));}
-            IERC20(token[i]).transfer(withdrawTo, withdrawalValue);
+            IERC20(token[i]).transfer(withdrawTo[i], withdrawalValue);
         }
     }
 }
