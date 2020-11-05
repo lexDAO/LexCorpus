@@ -177,10 +177,8 @@ contract LexToken {
     }
     
     function redeem(uint256 value, string calldata _details) external {
-        balanceOf[msg.sender] = balanceOf[msg.sender].sub(value); 
-        totalSupply = totalSupply.sub(value); 
+        _burn(value);
         emit Redeem(_details);
-        emit Transfer(msg.sender, address(0), value);
     }
     
     function transfer(address to, uint256 value) external returns (bool) {
