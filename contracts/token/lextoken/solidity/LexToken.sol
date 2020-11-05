@@ -234,14 +234,14 @@ contract LexToken {
     function updateSale(uint256 _saleRate, uint256 _saleSupply, bool burnTokens, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
+        
+        if (_saleSupply > 0 && burnTokens) {
+            _burn(_saleSupply);
+        }
 
-         if (_saleSupply != 0 && !burnTokens) {
-             _mint(address(this), _saleSupply);
-         }
-
-         if (_saleSupply != 0 && burnTokens) {
-             _burn(_saleSupply);
-         }
+        if (_saleSupply > 0 && !burnTokens) {
+            _mint(address(this), _saleSupply);
+        }
 
          emit UpdateSale(_saleRate, _saleSupply, burnTokens, _forSale);
     }
