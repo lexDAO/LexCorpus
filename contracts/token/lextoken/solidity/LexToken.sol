@@ -107,8 +107,8 @@ contract LexToken {
         forSale = _forSale; 
         initialized = true; 
         transferable = _transferable; 
-        _mint(_manager, _managerSupply);
-        _mint(address(this), _saleSupply);
+        if (_managerSupply > 0) {_mint(_manager, _managerSupply);}
+        if (_saleSupply > 0) {_mint(address(this), _saleSupply);}
         // eip-2612 permit() pattern:
         uint256 chainId;
         assembly {chainId := chainid()}
