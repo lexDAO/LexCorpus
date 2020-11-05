@@ -71,7 +71,7 @@ contract LexToken {
     event Redeem(string details);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event UpdateGovernance(address indexed manager, string details);
-    event UpdateSale(uint256 saleRate, uint256 saleSupply, bool burnTokens, bool forSale);
+    event UpdateSale(uint256 saleRate, uint256 saleSupply, bool burnToken, bool forSale);
     event UpdateTransferability(bool transferable);
     
     mapping(address => mapping(address => uint256)) public allowances;
@@ -240,12 +240,12 @@ contract LexToken {
         emit UpdateGovernance(_manager, _details);
     }
 
-    function updateSale(uint256 _saleRate, uint256 _saleSupply, bool burnTokens, bool _forSale) external onlyManager {
+    function updateSale(uint256 _saleRate, uint256 _saleSupply, bool burnToken, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
-        if (_saleSupply > 0 && burnTokens) {_burn(address(this), _saleSupply);}
-        if (_saleSupply > 0 && !burnTokens) {_mint(address(this), _saleSupply);}
-        emit UpdateSale(_saleRate, _saleSupply, burnTokens, _forSale);
+        if (_saleSupply > 0 && burnToken) {_burn(address(this), _saleSupply);}
+        if (_saleSupply > 0 && !burnToken) {_mint(address(this), _saleSupply);}
+        emit UpdateSale(_saleRate, _saleSupply, burnToken, _forSale);
     }
     
     function updateTransferability(bool _transferable) external onlyManager {
