@@ -120,32 +120,39 @@ contract LexToken {
             address(this)));
     }
     
-    receive() external payable { // SALE 
-        require(forSale, "!forSale");
-        (bool success, ) = manager.call{value: msg.value}("");
-        require(success, "!ethCall");
-        _transfer(address(this), msg.sender, msg.value.mul(saleRate));
-    } 
-    
     function _approve(address owner, address spender, uint256 value) internal {
         allowances[owner][spender] = value; 
         emit Approval(owner, spender, value); 
     }
     
     function approve(address spender, uint256 value) external returns (bool) {
-        require(value == 0 || allowances[msg.sender][spender] == 0, "!reset"); 
         _approve(msg.sender, spender, value);
         return true;
     }
     
-    function _burn(uint256 value) internal {
-        balanceOf[msg.sender] = balanceOf[msg.sender].sub(value); 
+    function _burn(address from, uint256 value) internal {
+        balanceOf[from] = balanceOf[from].sub(value); 
         totalSupply = totalSupply.sub(value); 
-        emit Transfer(msg.sender, address(0), value);
+        emit Transfer(from, address(0), value);
     }
     
     function burn(uint256 value) external {
-        _burn(value);
+        _burn(msg.sender, value);
+    }
+    
+    function burnFrom(address from, uint256 value) external {
+        _approve(from, msg.sender, allowances[from][msg.sender].sub(value));
+        _burn(from, value);
+    }
+    
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
+        _approve(msg.sender, spender, allowances[msg.sender][spender].sub(subtractedValue));
+        return true;
+    }
+    
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
+        _approve(msg.sender, spender, allowances[msg.sender][spender].add(addedValue));
+        return true;
     }
     
     // Adapted from https://github.com/albertocuestacanada/ERC20Permit/blob/master/contracts/ERC20Permit.sol
@@ -167,15 +174,22 @@ contract LexToken {
         _approve(owner, spender, value);
     }
     
+    receive() external payable { // SALE 
+        require(forSale, "!forSale");
+        (bool success, ) = manager.call{value: msg.value}("");
+        require(success, "!ethCall");
+        _transfer(address(this), msg.sender, msg.value.mul(saleRate));
+    } 
+    
+    function redeem(uint256 value, string calldata _details) external {
+        _burn(msg.sender, value);
+        emit Redeem(_details);
+    }
+    
     function _transfer(address from, address to, uint256 value) internal {
         balanceOf[from] = balanceOf[from].sub(value); 
         balanceOf[to] = balanceOf[to].add(value); 
         emit Transfer(from, to, value); 
-    }
-    
-    function redeem(uint256 value, string calldata _details) external {
-        _burn(value);
-        emit Redeem(_details);
     }
     
     function transfer(address to, uint256 value) external returns (bool) {
@@ -229,15 +243,8 @@ contract LexToken {
     function updateSale(uint256 _saleRate, uint256 _saleSupply, bool burnTokens, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
-        
-        if (_saleSupply > 0 && burnTokens) {
-            _burn(_saleSupply);
-        }
-
-        if (_saleSupply > 0 && !burnTokens) {
-            _mint(address(this), _saleSupply);
-        }
-
+        if (_saleSupply > 0 && burnTokens) {_burn(address(this), _saleSupply);}
+        if (_saleSupply > 0 && !burnTokens) {_mint(address(this), _saleSupply);}
         emit UpdateSale(_saleRate, _saleSupply, burnTokens, _forSale);
     }
     
