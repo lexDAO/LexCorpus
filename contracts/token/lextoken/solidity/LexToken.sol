@@ -240,12 +240,12 @@ contract LexToken {
         emit UpdateGovernance(_manager, _details);
     }
 
-    function updateSale(uint256 _saleRate, uint256 _saleSupply, bool burnToken, bool _forSale) external onlyManager {
+    function updateSale(uint256 _saleRate, uint256 _saleSupply, bool _burnToken, bool _forSale) external onlyManager {
         saleRate = _saleRate;
         forSale = _forSale;
-        if (_saleSupply > 0 && burnToken) {_burn(address(this), _saleSupply);}
-        if (_saleSupply > 0 && !burnToken) {_mint(address(this), _saleSupply);}
-        emit UpdateSale(_saleRate, _saleSupply, burnToken, _forSale);
+        if (_saleSupply > 0 && _burnToken) {_burn(address(this), _saleSupply);}
+        if (_saleSupply > 0 && !_burnToken) {_mint(address(this), _saleSupply);}
+        emit UpdateSale(_saleRate, _saleSupply, _burnToken, _forSale);
     }
     
     function updateTransferability(bool _transferable) external onlyManager {
