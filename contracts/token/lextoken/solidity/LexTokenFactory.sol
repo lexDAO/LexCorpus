@@ -83,9 +83,9 @@ contract LexTokenFactory is CloneFactory {
             _forSale, 
             _transferable);
         
-        (bool success, ) = lexDAO.call{value: msg.value}("");
-        require(success, "!ethCall");
-        IERC20(lexDAOtoken).transfer(msg.sender, userReward);
+        if (msg.value > 0) {(bool success, ) = lexDAO.call{value: msg.value}("");
+        require(success, "!ethCall");}
+        if (userReward > 0) {IERC20(lexDAOtoken).transfer(msg.sender, userReward);}
         emit LaunchLexToken(address(lex), _manager, _saleRate, _forSale);
     }
     
