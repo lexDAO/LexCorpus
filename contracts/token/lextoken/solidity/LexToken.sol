@@ -78,11 +78,6 @@ contract LexToken {
     mapping(address => uint256) public balanceOf;
     mapping(address => uint256) public nonces;
     
-    modifier onlyManager {
-        require(msg.sender == manager, "!manager");
-        _;
-    }
-    
     function init(
         address payable _manager,
         uint8 _decimals, 
@@ -216,6 +211,11 @@ contract LexToken {
     /****************
     MANAGER FUNCTIONS
     ****************/
+    modifier onlyManager {
+        require(msg.sender == manager, "!manager");
+        _;
+    }
+    
     function _mint(address to, uint256 value) internal {
         require(totalSupply.add(value) <= totalSupplyCap, "capped"); 
         balanceOf[to] = balanceOf[to].add(value); 
