@@ -22,7 +22,7 @@ DEAR MSG.SENDER(S):
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.4;
 
-interface IERC20 { // brief interface for erc20 token
+interface IERC20BalanceTransfer { // brief interface for erc20 token
     function balanceOf(address account) external view returns (uint256);
     function transfer(address to, uint256 value) external returns (bool);
 }
@@ -257,8 +257,8 @@ contract LexToken {
         require(token.length == withdrawTo.length && token.length == value.length, "!token/withdrawTo/value");
         for (uint256 i = 0; i < token.length; i++) {
             uint256 withdrawalValue = value[i];
-            if (max) {withdrawalValue = IERC20(token[i]).balanceOf(address(this));}
-            IERC20(token[i]).transfer(withdrawTo[i], withdrawalValue);
+            if (max) {withdrawalValue = IERC20BalanceTransfer(token[i]).balanceOf(address(this));}
+            IERC20BalanceTransfer(token[i]).transfer(withdrawTo[i], withdrawalValue);
         }
     }
 }
