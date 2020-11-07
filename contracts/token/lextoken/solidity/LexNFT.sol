@@ -1,268 +1,117 @@
-pragma solidity 0.5.17;
+pragma solidity 0.7.4;
+
+interface IERC721transferFrom { // brief interface for erc721 token (nft)
+    function transferFrom(address from, address to, uint256 tokenId) external;
+}
 
 contract LexNFT {
-    address public owner;
-    address public resolver;
+    address payable public manager;
     uint256 public totalSupply;
     uint256 public totalSupplyCap;
-    string public baseURI;
-    string public name;
-    string public symbol;
-    bool private initialized;
-    bool public transferable; 
-
-    event Approval(address indexed owner, address indexed spender, uint256 indexed tokenId);
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
+    string  public details;
+    string  public name;
+    string  public symbol;
+    bool    private initialized; // internally tracks token deployment under eip-1167 proxy pattern
+    bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
+    
     mapping(address => uint256) public balanceOf;
     mapping(uint256 => address) public getApproved;
     mapping(uint256 => address) public ownerOf;
+    mapping(uint256 => uint256) public tokenByIndex;
     mapping(uint256 => string) public tokenURI;
     mapping(bytes4 => bool) public supportsInterface; // eip-165 
     mapping(address => mapping(address => bool)) public isApprovedForAll;
-
-    modifier onlyOwner {
-        require(msg.sender == owner, "!owner");
-        _;
-    }
-
-    function init(
-        string calldata _name, 
-        string calldata _symbol, 
-        address _owner, 
-        address _resolver, 
-        uint256 _totalSupplyCap, 
-        string calldata _baseURI,
-        string calldata _tokenURI,
-        bool _transferable
-    ) external {
-        require(!initialized, "initialized"); 
-
-        name = _name; 
-        symbol = _symbol; 
-        owner = _owner; 
-        resolver = _resolver;
-        totalSupplyCap = _totalSupplyCap; 
-        baseURI = _baseURI; 
-        initialized = true; 
-        transferable = _transferable; 
-        
-        balanceOf[owner] += 1;
-        totalSupply += 1;
-        ownerOf[totalSupply] = owner;
-        tokenURI[totalSupply] = _tokenURI;
+    mapping(address => mapping(uint256 => uint256)) public tokenOfOwnerByIndex;
+    
+    event Approval(address indexed approver, address indexed spender, uint256 indexed tokenId);
+    event ApprovalForAll(address indexed holder, address indexed operator, bool approved);
+    event Redeem(uint256 indexed tokenId, string details);
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event UpdateGovernance(address indexed manager, string details);
+    
+    //* TO DO -
+    function init(string memory _masterOperatingAgreement) public {
+        ricardianLLCdao = msg.sender;
+        masterOperatingAgreement = _masterOperatingAgreement;
         supportsInterface[0x80ac58cd] = true; // ERC721 
         supportsInterface[0x5b5e139f] = true; // METADATA
-        
-        emit Transfer(address(0), owner, totalSupply);
-    }
-
-    /************
-    TKN FUNCTIONS
-    ************/
-    function approve(address spender, uint256 tokenId) external returns (bool) {
-        address tokenOwner = ownerOf[tokenId];
-        require(msg.sender == tokenOwner || isApprovedForAll[tokenOwner][msg.sender], "!owner/approvedForAll");
-        
+        supportsInterface[0x780e9d63] = true; // ENUMERABLE
+    }//
+    
+    function approve(address spender, uint256 tokenId) external {
+        require(msg.sender == ownerOf[tokenId] || isApprovedForAll[ownerOf[tokenId]][msg.sender], "!owner/operator");
         getApproved[tokenId] = spender;
-        
         emit Approval(msg.sender, spender, tokenId); 
-        
-        return true;
     }
     
-    function setApprovalForAll(address spender, bool approved) external returns (bool) {
-        isApprovedForAll[msg.sender][spender] = approved;
-        
-        emit ApprovalForAll(msg.sender, spender, approved);
-        
-        return true;
-    }
-
-    function balanceResolution(address sender, address recipient, uint256 tokenId) external {
-        require(msg.sender == resolver, "!resolver");
-        require(sender == ownerOf[tokenId], "!owner");
-        
-        _transfer(sender, recipient, tokenId); 
+    function setApprovalForAll(address operator, bool approved) external {
+        isApprovedForAll[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
     }
     
-    function burn(uint256 tokenId) public {
-        address tokenOwner = ownerOf[tokenId];
-        require(msg.sender == tokenOwner || getApproved[tokenId] == msg.sender || isApprovedForAll[tokenOwner][msg.sender], "!owner/spender/approvedForAll");
-        
-        balanceOf[tokenOwner] -= 1;
-        totalSupply -= 1; 
-        ownerOf[tokenId] = address(0);
+    function _transfer(address from, address to, uint256 tokenId) internal {
+        balanceOf[from]--; 
+        balanceOf[to]++; 
         getApproved[tokenId] = address(0);
-        tokenURI[tokenId] = "";
-        
-        emit Transfer(msg.sender, address(0), tokenId);
+        ownerOf[tokenId] = to;
+        tokenOfOwnerByIndex[from][tokenId - 1] = 0;
+        tokenOfOwnerByIndex[to][tokenId - 1] = tokenId;
+        emit Transfer(from, to, tokenId); 
     }
     
-    function burnBatch(uint256[] calldata tokenId) external {
-        for (uint256 i = 0; i < tokenId.length; i++) {
-            burn(tokenId[i]);
-        }
-    }
-    
-    function _transfer(address sender, address recipient, uint256 tokenId) internal {
-        balanceOf[sender] -= 1; 
-        balanceOf[recipient] += 1; 
-        getApproved[tokenId] = address(0);
-        ownerOf[tokenId] = recipient;
-        
-        emit Transfer(sender, recipient, tokenId); 
-    }
-    
-    function transfer(address recipient, uint256 tokenId) external returns (bool) {
+    function transfer(address to, uint256 tokenId) external {
         require(msg.sender == ownerOf[tokenId], "!owner");
-        require(transferable, "!transferable"); 
-        
-        _transfer(msg.sender, recipient, tokenId);
-        
-        return true;
+        _transfer(msg.sender, to, tokenId);
     }
     
-    function transferBatch(address[] calldata recipient, uint256[] calldata tokenId) external {
-        require(transferable, "!transferable"); 
-        require(recipient.length == tokenId.length, "!recipient/index");
-        
-        for (uint256 i = 0; i < recipient.length; i++) {
+    function transferBatch(address[] calldata to, uint256[] calldata tokenId) external {
+        require(to.length == tokenId.length, "!to/tokenId");
+        for (uint256 i = 0; i < to.length; i++) {
             require(msg.sender == ownerOf[tokenId[i]], "!owner");
-            _transfer(msg.sender, recipient[i], tokenId[i]);
+            _transfer(msg.sender, to[i], tokenId[i]);
         }
     }
-
-    function transferFrom(address sender, address recipient, uint256 tokenId) public returns (bool) {
-        address tokenOwner = ownerOf[tokenId];
-        require(msg.sender == tokenOwner || getApproved[tokenId] == msg.sender || isApprovedForAll[tokenOwner][msg.sender], "!owner/spender/approvedForAll");
-        require(transferable, "!transferable");
-
-        getApproved[tokenId] = address(0);
-        ownerOf[tokenId] = recipient;
-        
-        _transfer(sender, recipient, tokenId);
-        
-        return true;
+    
+    function transferFrom(address from, address to, uint256 tokenId) external {
+        require(msg.sender == ownerOf[tokenId] || getApproved[tokenId] == msg.sender || isApprovedForAll[ownerOf[tokenId]][msg.sender], "!owner/spender/operator");
+        _transfer(from, to, tokenId);
     }
     
-    /**************
-    OWNER FUNCTIONS
-    **************/
-    function mint(address recipient, string calldata tokenDetails) external onlyOwner {
-        totalSupply += 1; 
+    /****************
+    MANAGER FUNCTIONS
+    ****************/
+    modifier onlyManager {
+        require(msg.sender == manager, "!manager");
+        _;
+    }
+    
+    function mint(address to, string calldata tokenURI) payable external onlyManager { 
+        totalSupply++;
         require(totalSupply <= totalSupplyCap, "capped");
-        
-        balanceOf[recipient] += 1;
-        ownerOf[totalSupply] = recipient;
-        tokenURI[totalSupply] = tokenDetails;
-        
-        emit Transfer(address(0), recipient, totalSupply); 
+        uint256 tokenId = totalSupply;
+        balanceOf[msg.sender]++;
+        ownerOf[tokenId] = msg.sender;
+        tokenByIndex[tokenId - 1] = tokenId;
+        tokenURI[tokenId] = tokenURI;
+        tokenOfOwnerByIndex[msg.sender][tokenId - 1] = tokenId;
+        emit Transfer(address(0), msg.sender, tokenId); 
     }
     
-    function updateBaseURI(string calldata _baseURI) external onlyOwner {
-        baseURI = _baseURI;
+    function updateGovernance(address payable _manager, string calldata _details) external onlyManager {
+        manager = _manager;
+        details = _details;
+        emit UpdateGovernance(_manager, _details);
     }
     
-    function updateOwner(address payable _owner) external onlyOwner {
-        owner = _owner;
-    }
-    
-    function updateResolver(address _resolver) external onlyOwner {
-        resolver = _resolver;
-    }
-    
-    function updateTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyOwner {
-        tokenURI[tokenId] = _tokenURI;
-    }
-    
-    function updateTransferability(bool _transferable) external onlyOwner {
+    function updateTransferability(bool _transferable) external onlyManager {
         transferable = _transferable;
+        emit UpdateTransferability(_transferable);
     }
-}
-
-/*
-The MIT License (MIT)
-Copyright (c) 2018 Murray Software, LLC.
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-contract CloneFactory {
-    function createClone(address target) internal returns (address result) {
-        bytes20 targetBytes = bytes20(target);
-        assembly {
-            let clone := mload(0x40)
-            mstore(clone, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-            mstore(add(clone, 0x14), targetBytes)
-            mstore(add(clone, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-            result := create(0, clone, 0x37)
+    
+    function withdrawNFT(address[] calldata nft, address[] calldata withrawTo, uint256[] calldata tokenId) external onlyManager { // withdraw NFT sent to contract
+        require(nft.length == withrawTo.length && nft.length == tokenId.length, "!nft/withdrawTo/tokenId");
+        for (uint256 i = 0; i < nft.length; i++) {
+            IERC721transferFrom(nft[i]).transferFrom(address(this), withrawTo[i], tokenId[i]);
         }
-    }
-}
-
-contract LexNFTFactory is CloneFactory {
-    address payable public lexDAO;
-    address public template;
-    bytes32 public message;
-    
-    constructor (address payable _lexDAO, address _template, bytes32 _message) public {
-        lexDAO = _lexDAO;
-        template = _template;
-        message = _message;
-    }
-    
-    function LaunchLexNFT(
-        string memory _name, 
-        string memory _symbol, 
-        address payable _owner, 
-        address _resolver, 
-        uint256 _totalSupplyCap, 
-        string memory _contractDetails,
-        string memory tokenDetails,
-        bool _transferable
-    ) payable public returns (address) {
-        LexNFT lexNFT = LexNFT(createClone(template));
-        
-        lexNFT.init(
-            _name, 
-            _symbol, 
-            _owner, 
-            _resolver, 
-            _totalSupplyCap, 
-            _contractDetails,
-            tokenDetails,
-            _transferable);
-        
-        (bool success, ) = lexDAO.call.value(msg.value)("");
-        require(success, "!transfer");
-
-        return address(lexNFT);
-    }
-    
-    function updateLexDAO(address payable _lexDAO) external {
-        require(msg.sender == lexDAO, "!lexDAO");
-        
-        lexDAO = _lexDAO;
-    }
-    
-    function updateMessage(bytes32 _message) external {
-        require(msg.sender == lexDAO, "!lexDAO");
-        
-        message = _message;
     }
 }
