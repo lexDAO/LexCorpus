@@ -67,16 +67,16 @@ contract LexToken {
     bool    private initialized; // internally tracks token deployment under eip-1167 proxy pattern
     bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
     
+    mapping(address => mapping(address => uint256)) public allowances;
+    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public nonces;
+    
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Redeem(string details);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event UpdateGovernance(address indexed manager, string details);
     event UpdateSale(uint256 saleRate, uint256 saleSupply, bool burnToken, bool forSale);
     event UpdateTransferability(bool transferable);
-    
-    mapping(address => mapping(address => uint256)) public allowances;
-    mapping(address => uint256) public balanceOf;
-    mapping(address => uint256) public nonces;
     
     function init(
         address payable _manager,
