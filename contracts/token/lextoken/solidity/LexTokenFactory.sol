@@ -41,13 +41,7 @@ contract LexTokenFactory is CloneFactory {
     event LaunchLexToken(address indexed lexToken, address indexed manager, uint256 saleRate, bool forSale);
     event UpdateGovernance(address indexed lexDAO, address indexed lexDAOtoken, uint256 userReward, string details);
     
-    constructor(
-        address payable _lexDAO, 
-        address _lexDAOtoken, 
-        address payable _template, 
-        uint256 _userReward, 
-        string memory _details
-    ) {
+    constructor(address payable _lexDAO, address _lexDAOtoken, address payable _template, uint256 _userReward, string memory _details) {
         lexDAO = _lexDAO;
         lexDAOtoken = _lexDAOtoken;
         template = _template;
