@@ -110,7 +110,12 @@ contract ReentrancyGuard { // call wrapper for reentrancy check - see https://gi
     }
 }
 
-contract LexLocker is Context, ReentrancyGuard { // milestone token locker registry w/ ADR for digital dealing
+/**
+ * @title LexLocker
+ * @author LexDAO LLC
+ * @notice Milestone token locker registry with resolution. 
+ */
+contract LexLocker is Context, ReentrancyGuard { 
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -123,13 +128,13 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
     uint256 public resolutionRate; // rate to determine resolution fee for disputed locker (e.g., 20 = 5% of remainder) - updateable by manager
     uint256 public swiftResolverTokenBalance; // balance required in swiftResolverToken to participate as swift resolver - updateable by manager
     string public lockerTerms; // general terms wrapping LXL - updateable by manager
-    string[] public marketTerms; // tracks ref. locker terms stamped by manager
-    bool public recoveryRoleRenounced; // tracks status of manager burning admin role over deposited tokens 
+    string[] public marketTerms; // market terms stamped by manager
+    string[] public resolutions; // locker resolutions stamped by LXL resolver
     
-    mapping(uint256 => ADR) public adrs; // tracks ADR details for registered LXL
-    mapping(uint256 => Locker) public lockers; // tracks registered LXL details
     mapping(address => uint256[]) private clientRegistrations; // tracks registered lockers per client account
     mapping(address => uint256[]) private providerRegistrations; // tracks registered lockers per provider account
+    mapping(uint256 => ADR) public adrs; // tracks ADR details for registered LXL
+    mapping(uint256 => Locker) public lockers; // tracks registered LXL details
     
     event DepositLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
     event RegisterLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
@@ -142,8 +147,9 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
     event ProviderProposeResolver(address indexed proposedResolver, uint256 indexed registration, string details);
     event Lock(address indexed caller, uint256 indexed registration, string indexed details);
     event Resolve(uint256 indexed clientAward, uint256 indexed providerAward, uint256 indexed registration, uint256 resolutionFee, string resolution); 
+    event AddMarketTerms(uint256 indexed index, string terms);
+    event AmendMarketTerms(uint256 indexed index, string terms);
     event UpdateLockerSettings(address indexed manager, address indexed swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
-    event RecoverTokenBalance(address indexed to, address indexed token, uint256 indexed amount, uint256 registration, string details);
     event TributeToManager(uint256 amount, string details);
 
     struct ADR {  
@@ -195,23 +201,36 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
     // ************
     // REGISTRATION
     // ************
-    function depositLocker( // CLIENT-TRACK: register locker w/ token deposit & provider deal confirmation via performance
-        address clientOracle, // client can set additional account to manage release of milestone amounts
+    /**
+     * @notice LXL can be registered as deposit from `client` for benefit of `provider`.
+     * @dev If LXL `token` is wETH, msg.value can be wrapped into wETH in single call.
+     * @param clientOracle Account that can help call `release()` and `withdraw()` (default to client if unsure).
+     * @param provider Account to receive registered `amount`s.
+     * @param resolver Account that can call `resolve()` to award deposit between LXL parties.
+     * @param token Token address for deposit.
+     * @param amount Lump sum or array of milestone amounts to be sent to `provider` on call of `release()`.
+     * @param termination Exact termination date in seconds since epoch.
+     * @param details Context re: LXL.
+     * @param swiftResolver If `true`, deposit can be resolved by holders of `swiftResolverToken`.
+     */
+    function depositLocker( // CLIENT-TRACK
+        address clientOracle, 
         address provider,
         address resolver,
         address token,
         uint256[] memory amount, 
-        uint256 termination, // exact termination date in seconds since epoch
+        uint256 termination, 
         string memory details,
-        bool swiftResolver // allow swiftResolverToken balance holder to resolve
+        bool swiftResolver 
     ) external nonReentrant payable returns (uint256) {
+        require(_msgSender() != resolver && clientOracle != resolver && provider != resolver, "client/clientOracle/provider == resolver");
+        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
+        
         uint256 sum;
         for (uint256 i = 0; i < amount.length; i++) {
             sum = sum.add(amount[i]);
         }
- 
-        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
-        
+
         if (msg.value > 0) {
             require(token == wETH && msg.value == sum, "!ethBalance");
             (bool success, ) = wETH.call{value: msg.value}("");
@@ -255,24 +274,37 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    return registration;
     }
     
-    function registerLocker( // PROVIDER-TRACK: register locker for token deposit & client deal confirmation
+    /**
+     * @notice LXL can be registered as `provider` request for `client` deposit (by calling `confirmLocker()`).
+     * @param client Account to provide sum deposit and call `release()` of registered `amount`s.
+     * @param clientOracle Account that can help call `release()` and `withdraw()` (default to client if unsure).
+     * @param provider Account to receive registered `amount`s.
+     * @param resolver Account that can call `resolve()` to award deposit between LXL parties.
+     * @param token Token address for deposit.
+     * @param amount Lump sum or array of milestone amounts to be sent to `provider` on call of `release()`.
+     * @param termination Exact termination date in seconds since epoch.
+     * @param details Context re: LXL.
+     * @param swiftResolver If `true`, deposit can be resolved by holders of `swiftResolverToken`.
+     */
+    function registerLocker( // PROVIDER-TRACK
         address client,
-        address clientOracle,
+        address clientOracle, 
         address provider,
         address resolver,
         address token,
         uint256[] memory amount, 
-        uint256 termination, // exact termination date in seconds since epoch
+        uint256 termination, 
         string memory details,
-        bool swiftResolver // allow swiftResolverToken balance holder to resolve
+        bool swiftResolver 
     ) external nonReentrant returns (uint256) {
+        require(client != resolver && clientOracle != resolver && provider != resolver, "client/clientOracle/provider == resolver");
+        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
+        
         uint256 sum;
         for (uint256 i = 0; i < amount.length; i++) {
             sum = sum.add(amount[i]);
         }
  
-        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
-        
         lockerCount++;
         uint256 registration = lockerCount;
         
@@ -292,7 +324,7 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
             clientOracle,
             provider,
             token,
-            1,
+            0,
             0,
             amount,
             1,
@@ -307,11 +339,16 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    return registration;
     }
     
-    function confirmLocker(uint256 registration) external nonReentrant payable { // PROVIDER-TRACK: client confirms deposit of cap & locks in deal
+     /**
+     * @notice LXL `client` can confirm after `registerLocker()` is called to deposit sum for `provider`.
+     * @dev If LXL `token` is wETH, msg.value can be wrapped into wETH in single call.
+     * @param registration Registered LXL number.
+     */
+    function confirmLocker(uint256 registration) external nonReentrant payable { // PROVIDER-TRACK
         Locker storage locker = lockers[registration];
         
-        require(locker.confirmed == 0, "confirmed");
         require(_msgSender() == locker.client, "!client");
+        require(locker.confirmed == 0, "confirmed");
         
         address token = locker.token;
         uint256 sum = locker.sum;
@@ -330,8 +367,19 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
         emit ConfirmLocker(registration); 
     }
     
-     // register locker w/ token deposit for direct resolution (e.g., interpreting performance of agreement, occurrence of wagered event)
+    /**
+     * @notice LXL depositor (`client`) can request direct resolution between selected `counterparty` over `deposit`. E.g., staked wager to benefit charity as `counterparty`.
+     * @dev If LXL `token` is wETH, msg.value can be wrapped into wETH in single call. 
+     * @param counterparty Other account (`provider`) that can receive award from `resolver`.
+     * @param resolver Account that can call `resolve()` to award deposit between LXL parties.
+     * @param token Token address for deposit.
+     * @param deposit Lump sum amount for deposit.
+     * @param details Context re: resolution request.
+     * @param swiftResolver If `true`, deposit can be resolved by holders of `swiftResolverToken`.
+     */
     function requestLockerResolution(address counterparty, address resolver, address token, uint256 deposit, string memory details, bool swiftResolver) external nonReentrant payable returns (uint256) {
+        require(_msgSender() != resolver && counterparty != resolver, "client/counterparty == resolver");
+        
         if (msg.value > 0) {
             require(token == wETH && msg.value == deposit, "!ethBalance");
             (bool success, ) = wETH.call{value: msg.value}("");
@@ -341,10 +389,10 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
             IERC20(token).safeTransferFrom(_msgSender(), address(this), deposit);
         }
         
-        lockerCount++;
-        uint256 registration = lockerCount;
         uint256[] memory amount = new uint256[](1);
         amount[0] = deposit;
+        lockerCount++;
+        uint256 registration = lockerCount;
         
         clientRegistrations[_msgSender()].push(registration);
         providerRegistrations[counterparty].push(registration);
@@ -365,11 +413,11 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
             1,
             1,
             amount,
-            1,
-            1,
+            0,
+            0,
             0,
             deposit,
-            block.timestamp.add(MAX_DURATION),
+            0,
             details);
 
         emit RequestLockerResolution(_msgSender(), counterparty, resolver, token, deposit, registration, details, swiftResolver); 
@@ -377,104 +425,107 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    return registration;
     }
     
-    // ******
-    // CLIENT
-    // *****
+    // ***********
+    // CLIENT MGMT
+    // ***********
+    /**
+     * @notice LXL `client` can assign account as `clientOracle` to help call `release()` and `withdraw()`.
+     * @param registration Registered LXL number.
+     */
     function assignClientOracle(address clientOracle, uint256 registration) external nonReentrant {
         Locker storage locker = lockers[registration];
         
         require(_msgSender() == locker.client, "!client");
+        require(locker.locked == 0, "locked");
+	    require(locker.released < locker.sum, "released");
         
         locker.clientOracle = clientOracle;
         
         emit AssignClientOracle(clientOracle, registration);
     }
     
-    function release(uint256 registration) external nonReentrant { // client or oracle can release milestone payment to provider 
+    /**
+     * @notice LXL `client` or `clientOracle` can release milestone `amount` to `provider`. 
+     * @param registration Registered LXL number.
+     */
+    function release(uint256 registration) external nonReentrant {
     	Locker storage locker = lockers[registration];
 	    
+	    require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
 	    require(locker.confirmed == 1, "!confirmed");
 	    require(locker.locked == 0, "locked");
 	    require(locker.released < locker.sum, "released");
-	    require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         
         uint256 milestone = locker.currentMilestone-1;
         uint256 payment = locker.amount[milestone];
         
         IERC20(locker.token).safeTransfer(locker.provider, payment);
         locker.released = locker.released.add(payment);
-        if (locker.released != locker.sum) {locker.currentMilestone++;}
+        if (locker.released < locker.sum) {locker.currentMilestone++;}
         
-	    emit Release(milestone, registration); 
+	    emit Release(milestone+1, registration); 
     }
     
-    function withdraw(uint256 registration) external nonReentrant { // withdraw locker remainder to client if termination time passes & no lock
+    /**
+     * @notice LXL `client` or `clientOracle` can withdraw sum remainder after `termination`. 
+     * @dev `release()` can still be called by `client` after `termination` to preserve extension option. 
+     * @param registration Registered LXL number.
+     */
+    function withdraw(uint256 registration) external nonReentrant {
     	Locker storage locker = lockers[registration];
         
+        require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
         require(locker.confirmed == 1, "!confirmed");
         require(locker.locked == 0, "locked");
         require(locker.released < locker.sum, "released");
-        require(block.timestamp > locker.termination, "!terminated");
-        require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
+        require(locker.termination < block.timestamp, "!terminated");
         
         uint256 remainder = locker.sum.sub(locker.released); 
-        
         IERC20(locker.token).safeTransfer(locker.client, remainder);
-        
         locker.released = locker.sum; 
         
 	    emit Withdraw(registration); 
     }
     
-    // *******
-    // GETTERS
-    // *******
-    function getClientRegistrations(address account) external view returns (uint256[] memory) { // get set of registered lockers 
-        return clientRegistrations[account];
-    }
-    
-    function getProviderRegistrations(address account) external view returns (uint256[] memory) { // get set of registered lockers 
-        return providerRegistrations[account];
-    }
-    
-    function getLockerCount() external view returns (uint256) { // helper to make it easier to track total lockers
-        return lockerCount;
-    }
-    
-    function getLockerMilestones(uint256 registration) external view returns (address, uint256[] memory) {
-        return (lockers[registration].provider, lockers[registration].amount);
-    }
-    
-    function getTotalMarketTerms() external view returns (uint256) {
-        return marketTerms.length;
-    }
-    
-    /************
-    ADR FUNCTIONS
-    ************/
-    function lock(uint256 registration, string calldata details) external nonReentrant { // client or provider can lock remainder for resolution during locker period / update request details
+    // **********
+    // RESOLUTION
+    // **********
+    /**
+     * @notice LXL `client` or `provider` can lock to freeze release and withdrawal of sum remainder until `resolver` calls `resolve()`. 
+     * @dev `lock()` can be called repeatedly to allow LXL parties to continue to provide context until resolution. 
+     * @param registration Registered LXL number.
+     * @param details Context re: lock and/or dispute.
+     */
+    function lock(uint256 registration, string calldata details) external nonReentrant {
         Locker storage locker = lockers[registration]; 
         
+        require(_msgSender() == locker.client || _msgSender() == locker.provider, "!party"); 
         require(locker.confirmed == 1, "!confirmed");
         require(locker.released < locker.sum, "released");
-        require(block.timestamp < locker.termination, "terminated"); 
-        require(_msgSender() == locker.client || _msgSender() == locker.provider, "!party"); 
 
 	    locker.locked = 1; 
 	    
 	    emit Lock(_msgSender(), registration, details);
     }
     
-    function resolve(uint256 registration, uint256 clientAward, uint256 providerAward, string calldata resolution) external nonReentrant { // resolver splits locked deposit remainder between client & provider
+    /**
+     * @notice After LXL is locked, selected `resolver` calls to distribute sum remainder between `client` and `provider` minus fee.
+     * @param registration Registered LXL number.
+     * @param clientAward Remainder amount awarded to `client`.
+     * @param providerAward Remainder amount awarded to `provider`.
+     * @param resolution Context re: resolution.
+     */
+    function resolve(uint256 registration, uint256 clientAward, uint256 providerAward, string calldata resolution) external nonReentrant {
         ADR storage adr = adrs[registration];
         Locker storage locker = lockers[registration];
         
         uint256 remainder = locker.sum.sub(locker.released); 
 	    uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate dispute resolution fee as set on registration
 	    
+	    require(_msgSender() != locker.client && _msgSender() != locker.clientOracle && _msgSender() != locker.provider, "client/clientOracle/provider == resolver");
 	    require(locker.locked == 1, "!locked"); 
 	    require(locker.released < locker.sum, "released");
-	    require(_msgSender() != locker.client && _msgSender() != locker.clientOracle && _msgSender() != locker.provider, "resolver == client/clientOracle/provider");
+	    require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
 	    if (adr.swiftResolver) {
 	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
@@ -482,25 +533,30 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
             require(_msgSender() == adr.resolver, "!resolver");
         }
 
-        require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "resolution != remainder");
-        
-        IERC20(locker.token).safeTransfer(locker.provider, providerAward);
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
+        IERC20(locker.token).safeTransfer(locker.provider, providerAward);
         IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
 	    
 	    locker.released = locker.sum; 
+	    resolutions.push(resolution);
 	    
 	    emit Resolve(clientAward, providerAward, registration, resolutionFee, resolution);
     }
     
-    function clientProposeResolver(address proposedResolver, uint256 registration, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
+    /**
+     * @notice 1-time, fallback to allow LXL party to suggest new `resolver` to counterparty.
+     * @dev LXL `client` calls to update `resolver` selection. If matches `provider` suggestion or confirmed, `resolver` updates. 
+     * @param proposedResolver Proposed account to resolve LXL.
+     * @param registration Registered LXL number.
+     * @param details Context re: proposed resolver.
+     */
+    function clientProposeResolver(address proposedResolver, uint256 registration, string calldata details) external nonReentrant { 
         ADR storage adr = adrs[registration];
         Locker storage locker = lockers[registration]; 
         
-        require(locker.confirmed == 1, "!confirmed");
-        require(adr.clientProposedResolver == 0, "pending");
-	    require(locker.sum > locker.released, "released");
         require(_msgSender() == locker.client, "!client"); 
+        require(adr.clientProposedResolver == 0, "pending");
+	    require(locker.released < locker.sum, "released");
         
         if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
@@ -515,14 +571,20 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    emit ClientProposeResolver(proposedResolver, registration, details);
     }
     
-    function providerProposeResolver(address proposedResolver, uint256 registration, string calldata details) external nonReentrant { // client & main (0) provider can update resolver selection
+    /**
+     * @notice 1-time, fallback to allow LXL party to suggest new `resolver` to counterparty.
+     * @dev LXL `provider` calls to update `resolver` selection. If matches `client` suggestion or confirmed, `resolver` updates. 
+     * @param proposedResolver Proposed account to resolve LXL.
+     * @param registration Registered LXL number.
+     * @param details Context re: proposed resolver.
+     */
+    function providerProposeResolver(address proposedResolver, uint256 registration, string calldata details) external nonReentrant { 
         ADR storage adr = adrs[registration];
         Locker storage locker = lockers[registration]; 
         
-        require(locker.confirmed == 1, "!confirmed");
-        require(adr.providerProposedResolver == 0, "pending");
-	    require(locker.sum > locker.released, "released");
         require(_msgSender() == locker.provider, "!provider"); 
+        require(adr.providerProposedResolver == 0, "pending");
+	    require(locker.released < locker.sum, "released");
 
 	    if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
@@ -536,29 +598,83 @@ contract LexLocker is Context, ReentrancyGuard { // milestone token locker regis
 	    
 	    emit ProviderProposeResolver(proposedResolver, registration, details);
     }
+    
+    // *******
+    // GETTERS
+    // *******
+    function getClientRegistrations(address account) external view returns (uint256[] memory) { // get set of `client` registered lockers 
+        return clientRegistrations[account];
+    }
+    
+    function getLockerCount() external view returns (uint256) { // helper to make it easier to track total lockers
+        return lockerCount;
+    }
+    
+    function getLockerMilestones(uint256 registration) external view returns (address, uint256[] memory) { // returns batch of milestone amounts for `provider`
+        return (lockers[registration].token, lockers[registration].amount);
+    }
+    
+    function getMarketTermsCount() external view returns (uint256) { // helper to make it easier to track total market terms stamped by `manager`
+        return marketTerms.length;
+    }
+    
+    function getProviderRegistrations(address account) external view returns (uint256[] memory) { // get set of `provider` registered lockers 
+        return providerRegistrations[account];
+    }
+    
+    function getResolutionCount() external view returns (uint256) { // helper to make it easier to track total resolutions passed by LXL `resolver`s
+        return resolutions.length;
+    }
    
     /****************
     MANAGER FUNCTIONS
     ****************/
+    /**
+     * @dev Throws if caller is not LXL manager.
+     */
     modifier onlyManager {
         require(msg.sender == manager, "!manager");
         _;
     }
     
-    function addTerms(string calldata terms) external nonReentrant onlyManager {
+    /**
+     * @notice Updates LXL with new market terms. 
+     * @param terms New terms to add to LXL market. 
+     */
+    function addMarketTerms(string calldata terms) external nonReentrant onlyManager {
         marketTerms.push(terms);
+        emit AddMarketTerms(marketTerms.length, terms);
     }
     
-    function amendTerms(uint256 index, string calldata terms) external nonReentrant onlyManager {
+    /**
+     * @notice Updates LXL with amended market terms. 
+     * @param index Targeted location in marketTerms array.
+     * @param terms Amended terms to add to LXL market. 
+     */
+    function amendMarketTerms(uint256 index, string calldata terms) external nonReentrant onlyManager {
         marketTerms[index] = terms;
+        emit AmendMarketTerms(index, terms);
     }
     
-    function tributeToManager(string calldata details) external payable { // tips, special requests & other payments to manager account
+    /**
+     * @notice General payment function for manager of LXL contract. 
+     * @param details Describes context for ether transfer.
+     */
+    function tributeToManager(string calldata details) external nonReentrant payable { // tips, special requests & other payments to manager account
         (bool success, ) = manager.call{value: msg.value}("");
         require(success, "!ethCall");
         emit TributeToManager(msg.value, details);
     }
     
+    /**
+     * @notice Updates LXL management settings.
+     * @param _manager Account that governs LXL contract settings.
+     * @param _swiftResolverToken Token to mark participants in swift resolution.
+     * @param _wETH Standard contract reference to wrap ether. 
+     * @param _resolutionRate Common rate to resolve LXL disputes & requests. 
+     * @param _swiftResolverTokenBalance Token balance required to perform swift resolution. 
+     * @param _lockerTerms General terms wrapping LXL  
+     */
     function updateLockerSettings(
         address _manager, 
         address _swiftResolverToken, 
