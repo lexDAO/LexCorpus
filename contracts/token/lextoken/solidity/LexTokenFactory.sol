@@ -61,7 +61,7 @@ contract LexTokenFactory is CloneFactory {
         string memory _symbol, 
         bool _forSale, 
         bool _transferable
-    ) external payable {
+    ) external payable returns (address) {
         LexToken lex = LexToken(createClone(template));
         
         lex.init(
@@ -79,8 +79,9 @@ contract LexTokenFactory is CloneFactory {
         
         if (msg.value > 0) {(bool success, ) = lexDAO.call{value: msg.value}("");
         require(success, "!ethCall");}
-        if (userReward > 0) {IERC20BalanceTransfer(lexDAOtoken).transfer(msg.sender, userReward);}
+        if (userReward > 0) {IERC20(lexDAOtoken).transfer(msg.sender, userReward);}
         emit LaunchLexToken(address(lex), _manager, _saleRate, _forSale);
+        return(address(lex));
     }
     
     function updateGovernance(address payable _lexDAO, address _lexDAOtoken, uint256 _userReward, string calldata _details) external {
