@@ -22,7 +22,7 @@ DEAR MSG.SENDER(S):
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.4;
 
-interface IERC20BalanceTransfer { // brief interface for erc20 token
+interface IERC20 { // brief interface for erc20 token
     function balanceOf(address account) external view returns (uint256);
     function transfer(address to, uint256 value) external returns (bool);
 }
@@ -72,7 +72,7 @@ contract LexToken {
     mapping(address => uint256) public nonces;
     
     event Approval(address indexed owner, address indexed spender, uint256 value);
-    event Redeem(string details);
+    event Redeem(string redemption);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event UpdateGovernance(address indexed manager, string details);
     event UpdateSale(uint256 saleRate, uint256 saleSupply, bool burnToken, bool forSale);
@@ -176,9 +176,9 @@ contract LexToken {
         _transfer(address(this), msg.sender, msg.value.mul(saleRate));
     } 
     
-    function redeem(uint256 value, string calldata details) external {
+    function redeem(uint256 value, string calldata redemption) external {
         _burn(msg.sender, value);
-        emit Redeem(details);
+        emit Redeem(redemption);
     }
     
     function _transfer(address from, address to, uint256 value) internal {
@@ -257,8 +257,8 @@ contract LexToken {
         require(token.length == withdrawTo.length && token.length == value.length, "!token/withdrawTo/value");
         for (uint256 i = 0; i < token.length; i++) {
             uint256 withdrawalValue = value[i];
-            if (max) {withdrawalValue = IERC20BalanceTransfer(token[i]).balanceOf(address(this));}
-            IERC20BalanceTransfer(token[i]).transfer(withdrawTo[i], withdrawalValue);
+            if (max) {withdrawalValue = IERC20(token[i]).balanceOf(address(this));}
+            IERC20(token[i]).transfer(withdrawTo[i], withdrawalValue);
         }
     }
 }
