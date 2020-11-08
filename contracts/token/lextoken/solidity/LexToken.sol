@@ -245,6 +245,8 @@ contract LexToken {
         forSale = _forSale;
         if (_saleSupply > 0 && _burnToken) {_burn(address(this), _saleSupply);}
         if (_saleSupply > 0 && !_burnToken) {_mint(address(this), _saleSupply);}
+        if (_forSale) {require(_saleRate > 0, "_saleRate = 0");}
+        if (!_forSale) {require(_saleRate == 0, "_saleRate != 0");}
         emit UpdateSale(_saleRate, _saleSupply, _burnToken, _forSale);
     }
     
