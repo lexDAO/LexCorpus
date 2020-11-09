@@ -32,12 +32,17 @@ contract CloneFactory {
 }
 
 contract LexTokenFactory is CloneFactory {
-    address payable public lexDAO;
-    address public lexDAOtoken;
-    address payable immutable public template;
-    uint256 public userReward;
-    string  public details;
+    address payable public lexDAO; // account managing lexToken factory
+    address public lexDAOtoken; // token for user rewards
+    address payable immutable public template; // fixed template for lexToken using eip-1167 proxy pattern
+    uint256 public userReward; // reward amount granted to lexToken users
+    string  public details; // general details re: lexToken factory
+    string[]public marketTerms; // market terms stamped by lexDAO for lexToken issuance (not legal advice!)
     
+    mapping(address => address[]) public lextoken;
+    
+    event AddMarketTerms(uint256 index, string terms);
+    event AmendMarketTerms(uint256 index, string terms);
     event LaunchLexToken(address indexed lexToken, address indexed manager, uint256 saleRate, bool forSale);
     event UpdateGovernance(address indexed lexDAO, address indexed lexDAOtoken, uint256 userReward, string details);
     
@@ -77,15 +82,45 @@ contract LexTokenFactory is CloneFactory {
             _forSale, 
             _transferable);
         
+        lextoken[_manager].push(address(lex)); // push initial manager to array
         if (msg.value > 0) {(bool success, ) = lexDAO.call{value: msg.value}("");
-        require(success, "!ethCall");}
-        if (userReward > 0) {IERC20(lexDAOtoken).transfer(msg.sender, userReward);}
+        require(success, "!ethCall");} // transfer ETH to lexDAO
+        if (userReward > 0) {IERC20(lexDAOtoken).transfer(msg.sender, userReward);} // grant user reward
         emit LaunchLexToken(address(lex), _manager, _saleRate, _forSale);
         return(address(lex));
     }
     
-    function updateGovernance(address payable _lexDAO, address _lexDAOtoken, uint256 _userReward, string calldata _details) external {
+    function getLexTokenCountPerAccount(address account) external view returns (uint256) {
+        return lextoken[account].length;
+    }
+    
+    function getLexTokenPerAccount(address account) external view returns (address[] memory) {
+        return lextoken[account];
+    }
+    
+    function getMarketTermsCount() external view returns (uint256) {
+        return marketTerms.length;
+    }
+    
+    /***************
+    LEXDAO FUNCTIONS
+    ***************/
+    modifier onlyLexDAO {
         require(msg.sender == lexDAO, "!lexDAO");
+        _;
+    }
+    
+    function addMarketTerms(string calldata terms) external onlyLexDAO {
+        marketTerms.push(terms);
+        emit AddMarketTerms(marketTerms.length, terms);
+    }
+    
+    function amendMarketTerms(uint256 index, string calldata terms) external onlyLexDAO {
+        marketTerms[index] = terms;
+        emit AmendMarketTerms(index, terms);
+    }
+    
+    function updateGovernance(address payable _lexDAO, address _lexDAOtoken, uint256 _userReward, string calldata _details) external onlyLexDAO {
         lexDAO = _lexDAO;
         lexDAOtoken = _lexDAOtoken;
         userReward = _userReward;
