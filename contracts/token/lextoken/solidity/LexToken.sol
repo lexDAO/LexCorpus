@@ -62,6 +62,7 @@ contract LexToken {
     bytes32 constant public PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"); // eip-2612 permit() pattern - hash identifies function for signature
     string  public details; // details token offering, redemption, etc. - updateable by manager
     string  public name; // fixed token name
+    string[]public offers; // offers made for token redemption - updateable by manager
     string  public symbol; // fixed token symbol
     bool    public forSale; // status of token sale - e.g., if `false`, ETH sent to token address will not return token per saleRate - updateable by manager
     bool    private initialized; // internally tracks token deployment under eip-1167 proxy pattern
@@ -71,6 +72,8 @@ contract LexToken {
     mapping(address => uint256) public balanceOf;
     mapping(address => uint256) public nonces;
     
+    event AddOffer(uint256 index, string terms);
+    event AmendOffer(uint256 index, string terms);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Redeem(string redemption);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -170,6 +173,13 @@ contract LexToken {
         _approve(owner, spender, value);
     }
     
+    function purchase() external payable { // SALE 
+        require(forSale, "!forSale");
+        (bool success, ) = manager.call{value: msg.value}("");
+        require(success, "!ethCall");
+        _transfer(address(this), msg.sender, msg.value.mul(saleRate));
+    } 
+    
     receive() external payable { // SALE 
         require(forSale, "!forSale");
         (bool success, ) = manager.call{value: msg.value}("");
@@ -177,7 +187,7 @@ contract LexToken {
         _transfer(address(this), msg.sender, msg.value.mul(saleRate));
     } 
     
-    function redeem(uint256 value, string calldata redemption) external {
+    function redeem(uint256 value, string calldata redemption) external { // burn token with redemption message
         _burn(msg.sender, value);
         emit Redeem(redemption);
     }
@@ -215,6 +225,16 @@ contract LexToken {
     modifier onlyManager {
         require(msg.sender == manager, "!manager");
         _;
+    }
+    
+    function addOffer(string calldata offer) external onlyManager {
+        offers.push(offer);
+        emit AddOffer(offers.length, offer);
+    }
+    
+    function amendOffer(uint256 index, string calldata offer) external onlyManager {
+        offers[index] = offer;
+        emit AmendOffer(index, offer);
     }
     
     function _mint(address to, uint256 value) internal {
@@ -255,7 +275,7 @@ contract LexToken {
         emit UpdateTransferability(_transferable);
     }
     
-    function withdrawToken(address[] calldata token, address[] calldata withdrawTo, uint256[] calldata value, bool max) external onlyManager { // withdraw token sent to lextoken contract
+    function withdrawToken(address[] calldata token, address[] calldata withdrawTo, uint256[] calldata value, bool max) external onlyManager { // withdraw token sent to contract
         require(token.length == withdrawTo.length && token.length == value.length, "!token/withdrawTo/value");
         for (uint256 i = 0; i < token.length; i++) {
             uint256 withdrawalValue = value[i];
