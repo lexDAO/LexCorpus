@@ -133,6 +133,7 @@ contract LexLocker is Context, ReentrancyGuard {
     
     mapping(address => uint256[]) private clientRegistrations; // tracks registered lockers per client account
     mapping(address => uint256[]) private providerRegistrations; // tracks registered lockers per provider account
+    mapping(address => bool) public swiftResolverConfirmed;
     mapping(uint256 => ADR) public adrs; // tracks ADR details for registered LXL
     mapping(uint256 => Locker) public lockers; // tracks registered LXL details
     
@@ -151,6 +152,7 @@ contract LexLocker is Context, ReentrancyGuard {
     event AmendMarketTerms(uint256 indexed index, string terms);
     event UpdateLockerSettings(address indexed manager, address indexed swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 indexed resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
     event TributeToManager(uint256 amount, string details);
+    event UpdateSwiftResolverStatus(address indexed swiftResolver, string details, bool confirmed);
 
     struct ADR {  
         address proposedResolver;
@@ -528,7 +530,7 @@ contract LexLocker is Context, ReentrancyGuard {
 	    require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
 	    if (adr.swiftResolver) {
-	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
+	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance && swiftResolverConfirmed[_msgSender()], "!swiftResolverTokenBalance/confirmed");
         } else {
             require(_msgSender() == adr.resolver, "!resolver");
         }
@@ -597,6 +599,18 @@ contract LexLocker is Context, ReentrancyGuard {
 	    adr.providerProposedResolver = 1;
 	    
 	    emit ProviderProposeResolver(proposedResolver, registration, details);
+    }
+    
+    /**
+     * @notice Swift resolvers can call to update service status.
+     * @dev Swift resolvers must first confirm and can continue with details and/or cancel service.  
+     * @param details Context re: status update.
+     * @param confirmed If `true`, swift resolver can participate in LXL resolutions.
+     */
+    function updateSwiftResolverStatus(string calldata details, bool confirmed) external nonReentrant {
+        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
+        swiftResolverConfirmed[_msgSender()] = confirmed;
+        emit UpdateSwiftResolverStatus(_msgSender(), details, confirmed);
     }
     
     // *******
