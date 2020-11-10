@@ -68,7 +68,7 @@ contract LexToken {
     bool    private initialized; // internally tracks token deployment under eip-1167 proxy pattern
     bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
     
-    mapping(address => mapping(address => uint256)) public allowances;
+    mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public balanceOf;
     mapping(address => uint256) public nonces;
     
@@ -120,7 +120,7 @@ contract LexToken {
     }
     
     function _approve(address owner, address spender, uint256 value) internal {
-        allowances[owner][spender] = value; 
+        allowance[owner][spender] = value; 
         emit Approval(owner, spender, value); 
     }
     
@@ -140,17 +140,17 @@ contract LexToken {
     }
     
     function burnFrom(address from, uint256 value) external {
-        _approve(from, msg.sender, allowances[from][msg.sender].sub(value));
+        _approve(from, msg.sender, allowance[from][msg.sender].sub(value));
         _burn(from, value);
     }
     
     function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
-        _approve(msg.sender, spender, allowances[msg.sender][spender].sub(subtractedValue));
+        _approve(msg.sender, spender, allowance[msg.sender][spender].sub(subtractedValue));
         return true;
     }
     
     function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
-        _approve(msg.sender, spender, allowances[msg.sender][spender].add(addedValue));
+        _approve(msg.sender, spender, allowance[msg.sender][spender].add(addedValue));
         return true;
     }
     
@@ -214,7 +214,7 @@ contract LexToken {
     
     function transferFrom(address from, address to, uint256 value) external returns (bool) {
         require(transferable, "!transferable");
-        _approve(from, msg.sender, allowances[from][msg.sender].sub(value));
+        _approve(from, msg.sender, allowance[from][msg.sender].sub(value));
         _transfer(from, to, value);
         return true;
     }
