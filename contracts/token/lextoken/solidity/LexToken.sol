@@ -155,13 +155,13 @@ contract LexToken {
     }
     
     // Adapted from https://github.com/albertocuestacanada/ERC20Permit/blob/master/contracts/ERC20Permit.sol
-    function permit(address owner, address spender, uint256 deadline, uint256 value, uint8 v, bytes32 r, bytes32 s) external {
+    function permit(address owner, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         require(block.timestamp <= deadline, "expired");
         bytes32 hashStruct = keccak256(abi.encode(
                 PERMIT_TYPEHASH,
                 owner,
                 spender,
-                value,
+                amount,
                 nonces[owner]++,
                 deadline));
         bytes32 hash = keccak256(abi.encodePacked(
@@ -170,7 +170,7 @@ contract LexToken {
                 hashStruct));
         address signer = ecrecover(hash, v, r, s);
         require(signer != address(0) && signer == owner, "!signer");
-        _approve(owner, spender, value);
+        _approve(owner, spender, amount);
     }
     
     function purchase() external payable { // SALE 
@@ -229,7 +229,7 @@ contract LexToken {
     
     function addOffer(string calldata offer) external onlyManager {
         offers.push(offer);
-        emit AddOffer(offers.length, offer);
+        emit AddOffer(offers.length-1, offer);
     }
     
     function amendOffer(uint256 index, string calldata offer) external onlyManager {
