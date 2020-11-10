@@ -112,7 +112,7 @@ contract LexTokenFactory is CloneFactory {
     
     function addMarketTerms(string calldata terms) external onlyLexDAO {
         marketTerms.push(terms);
-        emit AddMarketTerms(marketTerms.length, terms);
+        emit AddMarketTerms(marketTerms.length-1, terms);
     }
     
     function amendMarketTerms(uint256 index, string calldata terms) external onlyLexDAO {
