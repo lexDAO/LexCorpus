@@ -133,7 +133,7 @@ contract LexLocker is Context, ReentrancyGuard {
     
     mapping(address => uint256[]) private clientRegistrations; // tracks registered lockers per client account
     mapping(address => uint256[]) private providerRegistrations; // tracks registered lockers per provider account
-    mapping(address => bool) public swiftResolverConfirmed;
+    mapping(address => bool) public swiftResolverConfirmed; // tracks registered swift resolvers 
     mapping(uint256 => ADR) public adrs; // tracks ADR details for registered LXL
     mapping(uint256 => Locker) public lockers; // tracks registered LXL details
     
@@ -657,7 +657,7 @@ contract LexLocker is Context, ReentrancyGuard {
      */
     function addMarketTerms(string calldata terms) external nonReentrant onlyManager {
         marketTerms.push(terms);
-        emit AddMarketTerms(marketTerms.length, terms);
+        emit AddMarketTerms(marketTerms.length-1, terms);
     }
     
     /**
