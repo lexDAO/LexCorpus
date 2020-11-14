@@ -23,6 +23,6 @@ abstract contract Resolveable is LexToken {
     
     function transferResolver(address _resolver) external onlyResolver { // transfer resolver account
         resolver = _resolver;
-        TransferResolver(_resolver);
+        emit TransferResolver(_resolver);
     }
 }
