@@ -1,4 +1,4 @@
-abstract contract Resolveable is LexToken {
+abstract contract Resolveable is ERC20 { // extension to erc20 for admin token transfers
     address public resolver; // account managing token balances
     
     event TransferResolver(address indexed resolver);
