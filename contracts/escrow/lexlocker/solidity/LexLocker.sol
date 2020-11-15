@@ -160,6 +160,7 @@ contract LexLocker is Context, ReentrancyGuard {
         uint8 clientProposedResolver;
         uint8 providerProposedResolver;
 	    uint256 resolutionRate;
+	    string resolution;
 	    bool swiftResolver;
     }
     
@@ -253,7 +254,8 @@ contract LexLocker is Context, ReentrancyGuard {
             resolver,
             0,
             0,
-	        resolutionRate,
+	        resolutionRate, 
+	        "",
 	        swiftResolver);
 
         lockers[registration] = Locker( 
@@ -318,7 +320,8 @@ contract LexLocker is Context, ReentrancyGuard {
             resolver,
             0,
             0,
-	        resolutionRate,
+	        resolutionRate, 
+	        "",
 	        swiftResolver);
 
         lockers[registration] = Locker( 
@@ -404,7 +407,8 @@ contract LexLocker is Context, ReentrancyGuard {
             resolver,
             0,
             0,
-	        resolutionRate,
+	        resolutionRate, 
+	        "",
 	        swiftResolver);
      
         lockers[registration] = Locker( 
@@ -539,6 +543,7 @@ contract LexLocker is Context, ReentrancyGuard {
         IERC20(locker.token).safeTransfer(locker.provider, providerAward);
         IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
 	    
+	    adr.resolution = resolution;
 	    locker.released = locker.sum; 
 	    resolutions.push(resolution);
 	    
