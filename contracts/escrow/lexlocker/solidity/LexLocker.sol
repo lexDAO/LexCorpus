@@ -63,21 +63,18 @@ library SafeMath { // arithmetic wrapper for unit under/overflow check
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a);
-
         return c;
     }
     
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b <= a);
         uint256 c = a - b;
-
         return c;
     }
     
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b > 0);
         uint256 c = a / b;
-
         return c;
     }
 }
@@ -139,10 +136,10 @@ contract LexLocker is Context, ReentrancyGuard {
     
     event DepositLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
     event RegisterLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
-    event ConfirmLocker(uint256 registration); 
+    event ConfirmLocker(address token, uint256 registration, uint256 sum); 
     event RequestLockerResolution(address indexed client, address indexed counterparty, address indexed resolver, address token, uint256 deposit, uint256 registration, string details, bool swiftResolver); 
-    event Release(uint256 milestone, uint256 registration); 
-    event Withdraw(uint256 registration);
+    event Release(uint256 milestone, uint256 payment, uint256 registration); 
+    event Withdraw(address indexed client, uint256 registration);
     event AssignClientOracle(address indexed clientOracle, uint256 registration);
     event ClientProposeResolver(address indexed proposedResolver, uint256 registration, string details);
     event ProviderProposeResolver(address indexed proposedResolver, uint256 registration, string details);
@@ -151,7 +148,7 @@ contract LexLocker is Context, ReentrancyGuard {
     event Resolve(address indexed resolver, uint256 clientAward, uint256 providerAward, uint256 registration, uint256 resolutionFee, string resolution); 
     event AddMarketTerms(uint256 index, string terms);
     event AmendMarketTerms(uint256 index, string terms);
-    event UpdateLockerSettings(address indexed manager, address indexed swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
+    event UpdateLockerSettings(address indexed manager, address swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
     event TributeToManager(uint256 amount, string details);
 
     struct ADR {  
@@ -159,9 +156,9 @@ contract LexLocker is Context, ReentrancyGuard {
         address resolver;
         uint8 clientProposedResolver;
         uint8 providerProposedResolver;
-	uint256 resolutionRate;
-	string resolution;
-	bool swiftResolver;
+	    uint256 resolutionRate;
+	    string resolution;
+	    bool swiftResolver;
     }
     
     struct Locker {  
@@ -235,10 +232,11 @@ contract LexLocker is Context, ReentrancyGuard {
         }
 
         if (msg.value > 0) {
-            require(token == wETH && msg.value == sum, "!ethBalance");
-            (bool success, ) = wETH.call{value: msg.value}("");
+            address weth = wETH;
+            require(token == weth && msg.value == sum, "!ethBalance");
+            (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(wETH).safeTransfer(address(this), msg.value);
+            IERC20(weth).safeTransfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(_msgSender(), address(this), sum);
         }
@@ -254,9 +252,9 @@ contract LexLocker is Context, ReentrancyGuard {
             resolver,
             0,
             0,
-	    resolutionRate, 
-	    "",
-	    swiftResolver);
+	        resolutionRate, 
+	        "",
+	        swiftResolver);
 
         lockers[registration] = Locker( 
             _msgSender(), 
@@ -275,7 +273,7 @@ contract LexLocker is Context, ReentrancyGuard {
 
         emit DepositLocker(_msgSender(), clientOracle, provider, resolver, token, amount, registration, sum, termination, details, swiftResolver); 
         
-	return registration;
+	    return registration;
     }
     
     /**
@@ -320,9 +318,9 @@ contract LexLocker is Context, ReentrancyGuard {
             resolver,
             0,
             0,
-	    resolutionRate, 
-	    "",
-	    swiftResolver);
+	        resolutionRate, 
+	        "",
+	        swiftResolver);
 
         lockers[registration] = Locker( 
             client, 
@@ -341,7 +339,7 @@ contract LexLocker is Context, ReentrancyGuard {
 
         emit RegisterLocker(client, clientOracle, provider, resolver, token, amount, registration, sum, termination, details, swiftResolver); 
         
-	return registration;
+	    return registration;
     }
     
     /**
@@ -359,17 +357,18 @@ contract LexLocker is Context, ReentrancyGuard {
         uint256 sum = locker.sum;
         
         if (msg.value > 0) {
-            require(token == wETH && msg.value == sum, "!ethBalance");
-            (bool success, ) = wETH.call{value: msg.value}("");
+            address weth = wETH;
+            require(token == weth && msg.value == sum, "!ethBalance");
+            (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(wETH).safeTransfer(address(this), msg.value);
+            IERC20(weth).safeTransfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(_msgSender(), address(this), sum);
         }
         
         locker.confirmed = 1;
         
-        emit ConfirmLocker(registration); 
+        emit ConfirmLocker(token, registration, sum); 
     }
     
     /**
@@ -386,10 +385,11 @@ contract LexLocker is Context, ReentrancyGuard {
         require(_msgSender() != resolver && counterparty != resolver, "client/counterparty = resolver");
         
         if (msg.value > 0) {
-            require(token == wETH && msg.value == deposit, "!ethBalance");
-            (bool success, ) = wETH.call{value: msg.value}("");
+            address weth = wETH;
+            require(token == weth && msg.value == deposit, "!ethBalance");
+            (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(wETH).safeTransfer(address(this), msg.value);
+            IERC20(weth).safeTransfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(_msgSender(), address(this), deposit);
         }
@@ -408,9 +408,9 @@ contract LexLocker is Context, ReentrancyGuard {
             resolver,
             0,
             0,
-	    resolutionRate, 
-	    "",
-	    swiftResolver);
+	        resolutionRate, 
+	        "",
+	        swiftResolver);
      
         lockers[registration] = Locker( 
             _msgSender(), 
@@ -429,7 +429,7 @@ contract LexLocker is Context, ReentrancyGuard {
 
         emit RequestLockerResolution(_msgSender(), counterparty, resolver, token, deposit, registration, details, swiftResolver); 
         
-	return registration;
+	    return registration;
     }
     
     // ***********
@@ -441,11 +441,13 @@ contract LexLocker is Context, ReentrancyGuard {
      * @param registration Registered LXL number.
      */
     function assignClientOracle(address clientOracle, uint256 registration) external nonReentrant {
+        ADR storage adr = adrs[registration];
         Locker storage locker = lockers[registration];
         
         require(_msgSender() == locker.client, "!client");
+        require(adr.resolver != clientOracle, "clientOracle = resolver");
         require(locker.locked == 0, "locked");
-	require(locker.released < locker.sum, "released");
+	    require(locker.released < locker.sum, "released");
         
         locker.clientOracle = clientOracle;
         
@@ -458,20 +460,23 @@ contract LexLocker is Context, ReentrancyGuard {
      */
     function release(uint256 registration) external nonReentrant {
     	Locker storage locker = lockers[registration];
-	    
-	require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
-	require(locker.confirmed == 1, "!confirmed");
-	require(locker.locked == 0, "locked");
-	require(locker.released < locker.sum, "released");
-        
-        uint256 milestone = locker.currentMilestone-1;
+    	
+    	uint256 milestone = locker.currentMilestone-1;
         uint256 payment = locker.amount[milestone];
-        
+        uint256 released = locker.released;
+        uint256 sum = locker.sum;
+	    
+	    require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
+	    require(locker.confirmed == 1, "!confirmed");
+	    require(locker.locked == 0, "locked");
+	    require(released < sum, "released");
+
         IERC20(locker.token).safeTransfer(locker.provider, payment);
-        locker.released = locker.released.add(payment);
-        if (locker.released < locker.sum) {locker.currentMilestone++;}
+        locker.released = released.add(payment);
         
-	emit Release(milestone+1, registration); 
+        if (locker.released < sum) {locker.currentMilestone++;}
+        
+	    emit Release(milestone+1, payment, registration); 
     }
     
     /**
@@ -481,18 +486,21 @@ contract LexLocker is Context, ReentrancyGuard {
      */
     function withdraw(uint256 registration) external nonReentrant {
     	Locker storage locker = lockers[registration];
+    	
+    	address client = locker.client;
+    	uint256 released = locker.released;
+    	uint256 sum = locker.sum;
         
-        require(_msgSender() == locker.client || _msgSender() == locker.clientOracle, "!client/oracle");
+        require(_msgSender() == client || _msgSender() == locker.clientOracle, "!client/oracle");
         require(locker.confirmed == 1, "!confirmed");
         require(locker.locked == 0, "locked");
-        require(locker.released < locker.sum, "released");
+        require(released < sum, "released");
         require(locker.termination < block.timestamp, "!terminated");
         
-        uint256 remainder = locker.sum.sub(locker.released); 
-        IERC20(locker.token).safeTransfer(locker.client, remainder);
-        locker.released = locker.sum; 
+        IERC20(locker.token).safeTransfer(client, sum.sub(released));
+        locker.released = sum; 
         
-	emit Withdraw(registration); 
+	    emit Withdraw(client, registration); 
     }
     
     // **********
@@ -511,9 +519,9 @@ contract LexLocker is Context, ReentrancyGuard {
         require(locker.confirmed == 1, "!confirmed");
         require(locker.released < locker.sum, "released");
 
-	locker.locked = 1; 
+	    locker.locked = 1; 
 	    
-	emit Lock(_msgSender(), registration, details);
+	    emit Lock(_msgSender(), registration, details);
     }
     
     /**
@@ -527,33 +535,36 @@ contract LexLocker is Context, ReentrancyGuard {
         ADR storage adr = adrs[registration];
         Locker storage locker = lockers[registration];
         
-        uint256 remainder = locker.sum.sub(locker.released); 
-	uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate resolution fee as set on registration
+        address token = locker.token;
+        uint256 released = locker.released;
+	    uint256 sum = locker.sum;
+	    // calculate resolution fee as set on registration:
+	    uint256 remainder = sum.sub(released); 
+	    uint256 resolutionFee = remainder.div(adr.resolutionRate); 
 	    
-	require(_msgSender() != locker.client && _msgSender() != locker.clientOracle && _msgSender() != locker.provider, "client/clientOracle/provider = resolver");
-	require(locker.locked == 1, "!locked"); 
-	require(locker.released < locker.sum, "released");
-	require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
+	    require(locker.locked == 1, "!locked"); 
+	    require(released < sum, "released");
+	    require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
-	if (adr.swiftResolver) {
-	    require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance && swiftResolverConfirmed[_msgSender()], "!swiftResolverTokenBalance/confirmed");
+	    if (adr.swiftResolver) {
+	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance && swiftResolverConfirmed[_msgSender()], "!swiftResolverTokenBalance/confirmed");
         } else {
             require(_msgSender() == adr.resolver, "!resolver");
         }
         
-        IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
-        IERC20(locker.token).safeTransfer(locker.client, clientAward);
-        IERC20(locker.token).safeTransfer(locker.provider, providerAward);
+        IERC20(token).safeTransfer(_msgSender(), resolutionFee);
+        IERC20(token).safeTransfer(locker.client, clientAward);
+        IERC20(token).safeTransfer(locker.provider, providerAward);
         
-	adr.resolution = resolution;
-	locker.released = locker.sum; 
-	resolutions.push(resolution);
+	    adr.resolution = resolution;
+	    locker.released = sum; 
+	    resolutions.push(resolution);
 	    
-	emit Resolve(_msgSender(), clientAward, providerAward, registration, resolutionFee, resolution);
+	    emit Resolve(_msgSender(), clientAward, providerAward, registration, resolutionFee, resolution);
     }
     
     /**
-     * @notice 1-time, fallback to allow LXL party to suggest new `resolver` to counterparty.
+     * @notice Fallback to allow LXL party to suggest new `resolver` to counterparty.
      * @dev LXL `client` calls to update `resolver` selection - if matches `provider` suggestion or confirmed, `resolver` updates. 
      * @param proposedResolver Proposed account to resolve LXL.
      * @param registration Registered LXL number.
@@ -564,24 +575,23 @@ contract LexLocker is Context, ReentrancyGuard {
         Locker storage locker = lockers[registration]; 
         
         require(_msgSender() == locker.client, "!client"); 
+        require(_msgSender() != proposedResolver && locker.clientOracle != proposedResolver && locker.provider != proposedResolver, "client/clientOracle/provider = proposedResolver");
         require(adr.clientProposedResolver == 0, "pending");
-	require(locker.released < locker.sum, "released");
+	    require(locker.released < locker.sum, "released");
         
         if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
-        } else {
-            adr.clientProposedResolver = 0;
-            adr.providerProposedResolver = 0;
-        }
+        } 
 
-	adr.proposedResolver = proposedResolver; 
-	adr.clientProposedResolver = 1;
+	    adr.proposedResolver = proposedResolver; 
+	    adr.clientProposedResolver = 1;
+	    adr.providerProposedResolver = 0;
 	    
-	emit ClientProposeResolver(proposedResolver, registration, details);
+	    emit ClientProposeResolver(proposedResolver, registration, details);
     }
     
     /**
-     * @notice 1-time, fallback to allow LXL party to suggest new `resolver` to counterparty.
+     * @notice Fallback to allow LXL party to suggest new `resolver` to counterparty.
      * @dev LXL `provider` calls to update `resolver` selection - if matches `client` suggestion or confirmed, `resolver` updates. 
      * @param proposedResolver Proposed account to resolve LXL.
      * @param registration Registered LXL number.
@@ -592,20 +602,19 @@ contract LexLocker is Context, ReentrancyGuard {
         Locker storage locker = lockers[registration]; 
         
         require(_msgSender() == locker.provider, "!provider"); 
+        require(locker.client != proposedResolver && locker.clientOracle != proposedResolver && _msgSender() != proposedResolver, "client/clientOracle/provider = proposedResolver");
         require(adr.providerProposedResolver == 0, "pending");
-	require(locker.released < locker.sum, "released");
+	    require(locker.released < locker.sum, "released");
 
-	if (adr.proposedResolver == proposedResolver) {
+	    if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
-        } else {
-            adr.clientProposedResolver = 0;
-            adr.providerProposedResolver = 0;
-        }
+        } 
 	    
-	adr.proposedResolver = proposedResolver;
-	adr.providerProposedResolver = 1;
+	    adr.proposedResolver = proposedResolver;
+	    adr.clientProposedResolver = 0;
+	    adr.providerProposedResolver = 1;
 	    
-	emit ProviderProposeResolver(proposedResolver, registration, details);
+	    emit ProviderProposeResolver(proposedResolver, registration, details);
     }
     
     /**
@@ -714,6 +723,6 @@ contract LexLocker is Context, ReentrancyGuard {
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         lockerTerms = _lockerTerms;
 	    
-	emit UpdateLockerSettings(_manager, _swiftResolverToken, _wETH, _MAX_DURATION, _resolutionRate, _swiftResolverTokenBalance, _lockerTerms);
+	    emit UpdateLockerSettings(_manager, _swiftResolverToken, _wETH, _MAX_DURATION, _resolutionRate, _swiftResolverTokenBalance, _lockerTerms);
     }
 }
