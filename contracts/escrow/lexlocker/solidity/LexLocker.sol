@@ -245,7 +245,7 @@ contract LexLocker is Context, ReentrancyGuard {
         
         lockerCount++;
         uint256 registration = lockerCount;
-       
+        
         clientRegistrations[_msgSender()].push(registration);
         providerRegistrations[provider].push(registration);
         
@@ -396,6 +396,7 @@ contract LexLocker is Context, ReentrancyGuard {
         
         uint256[] memory amount = new uint256[](1);
         amount[0] = deposit;
+        
         lockerCount++;
         uint256 registration = lockerCount;
         
@@ -539,11 +540,11 @@ contract LexLocker is Context, ReentrancyGuard {
         } else {
             require(_msgSender() == adr.resolver, "!resolver");
         }
-	
-	IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
+        
+        IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(locker.provider, providerAward);
-	    
+        
 	adr.resolution = resolution;
 	locker.released = locker.sum; 
 	resolutions.push(resolution);
