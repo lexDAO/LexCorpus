@@ -113,7 +113,7 @@ contract ReentrancyGuard { // call wrapper for reentrancy check - see https://gi
 /**
  * @title LexLocker.
  * @author LexDAO LLC.
- * @notice Milestone token locker registry with resolution. 
+ * @notice Milestone token locker registry with embedded resolution. 
  */
 contract LexLocker is Context, ReentrancyGuard { 
     using SafeERC20 for IERC20;
@@ -516,10 +516,10 @@ contract LexLocker is Context, ReentrancyGuard {
     }
     
     /**
-     * @notice After LXL is locked, selected `resolver` calls to distribute `sum` remainder between `client` and `provider` minus fee.
-     * @param registration Registered LXL number.
+     * @notice After LXL is locked, selected `resolver` awards `sum` remainder between `client` and `provider` minus fee.
      * @param clientAward Remainder awarded to `client`.
      * @param providerAward Remainder awarded to `provider`.
+     * @param registration Registered LXL number.
      * @param resolution Context re: resolution.
      */
     function resolve(uint256 clientAward, uint256 providerAward, uint256 registration, string calldata resolution) external nonReentrant {
@@ -581,7 +581,7 @@ contract LexLocker is Context, ReentrancyGuard {
     
     /**
      * @notice 1-time, fallback to allow LXL party to suggest new `resolver` to counterparty.
-     * @dev LXL `provider` calls to update `resolver` selection. If matches `client` suggestion or confirmed, `resolver` updates. 
+     * @dev LXL `provider` calls to update `resolver` selection - if matches `client` suggestion or confirmed, `resolver` updates. 
      * @param proposedResolver Proposed account to resolve LXL.
      * @param registration Registered LXL number.
      * @param details Context re: proposed `resolver`.
@@ -608,8 +608,8 @@ contract LexLocker is Context, ReentrancyGuard {
     }
     
     /**
-     * @notice Swift resolvers can call to update service status.
-     * @dev Swift resolvers must first confirm and can continue with details / cancel service.  
+     * @notice Swift resolvers call to update LXL service status.
+     * @dev Swift resolvers must first confirm to participate and can continue with details / cancel LXL service.  
      * @param details Context re: status update.
      * @param confirmed If `true`, swift resolver can participate in LXL resolution.
      */
@@ -622,27 +622,27 @@ contract LexLocker is Context, ReentrancyGuard {
     // *******
     // GETTERS
     // *******
-    function getClientRegistrations(address account) external view returns (uint256[] memory) { // get set of `client` registered lockers 
+    function getClientRegistrations(address account) external view returns (uint256[] memory) { // get `client` registered lockers 
         return clientRegistrations[account];
     }
     
-    function getLockerCount() external view returns (uint256) { // helper to make it easier to track total lockers
-        return lockerCount;
-    }
-    
-    function getLockerMilestones(uint256 registration) external view returns (address, uint256[] memory) { // returns `token` and batch of milestone amounts for `provider`
+    function getProviderAmounts(uint256 registration) external view returns (address, uint256[] memory) { // get `token` and milestone `amount`s for `provider`
         return (lockers[registration].token, lockers[registration].amount);
     }
     
-    function getMarketTermsCount() external view returns (uint256) { // helper to make it easier to track total market terms stamped by `manager`
-        return marketTerms.length;
-    }
-    
-    function getProviderRegistrations(address account) external view returns (uint256[] memory) { // get set of `provider` registered lockers
+    function getProviderRegistrations(address account) external view returns (uint256[] memory) { // get `provider` registered lockers
         return providerRegistrations[account];
     }
     
-    function getResolutionCount() external view returns (uint256) { // helper to make it easier to track total resolutions passed by LXL `resolver`s
+    function getLockerCount() external view returns (uint256) { // get total registered lockers
+        return lockerCount;
+    }
+
+    function getMarketTermsCount() external view returns (uint256) { // get total market terms stamped by `manager`
+        return marketTerms.length;
+    }
+
+    function getResolutionsCount() external view returns (uint256) { // get total resolutions passed by LXL `resolver`s
         return resolutions.length;
     }
    
@@ -677,7 +677,7 @@ contract LexLocker is Context, ReentrancyGuard {
     }
     
     /**
-     * @notice General payment function for `manager` of LXL contract. 
+     * @notice General ether payment function for `manager` of LXL contract. 
      * @param details Describes context for ether transfer.
      */
     function tributeToManager(string calldata details) external nonReentrant payable { 
@@ -692,7 +692,7 @@ contract LexLocker is Context, ReentrancyGuard {
      * @param _swiftResolverToken Token to mark participants in swift resolution.
      * @param _wETH Standard contract reference to wrap ether. 
      * @param _MAX_DURATION Time limit in seconds on token lockup - default 63113904 (2-year).
-     * @param _resolutionRate Rate to determine resolution fee for disputed locker (e.g., 20 = 5% of remainder).
+     * @param _resolutionRate Rate to determine resolution fee for locker (e.g., 20 = 5% of remainder).
      * @param _swiftResolverTokenBalance Token balance required to perform swift resolution. 
      * @param _lockerTerms General terms wrapping LXL.  
      */
