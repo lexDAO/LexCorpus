@@ -146,13 +146,13 @@ contract LexLocker is Context, ReentrancyGuard {
     event AssignClientOracle(address indexed clientOracle, uint256 registration);
     event ClientProposeResolver(address indexed proposedResolver, uint256 registration, string details);
     event ProviderProposeResolver(address indexed proposedResolver, uint256 registration, string details);
+    event UpdateSwiftResolverStatus(address indexed swiftResolver, string details, bool confirmed);
     event Lock(address indexed caller, uint256 registration, string details);
     event Resolve(address indexed resolver, uint256 clientAward, uint256 providerAward, uint256 registration, uint256 resolutionFee, string resolution); 
     event AddMarketTerms(uint256 index, string terms);
     event AmendMarketTerms(uint256 index, string terms);
     event UpdateLockerSettings(address indexed manager, address indexed swiftResolverToken, address wETH, uint256 MAX_DURATION, uint256 resolutionRate, uint256 swiftResolverTokenBalance, string lockerTerms);
     event TributeToManager(uint256 amount, string details);
-    event UpdateSwiftResolverStatus(address indexed swiftResolver, string details, bool confirmed);
 
     struct ADR {  
         address proposedResolver;
