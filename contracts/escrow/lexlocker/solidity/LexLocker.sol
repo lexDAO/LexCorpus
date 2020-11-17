@@ -539,10 +539,10 @@ contract LexLocker is Context, ReentrancyGuard {
         } else {
             require(_msgSender() == adr.resolver, "!resolver");
         }
-
+	
+	IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
         IERC20(locker.token).safeTransfer(locker.client, clientAward);
         IERC20(locker.token).safeTransfer(locker.provider, providerAward);
-        IERC20(locker.token).safeTransfer(adr.resolver, resolutionFee);
 	    
 	adr.resolution = resolution;
 	locker.released = locker.sum; 
