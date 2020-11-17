@@ -527,7 +527,7 @@ contract LexLocker is Context, ReentrancyGuard {
         Locker storage locker = lockers[registration];
         
         uint256 remainder = locker.sum.sub(locker.released); 
-	uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate dispute resolution fee as set on registration
+	uint256 resolutionFee = remainder.div(adr.resolutionRate); // calculate resolution fee as set on registration
 	    
 	require(_msgSender() != locker.client && _msgSender() != locker.clientOracle && _msgSender() != locker.provider, "client/clientOracle/provider = resolver");
 	require(locker.locked == 1, "!locked"); 
