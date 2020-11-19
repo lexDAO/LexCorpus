@@ -1,6 +1,6 @@
 {
-  "description": "LexDAO Hack Call 10:2:20", 
-  "external_url": "lexdao.chat", 
-  "image": "https://ipfs.globalupload.io/QmUEsKHY8CFaymmnmSHUjH7NFfhYmfqwLYqj2y7RtkNXhi", 
-  "name": "10:2:20"
+  "description": "NFT commemorating FLAMINGO (DAO)", 
+  "external_url": "https://flamingodao.xyz/", 
+  "image": "https://gateway.pinata.cloud/ipfs/QmXuzQvPjoKf2TGbXx1UJvnJwjTVQddcp55einxUJ97jDp", 
+  "name": "Flamingo Falls Rarely"
 }
