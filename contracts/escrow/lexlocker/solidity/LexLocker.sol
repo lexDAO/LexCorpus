@@ -20,7 +20,7 @@ DEAR MSG.SENDER(S):
 ~presented by LexDAO LLC \+|+/ 
 */
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.7.4;
+pragma solidity 0.7.5;
 
 interface IERC20 { // brief interface for erc20 token tx
     function balanceOf(address account) external view returns (uint256);
@@ -125,14 +125,14 @@ contract LexLocker is Context, ReentrancyGuard {
     uint256 public resolutionRate; // rate to determine resolution fee for disputed locker (e.g., 20 = 5% of remainder) - updateable by manager
     uint256 public swiftResolverTokenBalance; // balance required in `swiftResolverToken` to participate as swift resolver - updateable by manager
     string public lockerTerms; // general terms wrapping LXL - updateable by manager
-    string[] public marketTerms; // market terms stamped by manager
-    string[] public resolutions; // locker resolutions stamped by LXL resolver
+    string[] public marketTerms; // market LXL terms stamped by manager
+    string[] public resolutions; // locker resolutions stamped by LXL resolvers
     
     mapping(address => uint256[]) private clientRegistrations; // tracks registered lockers per client account
     mapping(address => uint256[]) private providerRegistrations; // tracks registered lockers per provider account
-    mapping(address => bool) public swiftResolverConfirmed; // tracks registered swift resolver status
-    mapping(uint256 => ADR) public adrs; // tracks ADR details for registered LXL
-    mapping(uint256 => Locker) public lockers; // tracks registered LXL details
+    mapping(address => bool) public swiftResolverRegistrations; // tracks registered swift resolvers
+    mapping(uint256 => ADR) public adrs; // tracks ADR details for registered lockers
+    mapping(uint256 => Locker) public lockers; // tracks registered lockers details
     
     event DepositLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
     event RegisterLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
@@ -143,7 +143,7 @@ contract LexLocker is Context, ReentrancyGuard {
     event AssignClientOracle(address indexed clientOracle, uint256 registration);
     event ClientProposeResolver(address indexed proposedResolver, uint256 registration, string details);
     event ProviderProposeResolver(address indexed proposedResolver, uint256 registration, string details);
-    event UpdateSwiftResolverStatus(address indexed swiftResolver, string details, bool confirmed);
+    event UpdateSwiftResolverStatus(address indexed swiftResolver, string details, bool registered);
     event Lock(address indexed caller, uint256 registration, string details);
     event Resolve(address indexed resolver, uint256 clientAward, uint256 providerAward, uint256 registration, uint256 resolutionFee, string resolution); 
     event AddMarketTerms(uint256 index, string terms);
@@ -547,7 +547,7 @@ contract LexLocker is Context, ReentrancyGuard {
 	    require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
 	    if (adr.swiftResolver) {
-	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance && swiftResolverConfirmed[_msgSender()], "!swiftResolverTokenBalance/confirmed");
+	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance && swiftResolverRegistrations[_msgSender()], "!swiftResolverTokenBalance/registered");
         } else {
             require(_msgSender() == adr.resolver, "!resolver");
         }
@@ -621,12 +621,12 @@ contract LexLocker is Context, ReentrancyGuard {
      * @notice Swift resolvers call to update LXL service status.
      * @dev Swift resolvers must first confirm to participate and can continue with details / cancel LXL service.  
      * @param details Context re: status update.
-     * @param confirmed If `true`, swift resolver can participate in LXL resolution.
+     * @param registered If `true`, swift resolver can participate in LXL resolution.
      */
-    function updateSwiftResolverStatus(string calldata details, bool confirmed) external nonReentrant {
+    function updateSwiftResolverStatus(string calldata details, bool registered) external nonReentrant {
         require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance, "!swiftResolverTokenBalance");
-        swiftResolverConfirmed[_msgSender()] = confirmed;
-        emit UpdateSwiftResolverStatus(_msgSender(), details, confirmed);
+        swiftResolverRegistrations[_msgSender()] = registered;
+        emit UpdateSwiftResolverStatus(_msgSender(), details, registered);
     }
     
     // *******
