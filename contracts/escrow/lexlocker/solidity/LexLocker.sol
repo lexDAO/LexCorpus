@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2020-11-25
+*/
+
 /*
 ██╗     ███████╗██╗  ██╗    
 ██║     ██╔════╝╚██╗██╔╝    
@@ -445,7 +449,7 @@ contract LexLocker is Context, ReentrancyGuard {
         Locker storage locker = lockers[registration];
         
         require(_msgSender() == locker.client, "!client");
-        require(adr.resolver != clientOracle, "clientOracle = resolver");
+        require(clientOracle != adr.resolver, "clientOracle = resolver");
         require(locker.locked == 0, "locked");
 	    require(locker.released < locker.sum, "released");
         
@@ -547,6 +551,7 @@ contract LexLocker is Context, ReentrancyGuard {
 	    require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
 	    if (adr.swiftResolver) {
+	        require(_msgSender() != locker.client && _msgSender() != locker.provider, "client/provider = swiftResolver");
 	        require(IERC20(swiftResolverToken).balanceOf(_msgSender()) >= swiftResolverTokenBalance && swiftResolverRegistrations[_msgSender()], "!swiftResolverTokenBalance/registered");
         } else {
             require(_msgSender() == adr.resolver, "!resolver");
