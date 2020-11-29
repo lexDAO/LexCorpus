@@ -179,6 +179,8 @@ contract LexLocker is ReentrancyGuard {
         uint256 _userReward,
         string memory _lockerTerms
     ) {
+        require(_resolutionRate > 0, "_resolutionRate < 1");
+        
         manager = _manager;
         swiftResolverToken = _swiftResolverToken;
         userRewardToken = _userRewardToken;
@@ -631,8 +633,8 @@ contract LexLocker is ReentrancyGuard {
 	require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
 	if (adr.swiftResolver) {
-	    require(msg.sender != locker.client && msg.sender != locker.provider, "client/provider = swiftResolver");
-	    require(IERC20(swiftResolverToken).balanceOf(msg.sender) >= swiftResolverTokenBalance && swiftResolverRegistrations[msg.sender], "!swiftResolverTokenBalance/registered");
+	     require(msg.sender != locker.client && msg.sender != locker.provider, "client/provider = swiftResolver");
+	     require(IERC20(swiftResolverToken).balanceOf(msg.sender) >= swiftResolverTokenBalance && swiftResolverRegistrations[msg.sender], "!swiftResolverTokenBalance/registered");
         } else {
             require(msg.sender == adr.resolver, "!resolver");
         }
@@ -803,6 +805,8 @@ contract LexLocker is ReentrancyGuard {
         uint256 _userReward,
         string calldata _lockerTerms
     ) external nonReentrant onlyManager { 
+        require(_resolutionRate > 0, "_resolutionRate < 1");
+        
         manager = _manager;
         swiftResolverToken = _swiftResolverToken;
         userRewardToken = _userRewardToken;
