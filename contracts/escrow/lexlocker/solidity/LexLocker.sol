@@ -98,7 +98,7 @@ contract ReentrancyGuard { // call wrapper for reentrancy check - see https://gi
 /**
  * @title LexLocker.
  * @author LexDAO LLC.
- * @notice Token locker registry with embedded terms and resolution protocol. 
+ * @notice Token locker registry with embedded terms and resolution.
  */
 contract LexLocker is ReentrancyGuard { 
     using SafeERC20 for IERC20;
@@ -125,10 +125,10 @@ contract LexLocker is ReentrancyGuard {
     
     event DepositLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
     event RegisterLocker(address indexed client, address clientOracle, address indexed provider, address indexed resolver, address token, uint256[] amount, uint256 registration, uint256 sum, uint256 termination, string details, bool swiftResolver);
-    event ConfirmLocker(address token, uint256 registration, uint256 sum); 
+    event ConfirmLocker(uint256 registration); 
     event RequestLockerResolution(address indexed client, address indexed counterparty, address indexed resolver, address token, uint256 registration, uint256 sum, string details, bool swiftResolver); 
     event Release(uint256 milestone, uint256 payment, uint256 registration); 
-    event Withdraw(address indexed client, uint256 registration);
+    event Withdraw(uint256 registration);
     event AssignClientOracle(address indexed clientOracle, uint256 registration);
     event ClientProposeResolver(address indexed proposedResolver, uint256 registration, string details);
     event ProviderProposeResolver(address indexed proposedResolver, uint256 registration, string details);
@@ -233,7 +233,7 @@ contract LexLocker is ReentrancyGuard {
             require(token == weth && msg.value == sum, "!ethBalance");
             (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(weth).safeTransfer(address(this), msg.value);
+            IERC20(weth).transfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(msg.sender, address(this), sum);
         }
@@ -307,7 +307,7 @@ contract LexLocker is ReentrancyGuard {
             require(token == weth && msg.value == sum, "!ethBalance");
             (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(weth).safeTransfer(address(this), msg.value);
+            IERC20(weth).transfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(msg.sender, address(this), sum);
         }
@@ -435,22 +435,19 @@ contract LexLocker is ReentrancyGuard {
         require(msg.sender == locker.client, "!client");
         require(locker.confirmed == 0, "confirmed");
         
-        address token = locker.token;
-        uint256 sum = locker.sum;
-        
         if (msg.value > 0) {
             address weth = wETH;
-            require(token == weth && msg.value == sum, "!ethBalance");
+            require(locker.token == weth && msg.value == locker.sum, "!ethBalance");
             (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(weth).safeTransfer(address(this), msg.value);
+            IERC20(weth).transfer(address(this), msg.value);
         } else {
-            IERC20(token).safeTransferFrom(msg.sender, address(this), sum);
+            IERC20(locker.token).safeTransferFrom(msg.sender, address(this), locker.sum);
         }
         
         locker.confirmed = 1;
         
-        emit ConfirmLocker(token, registration, sum); 
+        emit ConfirmLocker(registration); 
     }
     
     /**
@@ -471,7 +468,7 @@ contract LexLocker is ReentrancyGuard {
             require(token == weth && msg.value == sum, "!ethBalance");
             (bool success, ) = weth.call{value: msg.value}("");
             require(success, "!ethCall");
-            IERC20(weth).safeTransfer(address(this), msg.value);
+            IERC20(weth).transfer(address(this), msg.value);
         } else {
             IERC20(token).safeTransferFrom(msg.sender, address(this), sum);
         }
@@ -586,7 +583,7 @@ contract LexLocker is ReentrancyGuard {
         IERC20(locker.token).safeTransfer(client, sum.sub(released));
         locker.released = sum; 
         
-	emit Withdraw(client, registration); 
+	emit Withdraw(registration); 
     }
     
     // **********
@@ -633,8 +630,8 @@ contract LexLocker is ReentrancyGuard {
 	require(clientAward.add(providerAward) == remainder.sub(resolutionFee), "awards != remainder - fee");
 	    
 	if (adr.swiftResolver) {
-	     require(msg.sender != locker.client && msg.sender != locker.provider, "client/provider = swiftResolver");
-	     require(IERC20(swiftResolverToken).balanceOf(msg.sender) >= swiftResolverTokenBalance && swiftResolverRegistrations[msg.sender], "!swiftResolverTokenBalance/registered");
+	    require(msg.sender != locker.client && msg.sender != locker.provider, "client/provider = swiftResolver");
+	    require(IERC20(swiftResolverToken).balanceOf(msg.sender) >= swiftResolverTokenBalance && swiftResolverRegistrations[msg.sender], "!swiftResolverTokenBalance/registered");
         } else {
             require(msg.sender == adr.resolver, "!resolver");
         }
@@ -666,7 +663,7 @@ contract LexLocker is ReentrancyGuard {
         require(msg.sender == locker.client, "!client"); 
         require(msg.sender != proposedResolver && locker.clientOracle != proposedResolver && locker.provider != proposedResolver, "client/clientOracle/provider = proposedResolver");
         require(adr.clientProposedResolver == 0, "pending");
-	require(locker.released < locker.sum, "released");
+	    require(locker.released < locker.sum, "released");
         
         if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
