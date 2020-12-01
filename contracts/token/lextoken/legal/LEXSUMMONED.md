@@ -1,6 +1,6 @@
 {
   "description": "NFT commemorating FLAMINGO (DAO)", 
   "external_url": "https://flamingodao.xyz/", 
-  "image": "https://gateway.pinata.cloud/ipfs/QmYV2wUoVMSHXCjEWNE8TGo2P1zWQ8nULXn5rwCndfEULa", 
-  "name": "Flamingo Falls Rarely"
+  "image": "https://gateway.pinata.cloud/ipfs/QmPqJAqVEXGkMC2dENL3Crv1DhxSuuoizDmTjw2uNVAGiH", 
+  "name": "Flamingo Redux"
 }
