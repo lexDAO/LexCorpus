@@ -5,7 +5,8 @@
 ██║╚██╗██║██╔══╝     ██║        ██║  ██║██╔══██╗██║   ██║██╔═══╝     
 ██║ ╚████║██║        ██║███████╗██████╔╝██║  ██║╚██████╔╝██║         
 ╚═╝  ╚═══╝╚═╝        ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝
-// SPDX-License-Identifier: MIT
+presented by LexDAO LLC
+// SPDX-License-Identifier: GPL-3.0-or-later
 */
 pragma solidity 0.7.5;
 
@@ -37,7 +38,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
     /*******************
     ERC20 DROP FUNCTIONS
     *******************/
-    function dropDetailedSumERC20(address erc721, address erc20, uint256[] calldata amount) external { // drop detailed erc20 amount on erc721 holders ("I want to give 10 DAI to 1st, 20 DAI to 2nd")
+    function dropDetailedSumERC20(address erc20, address erc721, uint256[] calldata amount) external { // drop detailed erc20 amount on erc721 holders ("I want to give 10 DAI to 1st, 20 DAI to 2nd")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         uint256 length = nft.totalSupply();
@@ -49,7 +50,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
         }
     }
     
-    function dropFixedSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount on erc721 holders ("I want to give 20 DAI to each")
+    function dropFixedSumERC20(address erc20, address erc721, uint256 amount) external { // drop erc20 amount on erc721 holders ("I want to give 20 DAI to each")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         
@@ -59,7 +60,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
         }
     }
     
-    function dropLumpSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount evenly on erc721 holders ("I want to spread 100 DAI across all")
+    function dropLumpSumERC20(address erc20, address erc721, uint256 amount) external { // drop erc20 amount evenly on erc721 holders ("I want to spread 100 DAI across all")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         uint256 length = nft.totalSupply();
