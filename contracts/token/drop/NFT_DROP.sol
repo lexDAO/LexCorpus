@@ -13,7 +13,7 @@ interface IERC20TransferFrom { // interface for erc20 token `transferFrom()`
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
-interface IERC721ListingTransferFrom { // brief interface for erc721 token listing and `transferFrom()`
+interface IERC721ListingTransferFrom { // interface for erc721 token listing and `transferFrom()`
     function ownerOf(uint256 tokenId) external view returns (address);
     function tokenByIndex(uint256 index) external view returns (uint256);
     function totalSupply() external view returns (uint256);
@@ -37,7 +37,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
     /*******************
     ERC20 DROP FUNCTIONS
     *******************/
-    function dropDetailedSumERC20(address erc721, address erc20, uint256[] calldata amount) external { // drop erc20 amount evenly on erc721 holders
+    function dropDetailedSumERC20(address erc721, address erc20, uint256[] calldata amount) external { // drop detailed erc20 amount on erc721 holders ("I want to give 10 DAI to 1st, 20 DAI to 2nd")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         uint256 length = nft.totalSupply();
@@ -48,7 +48,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
         }
     }
     
-    function dropFixedSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount evenly on erc721 holders
+    function dropFixedSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount on erc721 holders ("I want to give 20 DAI to each")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         uint256 length = nft.totalSupply();
@@ -59,7 +59,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
         }
     }
     
-    function dropLumpSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount evenly on erc721 holders
+    function dropLumpSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount evenly on erc721 holders ("I want to spread 100 DAI across all")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         uint256 length = nft.totalSupply();
