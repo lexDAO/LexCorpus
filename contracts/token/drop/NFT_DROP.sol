@@ -41,6 +41,7 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
         uint256 length = nft.totalSupply();
+        require(amount.length == length, "!amount/length");
         
         for (uint256 i = 0; i < length; i++) {
             IERC20TransferFrom(erc20).transferFrom(msg.sender, nft.ownerOf(nft.tokenByIndex(count)), amount[i]);
@@ -51,9 +52,8 @@ contract NFT_DROP { // drop tokens on enumerable NFT holders
     function dropFixedSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount on erc721 holders ("I want to give 20 DAI to each")
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
-        uint256 length = nft.totalSupply();
         
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < nft.totalSupply(); i++) {
             IERC20TransferFrom(erc20).transferFrom(msg.sender, nft.ownerOf(nft.tokenByIndex(count)), amount);
             count++;
         }
