@@ -22,8 +22,6 @@ interface IERC721ListingTransferFrom { // interface for erc721 token listing and
 }
 
 contract NFT_DROP { // drop tokens on enumerable NFT holders
-    uint256 constant public version = 1;
-    
     function dropERC721ParallelSeries(address erc721, address erc721ToDrop) external { // drop parallel erc721 series on erc721 holders
         IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
         uint256 count;
