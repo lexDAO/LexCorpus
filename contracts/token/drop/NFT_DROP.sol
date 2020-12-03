@@ -1,0 +1,72 @@
+/*
+███╗   ██╗███████╗████████╗     ██████╗ ██████╗  ██████╗ ██████╗     
+████╗  ██║██╔════╝╚══██╔══╝     ██╔══██╗██╔══██╗██╔═══██╗██╔══██╗    
+██╔██╗ ██║█████╗     ██║        ██║  ██║██████╔╝██║   ██║██████╔╝    
+██║╚██╗██║██╔══╝     ██║        ██║  ██║██╔══██╗██║   ██║██╔═══╝     
+██║ ╚████║██║        ██║███████╗██████╔╝██║  ██║╚██████╔╝██║         
+╚═╝  ╚═══╝╚═╝        ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝
+// SPDX-License-Identifier: MIT
+*/
+pragma solidity 0.7.5;
+
+interface IERC20TransferFrom { // interface for erc20 token `transferFrom()`
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+}
+
+interface IERC721ListingTransferFrom { // brief interface for erc721 token listing and `transferFrom()`
+    function ownerOf(uint256 tokenId) external view returns (address);
+    function tokenByIndex(uint256 index) external view returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function transferFrom(address from, address to, uint256 tokenId) external;
+}
+
+contract NFT_DROP { // drop tokens on enumerable NFT holders
+    uint256 constant public version = 1;
+    
+    function dropERC721ParallelSeries(address erc721, address erc721ToDrop) external { // drop parallel erc721 series on erc721 holders
+        IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
+        uint256 count;
+        uint256 length = nft.totalSupply();
+        
+        for (uint256 i = 0; i < length; i++) {
+            IERC721ListingTransferFrom(erc721ToDrop).transferFrom(msg.sender, nft.ownerOf(nft.tokenByIndex(count)), IERC721ListingTransferFrom(erc721ToDrop).tokenByIndex(count));
+            count++;
+        }
+    }
+    
+    /*******************
+    ERC20 DROP FUNCTIONS
+    *******************/
+    function dropDetailedSumERC20(address erc721, address erc20, uint256[] calldata amount) external { // drop erc20 amount evenly on erc721 holders
+        IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
+        uint256 count;
+        uint256 length = nft.totalSupply();
+        
+        for (uint256 i = 0; i < length; i++) {
+            IERC20TransferFrom(erc20).transferFrom(msg.sender, nft.ownerOf(nft.tokenByIndex(count)), amount[i]);
+            count++;
+        }
+    }
+    
+    function dropFixedSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount evenly on erc721 holders
+        IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
+        uint256 count;
+        uint256 length = nft.totalSupply();
+        
+        for (uint256 i = 0; i < length; i++) {
+            IERC20TransferFrom(erc20).transferFrom(msg.sender, nft.ownerOf(nft.tokenByIndex(count)), amount);
+            count++;
+        }
+    }
+    
+    function dropLumpSumERC20(address erc721, address erc20, uint256 amount) external { // drop erc20 amount evenly on erc721 holders
+        IERC721ListingTransferFrom nft = IERC721ListingTransferFrom(erc721);
+        uint256 count;
+        uint256 length = nft.totalSupply();
+        
+        for (uint256 i = 0; i < length; i++) {
+            IERC20TransferFrom(erc20).transferFrom(msg.sender, nft.ownerOf(nft.tokenByIndex(count)), amount / length);
+            count++;
+        }
+    }
+}
