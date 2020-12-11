@@ -663,7 +663,7 @@ contract LexLocker is ReentrancyGuard {
         require(msg.sender == locker.client, "!client"); 
         require(msg.sender != proposedResolver && locker.clientOracle != proposedResolver && locker.provider != proposedResolver, "client/clientOracle/provider = proposedResolver");
         require(adr.clientProposedResolver == 0, "pending");
-	    require(locker.released < locker.sum, "released");
+	require(locker.released < locker.sum, "released");
         
         if (adr.proposedResolver == proposedResolver) {
             adr.resolver = proposedResolver;
