@@ -15,7 +15,7 @@ Background, ["*Enter LexDAO Corpus Contracts"*](https://medium.com/lexdaoism/ent
 #### [GAMMA NFT](https://lexdao.github.io/GAMMANFT/) ✨
  * Public mint NFT with token sale-ability built-in. Check out our shitty artistry to start 🧑‍🎨. 
 #### [LEXTOKEN FACTORY](https://lexdao.github.io/LexTokenize/) 🏭
- * Launch a social token sale on [LexDAO legal engineering](https://lexdao.substack.com/p/launch-on-lextoken). Optimized so deployment is only a few bucks. Dogfooded by LexDAO to launch $LEX. $LEX Rewards available 💸. LexToken factory contract is managed by LexDAO Collective org.
+ * Launch a token sale on [LexDAO legal engineering](https://lexdao.substack.com/p/launch-on-lextoken). Optimized so deployment is only a few bucks. Dogfooded by LexDAO to launch $LEX. $LEX Rewards available 💸. LexToken factory contract is managed by LexDAO Collective org.
 #### [STANDARD TOKEN FACTORY](https://lexdao.github.io/OZToken/) 🏭
  * Launch a [standard OpenZeppelin erc20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/presets/ERC20PresetMinterPauser.sol). Optimized so deployment is only a few bucks. $LEX Rewards available 💸. Standard Token factory contract is managed by LexDAO Collective org.
 #### [MINION SUMMONER](https://lexdao.github.io/MinionSummoner/) 👺
