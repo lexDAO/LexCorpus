@@ -110,7 +110,6 @@ contract LexLocker is ReentrancyGuard {
     address public userRewardToken; // token for LXL user rewards - updateable by manager
     address public wETH; // ether token wrapper contract reference - updateable by manager
     uint256 public lockerCount; // lockers counted into LXL registry
-    uint256 public MAX_DURATION; // time limit in seconds on token lockup - default 63113904 (2-year) - updateable by manager
     uint256 public resolutionRate; // rate to determine resolution fee for disputed locker (e.g., 20 = 5% of remainder) - updateable by manager
     uint256 public swiftResolverTokenBalance; // balance required in `swiftResolverToken` to participate as swift resolver - updateable by manager
     uint256 public userReward; // reward amount granted to LXL users in `userRewardToken`- updateable by manager
@@ -137,7 +136,7 @@ contract LexLocker is ReentrancyGuard {
     event Resolve(address indexed resolver, uint256 clientAward, uint256 providerAward, uint256 registration, uint256 resolutionFee, string resolution); 
     event AddMarketTerms(uint256 index, string terms);
     event AmendMarketTerms(uint256 index, string terms);
-    event UpdateLockerSettings(address indexed manager, address swiftResolverToken, address userRewardToken, address wETH, uint256 MAX_DURATION, uint256 resolutionRate, uint256 swiftResolverTokenBalance, uint256 userReward, string lockerTerms);
+    event UpdateLockerSettings(address indexed manager, address swiftResolverToken, address userRewardToken, address wETH, uint256 resolutionRate, uint256 swiftResolverTokenBalance, uint256 userReward, string lockerTerms);
     event TributeToManager(address indexed caller, uint256 amount, string details);
 
     struct ADR {  
@@ -173,7 +172,6 @@ contract LexLocker is ReentrancyGuard {
         address _swiftResolverToken,
         address _userRewardToken,
         address _wETH,
-        uint256 _MAX_DURATION,
         uint256 _resolutionRate, 
         uint256 _swiftResolverTokenBalance, 
         uint256 _userReward,
@@ -185,7 +183,6 @@ contract LexLocker is ReentrancyGuard {
         swiftResolverToken = _swiftResolverToken;
         userRewardToken = _userRewardToken;
         wETH = _wETH;
-        MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         userReward = _userReward;
@@ -221,7 +218,6 @@ contract LexLocker is ReentrancyGuard {
         bool swiftResolver 
     ) external nonReentrant payable returns (uint256) {
         require(msg.sender != resolver && clientOracle != resolver && provider != resolver, "client/clientOracle/provider = resolver");
-        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
         uint256 sum;
         for (uint256 i = 0; i < amount.length; i++) {
@@ -300,7 +296,6 @@ contract LexLocker is ReentrancyGuard {
         bool swiftResolver 
     ) external nonReentrant payable returns (uint256) {
         require(msg.sender != resolver && clientOracle != resolver && provider != resolver, "client/clientOracle/provider = resolver");
-        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
         if (msg.value > 0) {
             address weth = wETH;
@@ -378,7 +373,6 @@ contract LexLocker is ReentrancyGuard {
         bool swiftResolver 
     ) external nonReentrant returns (uint256) {
         require(client != resolver && clientOracle != resolver && provider != resolver, "client/clientOracle/provider = resolver");
-        require(termination <= block.timestamp.add(MAX_DURATION), "duration maxed");
         
         uint256 sum;
         for (uint256 i = 0; i < amount.length; i++) {
@@ -785,7 +779,6 @@ contract LexLocker is ReentrancyGuard {
      * @param _swiftResolverToken Token to mark participants in swift resolution.
      * @param _userRewardToken Token for LXL user rewards.
      * @param _wETH Standard contract reference to wrap ether. 
-     * @param _MAX_DURATION Time limit in seconds on token lockup - default 63113904 (2-year).
      * @param _resolutionRate Rate to determine resolution fee for locker (e.g., 20 = 5% of remainder).
      * @param _swiftResolverTokenBalance Token balance required to perform swift resolution. 
      * @param _userReward Reward amount granted to LXL users in `userRewardToken`.
@@ -796,7 +789,6 @@ contract LexLocker is ReentrancyGuard {
         address _swiftResolverToken, 
         address _userRewardToken,
         address _wETH, 
-        uint256 _MAX_DURATION, 
         uint256 _resolutionRate, 
         uint256 _swiftResolverTokenBalance,
         uint256 _userReward,
@@ -808,12 +800,11 @@ contract LexLocker is ReentrancyGuard {
         swiftResolverToken = _swiftResolverToken;
         userRewardToken = _userRewardToken;
         wETH = _wETH;
-        MAX_DURATION = _MAX_DURATION;
         resolutionRate = _resolutionRate;
         swiftResolverTokenBalance = _swiftResolverTokenBalance;
         userReward = _userReward;
         lockerTerms = _lockerTerms;
 	    
-	emit UpdateLockerSettings(_manager, _swiftResolverToken, _userRewardToken, _wETH, _MAX_DURATION, _resolutionRate, _swiftResolverTokenBalance, _userReward, _lockerTerms);
+	emit UpdateLockerSettings(_manager, _swiftResolverToken, _userRewardToken, _wETH, _resolutionRate, _swiftResolverTokenBalance, _userReward, _lockerTerms);
     }
 }
