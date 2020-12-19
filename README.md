@@ -29,7 +29,7 @@ Background, ["*Enter LexDAO Corpus Contracts"*](https://medium.com/lexdaoism/ent
 
 ***LexDAO COLLECTIVE*** 🌐: Stake [$LEX](https://lexdao.github.io/LEX/) to join, [0x9b78A81836bda21CAaA368d935A09EFB1B86316c](https://etherscan.io/address/0x9b78A81836bda21CAaA368d935A09EFB1B86316c#code)
 
-TOGETHER, LEXCORPUS CONTRACTS AND LEXDAO ORGS CREATE LEXDAO PROTOCOLS:
+### TOGETHER, LEXCORPUS CONTRACTS AND LEXDAO ORGS CREATE LEXDAO PROTOCOLS:
 
 #### [Arbitration](https://github.com/lexDAO/Arbitration) 🧑‍⚖️
 Multi-org, multi-track protocol in production supporting [Raid Guild Escrow](https://escrow.raidguild.org/) and LexLocker.
