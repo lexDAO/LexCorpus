@@ -1,13 +1,3 @@
-/*
-███╗   ██╗███████╗████████╗     ██████╗ ██████╗  ██████╗ ██████╗     
-████╗  ██║██╔════╝╚══██╔══╝     ██╔══██╗██╔══██╗██╔═══██╗██╔══██╗    
-██╔██╗ ██║█████╗     ██║        ██║  ██║██████╔╝██║   ██║██████╔╝    
-██║╚██╗██║██╔══╝     ██║        ██║  ██║██╔══██╗██║   ██║██╔═══╝     
-██║ ╚████║██║        ██║███████╗██████╔╝██║  ██║╚██████╔╝██║         
-╚═╝  ╚═══╝╚═╝        ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝
-presented by LexDAO LLC
-// SPDX-License-Identifier: GPL-3.0-or-later
-*/
 pragma solidity 0.8.0; 
 
 interface IERC721ListingTransferFrom { // interface for erc721 token listing and `transferFrom()`
@@ -29,10 +19,10 @@ contract LexDropNFT { // drop deposited LexDAO LEX on NFT holders using LEX batc
         uint256 count;
         uint256 length = nft.totalSupply();
         
-        address[] memory holders = new address[](length);
+        address[] memory holders;// = new address[](length);
         
         for (uint256 i = 0; i < length; i++) {
-            holders.nft.ownerOf(nft.tokenByIndex(count);
+            holders.push(nft.ownerOf(nft.tokenByIndex(count)));
             count++;
         }
         
