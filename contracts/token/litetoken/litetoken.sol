@@ -1,5 +1,5 @@
 pragma solidity 0.8.0; // SPDX-License-Identifier: GPL-3.0-or-later
-contract LiteToken {
+contract LiteToken { // minimal viable erc20 token with common extensions, such as burn, cap, mint, pauseable, admin functions
     address public owner;
     string public name;
     string public symbol;
