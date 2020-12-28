@@ -79,8 +79,8 @@ contract Token {
     }
     
     function _burn(address from, uint256 value) internal {
-        balanceOf[from] = balanceOf[from].sub(value); 
-        totalSupply = totalSupply.sub(value); 
+        balanceOf[from] = balanceOf[from]-value; 
+        totalSupply = totalSupply-value; 
         emit Transfer(from, address(0), value);
     }
     
@@ -89,17 +89,17 @@ contract Token {
     }
     
     function burnFrom(address from, uint256 value) external {
-        _approve(from, msg.sender, allowance[from][msg.sender].sub(value));
+        _approve(from, msg.sender, allowance[from][msg.sender]-value);
         _burn(from, value);
     }
     
     function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
-        _approve(msg.sender, spender, allowance[msg.sender][spender].sub(subtractedValue));
+        _approve(msg.sender, spender, allowance[msg.sender][spender]-subtractedValue);
         return true;
     }
     
     function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
-        _approve(msg.sender, spender, allowance[msg.sender][spender].add(addedValue));
+        _approve(msg.sender, spender, allowance[msg.sender][spender]+addedValue);
         return true;
     }
     
@@ -123,8 +123,8 @@ contract Token {
     }
     
     function _transfer(address from, address to, uint256 value) internal {
-        balanceOf[from] = balanceOf[from].sub(value); 
-        balanceOf[to] = balanceOf[to].add(value); 
+        balanceOf[from] = balanceOf[from]-value; 
+        balanceOf[to] = balanceOf[to]+value; 
         emit Transfer(from, to, value); 
     }
     
@@ -144,7 +144,7 @@ contract Token {
     
     function transferFrom(address from, address to, uint256 value) external returns (bool) {
         require(transferable, "!transferable");
-        _approve(from, msg.sender, allowance[from][msg.sender].sub(value));
+        _approve(from, msg.sender, allowance[from][msg.sender]-value);
         _transfer(from, to, value);
         return true;
     }
@@ -158,9 +158,9 @@ contract Token {
     }
     
     function _mint(address to, uint256 value) internal {
-        require(totalSupply.add(value) <= totalSupplyCap, "capped"); 
-        balanceOf[to] = balanceOf[to].add(value); 
-        totalSupply = totalSupply.add(value); 
+        require(totalSupply+value <= totalSupplyCap, "capped"); 
+        balanceOf[to] = balanceOf[to]+value; 
+        totalSupply = totalSupply+value; 
         emit Transfer(address(0), to, value); 
     }
     
