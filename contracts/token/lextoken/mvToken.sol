@@ -30,7 +30,7 @@ contract Token {
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         balanceOf[from] = balanceOf[from] - amount;
         balanceOf[to] = balanceOf[to] + amount;
-        allowance[from][msg.sender] = amount;
+        allowance[from][msg.sender] = allowance[from][msg.sender] - amount;
         emit Transfer(from, to, amount);
         return true;
     }
