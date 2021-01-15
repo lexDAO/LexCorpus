@@ -25,7 +25,6 @@ contract Token {
     string  public details; // details token offering, redemption, etc. - updateable by manager
     string  public name; // fixed token name
     string  public symbol; // fixed token symbol
-    bool    private initialized; // internally tracks token deployment under eip-1167 proxy pattern
     bool    public transferable; // transferability of token - does not affect token sale - updateable by manager
     
     mapping(address => mapping(address => uint256)) public allowance;
@@ -37,7 +36,7 @@ contract Token {
     event UpdateGovernance(address indexed manager, string details);
     event UpdateTransferability(bool transferable);
     
-    function init(
+    constructor(
         address _manager,
         uint8 _decimals, 
         uint256 _managerSupply,  
@@ -47,14 +46,12 @@ contract Token {
         string calldata _symbol,  
         bool _transferable
     ) external {
-        require(!initialized, "initialized"); 
         manager = _manager; 
         decimals = _decimals; 
         totalSupplyCap = _totalSupplyCap; 
         details = _details; 
         name = _name; 
         symbol = _symbol;  
-        initialized = true; 
         transferable = _transferable; 
         if (_managerSupply > 0) {_mint(_manager, _managerSupply);}
         // eip-2612 permit() pattern:
