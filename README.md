@@ -29,3 +29,6 @@ Body of building block contracts for legal engineers and their clients: 🤖 �
 
 #### [Arbitration](https://github.com/lexDAO/Arbitration) 🧑‍⚖️
 Multi-org, multi-track protocol in production supporting [Raid Guild Escrow](https://escrow.raidguild.org/) and LexLocker.
+
+#### [Registry](https://github.com/lexDAO/LexList) 📜
+Starting with LexList of vetted tokens, LexDAO Corps. governs the qualification of Ethereum accounts for subjective features. 
