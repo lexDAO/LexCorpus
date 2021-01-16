@@ -1,11 +1,9 @@
-# LexCorpus
+# LexCorpus *[📕](https://medium.com/lexdaoism/enter-lexdao-corpus-contracts-df01d8518019)*
 Body of building block contracts for legal engineers and their clients: 🤖 📜
-
-Background, ["*Enter LexDAO Corpus Contracts"*](https://medium.com/lexdaoism/enter-lexdao-corpus-contracts-df01d8518019)
 
 ### GETTING STARTED
 
-1. Check out our [starter guide]() to legal engineering on ethereum 📕. 
+1. Check out our [starter guide]() to legal engineering on ethereum 🔧. 
 2. Review Contributor Guidelines 📋 (CONTRIBUTING.md).
 3. Request features by making an Issue ✋.
 4. Complete bounties listed as Issues 💰.
