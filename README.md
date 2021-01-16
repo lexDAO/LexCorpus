@@ -5,6 +5,12 @@ Background, ["*Enter LexDAO Corpus Contracts"*](https://medium.com/lexdaoism/ent
 
 ### GETTING STARTED
 
+1. Check out our [starter guide]() to legal engineering on ethereum 📕. 
+2. Review Contributor Guidelines 📋 (CONTRIBUTING.md).
+3. Request features by making an Issue ✋.
+4. Complete bounties listed as Issues 💰.
+5. Gain governance over LexDAO engineering and LexCorpus by earning $LEX ⚔️.
+
 ### FEATURED LEXCORPUS CONTRACT DAPPS:
 #### [STANDARD TOKEN FACTORY](https://lexdao.github.io/OZToken/) 🏭
  * Launch a [standard OpenZeppelin erc20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/presets/ERC20PresetMinterPauser.sol). Optimized so deployment is only a few bucks. $LEX Rewards available 💸. Standard Token factory contract is managed by LexDAO Collective org.
@@ -15,8 +21,6 @@ Background, ["*Enter LexDAO Corpus Contracts"*](https://medium.com/lexdaoism/ent
 #### [LEXLOCKER](https://lexdao.github.io/LXL/) 🔐
  * Locks in deals with flexible escrow logic and demonstrates LexDAO Arbitration protocol. $LEX Rewards available 💸. LexLocker contract is managed by LexDAO CORPS org.
  
-*LexDAO itself uses LexCorpus contracts and protocols to codify legal financial stack.*
-
 ### LEXDAO ORGS. 🗺️ (MYSTIC)
 
 ***LexDAO CORPS*** 🕵️: Get [certified as legal engineer](https://github.com/lexDAO/Legal-Engineers) by LexDAO Cooperative to join, [0x01B92E2C0D06325089c6Fd53C98a214f5C75B2aC](https://etherscan.io/address/0x01b92e2c0d06325089c6fd53c98a214f5c75b2ac#code)
