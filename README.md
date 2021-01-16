@@ -21,9 +21,9 @@ Body of building block contracts for legal engineers and their clients: 🤖 �
  
 ### LEXDAO ORGS. 🗺️ (MYSTIC)
 
-***LexDAO CORPS*** 🕵️: Get [certified as legal engineer](https://github.com/lexDAO/Legal-Engineers) by LexDAO Cooperative to join, [0x01B92E2C0D06325089c6Fd53C98a214f5C75B2aC](https://etherscan.io/address/0x01b92e2c0d06325089c6fd53c98a214f5c75b2ac#code). 
+***LexDAO CORPS*** 🕵️: Get [certified as legal engineer](https://github.com/lexDAO/Legal-Engineers) by LexDAO Cooperative to join, [0x01B92E2C0D06325089c6Fd53C98a214f5C75B2aC](https://etherscan.io/address/0x01b92e2c0d06325089c6fd53c98a214f5c75b2ac#code). (++Experts coordinated by LexDAO Coop. to offer "hard" governance (e.g., interpretation of agreements and code.)
 
-***LexDAO COLLECTIVE*** 🌐: Stake [$LEX](https://lexdao.github.io/LEX/) to join, [0x9b78A81836bda21CAaA368d935A09EFB1B86316c](https://etherscan.io/address/0x9b78A81836bda21CAaA368d935A09EFB1B86316c#code)
+***LexDAO COLLECTIVE*** 🌐: Stake [$LEX](https://lexdao.github.io/LEX/) to join, [0x9b78A81836bda21CAaA368d935A09EFB1B86316c](https://etherscan.io/address/0x9b78A81836bda21CAaA368d935A09EFB1B86316c#code). (++Crowd-wisdom faucet, contribution-weighted stakes over token factories and "soft" governance.)
 
 ### *TOGETHER, LEXCORPUS CONTRACTS AND LEXDAO ORGS CREATE LEXDAO PROTOCOLS:*
 
