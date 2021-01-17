@@ -1,6 +1,6 @@
 pragma solidity 0.8.0;
 
-contract Token {
+contract BaseToken {
     string public name = "TOKEN";
     string public symbol = "TKN";
     uint8 public decimals = 18;
