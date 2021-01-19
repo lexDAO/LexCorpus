@@ -24,7 +24,7 @@ contract DepositLocker {
     
     receive() payable external {}
     
-    function depositLocker(address receiver, address token, uint256 amount) external {
+    function depositLocker(address receiver, address token, uint256 amount) external payable {
         if (token == ETH_TOKEN) {
             (bool success, ) = address(this).call{value: amount}("");
             require(success, "withdraw failed");
