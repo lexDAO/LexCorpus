@@ -19,7 +19,9 @@ Body of building block contracts for legal engineers and their clients: 🤖 �
 #### [LEXLOCKER](https://lexdao.github.io/LXL/) 🔐
  * Locks in deals with flexible escrow logic and demonstrates LexDAO Arbitration protocol managed LexDO Corps. dao (see below). $LEX Rewards available 💸. 
  
-### LEXDAO ORGS. 🗺️ (MYSTIC)
+### LEXDAO ORGS. 🗺️ 
+
+***LexDAO COOP*** 🤝: Get sponsored for 1:1 shares by existing Coop member to join, [0x58234d4bf7a83693dc0815d97189ed7d188f6981](https://app.daohaus.club/dao/0x58234d4bf7a83693dc0815d97189ed7d188f6981).
 
 ***LexDAO CORPS*** 🕵️: Get [certified as legal engineer](https://github.com/lexDAO/Legal-Engineers) by LexDAO Cooperative to join, [0x01B92E2C0D06325089c6Fd53C98a214f5C75B2aC](https://etherscan.io/address/0x01b92e2c0d06325089c6fd53c98a214f5c75b2ac#code). (++Experts coordinated by LexDAO Coop. to offer "hard" governance (e.g., interpretation of agreements and code.)
 
