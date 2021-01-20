@@ -1,6 +1,8 @@
 pragma solidity 0.8.0;
 
-contract Resolveable is Token { // extension to erc20 for admin token transfers
+import "../token/Token.sol";
+
+contract ResolveableToken is Token { // admin transfer extension for erc20
     address public resolver; // account managing token balances
     
     event TransferResolver(address indexed resolver);
