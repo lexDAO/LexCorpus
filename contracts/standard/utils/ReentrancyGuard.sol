@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.0;
 
 contract ReentrancyGuard { // helper for reentrancy check
@@ -5,7 +6,7 @@ contract ReentrancyGuard { // helper for reentrancy check
     uint256 private constant _ENTERED = 2;
     uint256 private _status;
 
-    constructor () internal {
+    constructor () {
         _status = _NOT_ENTERED;
     }
 
