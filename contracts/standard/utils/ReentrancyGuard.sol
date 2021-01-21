@@ -1,6 +1,6 @@
 pragma solidity 0.8.0;
 
-contract ReentrancyGuard { // call wrapper for reentrancy check
+contract ReentrancyGuard { // helper for reentrancy check
     uint256 private constant _NOT_ENTERED = 1;
     uint256 private constant _ENTERED = 2;
     uint256 private _status;
