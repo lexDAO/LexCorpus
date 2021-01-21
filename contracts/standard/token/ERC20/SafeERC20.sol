@@ -2,7 +2,7 @@ pragma solidity 0.8.0;
 
 import "../utils/Address.sol";
 
-library SafeERC20 { // wrapper around erc20 token tx for non-standard contract
+library SafeERC20 { // helper for non-standard erc20 token
     using Address for address;
     
     function safeTransfer(IERC20 token, address to, uint256 amount) internal {
