@@ -5,7 +5,7 @@ contract ReentrancyGuard { // helper for reentrancy check
     uint256 private constant _ENTERED = 2;
     uint256 private _status;
 
-    constructor() {
+    constructor () internal {
         _status = _NOT_ENTERED;
     }
 
