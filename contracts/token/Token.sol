@@ -41,11 +41,11 @@ contract Token {
         uint8 _decimals, 
         uint256 _managerSupply,  
         uint256 _totalSupplyCap,
-        string calldata _details, 
-        string calldata _name, 
-        string calldata _symbol,  
+        string memory _details, 
+        string memory _name, 
+        string memory _symbol,  
         bool _transferable
-    ) external {
+    ) {
         manager = _manager; 
         decimals = _decimals; 
         totalSupplyCap = _totalSupplyCap; 
