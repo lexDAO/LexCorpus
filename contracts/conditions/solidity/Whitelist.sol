@@ -14,7 +14,7 @@ contract Whitelist {
     } 
     
     modifier onlyWhitelist {
-        require(whitelist[msg.sender] == true);
+        require(whitelist[msg.sender]);
         _;
     }
     
