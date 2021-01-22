@@ -10,12 +10,12 @@ contract Whitelist {
     
     modifier onlyOwner {
         require(msg.sender == owner);
-      _;
+        _;
     } 
     
     modifier onlyWhitelist {
-        require(whitelist[msg.sender] = true);
-      _;
+        require(whitelist[msg.sender] == true);
+        _;
     }
     
     function addToWhitelist(address account) onlyOwner external {
