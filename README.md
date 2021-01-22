@@ -1,6 +1,8 @@
 # LexCorpus *[📕](https://medium.com/lexdaoism/enter-lexdao-corpus-contracts-df01d8518019)*
 Body of building block contracts for legal engineers and their clients: 🤖 📜
 
+LexDAO emphasizes lean code for security and legibility. 
+
 ### GETTING STARTED
 
 1. Check out our [starter guide]() to legal engineering on ethereum 🔧. 
