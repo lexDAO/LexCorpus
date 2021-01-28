@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 contract TimeRestricted {
     uint256 immutable public timeRestrictionLift; 
     
-    /// @dev deploy TimeRestricted contract - `timeRestricted` modifer enforces condition
+    /// @dev deploy TimeRestricted contract - `timeRestricted` modifier enforces condition
     /// @param _timeRestrictionLift unix time for condition to lift
     constructor(uint256 _timeRestrictionLift) {
         timeRestrictionLift = _timeRestrictionLift;  
