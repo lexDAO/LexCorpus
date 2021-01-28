@@ -1,14 +1,18 @@
-pragma solidity 0.8.0;
+/// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity ^0.8.0;
 
 contract TimeRestricted {
-    uint256 public timeRestriction;
-
-    constructor(uint256 _timeRestriction) {
-        timeRestriction = _timeRestriction;
+    uint256 immutable public timeRestrictionLift; 
+    
+    /// @dev deploy TimeRestricted contract - `timeRestricted` modifer enforces condition
+    /// @param _timeRestrictionLift unix time for condition to lift
+    constructor(uint256 _timeRestrictionLift) {
+        timeRestrictionLift = _timeRestrictionLift;  
     }
     
-    modifier timeRestricted { // requires modified function to be called *at* timeRestriction or after
-        require(block.timestamp >= timeRestriction, "!time");
+    /// requires modified function to be called *at* `timeRestrictionLift` in unix time or after
+    modifier timeRestricted { 
+        require(block.timestamp >= timeRestrictionLift, "!time");
         _;
     }
 }
