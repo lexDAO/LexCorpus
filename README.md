@@ -1,5 +1,5 @@
 # LexCorpus *[📕](https://medium.com/lexdaoism/enter-lexdao-corpus-contracts-df01d8518019)*
-Body of building block contracts for legal engineers and their clients: 🤖 📜
+Contract library for legal engineering: 🤖 📜
 
 LexDAO emphasizes lean contract code for security and legibility. 
 > "Minimalist code only has upsides" - [Alberto Cuesta Cañada](https://twitter.com/acuestacanada/status/1354839730270183430?s=20) -- Technical Lead, Yield Protocol
