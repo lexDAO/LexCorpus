@@ -1,10 +1,10 @@
-pragma solidity 0.8.0;
-
+pragma solidity ^0.8.0;
+// SPDX-License-Identifier: GPL-3.0-or-later
 contract BaseToken {
-    string public name = "TOKEN";
-    string public symbol = "TKN";
-    uint8 public decimals = 18;
-    uint256 public totalSupply = 100 ether;
+    string constant public name = "TOKEN";
+    string constant public symbol = "TKN";
+    uint8 constant public decimals = 18;
+    uint256 constant public totalSupply = 100 ether;
     
     constructor() {balanceOf[msg.sender] = totalSupply;}
     
