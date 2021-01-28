@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 contract Owned {
     address public owner; 
     
-    /// @dev deploy Owned contract - `onlyOwner` modifer enforces condition
+    /// @dev deploy Owned contract - `onlyOwner` modifier enforces condition
     /// @param _owner account with `onlyOwner` permission 
     constructor(address _owner) {
         owner = _owner;
