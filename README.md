@@ -1,7 +1,7 @@
 # LexCorpus *[📕](https://medium.com/lexdaoism/enter-lexdao-corpus-contracts-df01d8518019)*
 Body of building block contracts for legal engineers and their clients: 🤖 📜
 
-LexDAO emphasizes lean code for security and legibility. 
+LexDAO emphasizes [lean code](https://twitter.com/acuestacanada/status/1354839730270183430?s=20) for security and legibility. 
 
 ### GETTING STARTED
 
