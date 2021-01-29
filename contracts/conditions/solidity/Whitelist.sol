@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 contract Whitelisted is Owned {
-    mapping(address => bool) public whitelist;
+    mapping(address => bool) public whitelist; // track account status
     
     /// @dev deploy Whitelisted contract - `onlyWhitelist` modifier enforces condition
-    /// @param _owner account with `onlyOwner` permission in `Owned` contract
-    constructor(address _owner) Owned(_owner) {}
+    /// @param owner Account with `onlyOwner` permission in `Owned` contract
+    constructor(address owner) Owned(owner) {}
     
     /// @dev requires modified function to be called by `whitelist` account
     modifier onlyWhitelist {
@@ -14,9 +14,10 @@ contract Whitelisted is Owned {
         _;
     }
     
-    /// @dev add account to `whitelist`
-    /// @param _account account to add `whitelist`
-    function addToWhitelist(address account) onlyOwner external {
-        whitelist[account] = true;
+    /// @dev update account `whitelist` status
+    /// @param account Account to update 
+    /// @param whitelisted Status on `whitelist` to update - if `true,` account is active
+    function updateWhitelist(address account, bool whitelisted) onlyOwner external {
+        whitelist[account] = whitelisted;
     }
 }
