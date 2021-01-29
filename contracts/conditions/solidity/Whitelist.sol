@@ -1,29 +1,22 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+/// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
 
-contract Whitelist {
-    address public owner;
+contract Whitelisted is Owned {
     mapping(address => bool) public whitelist;
     
-    constructor() {
-        owner = msg.sender;
-    }
+    /// @dev deploy Whitelisted contract - `onlyWhitelist` modifier enforces condition
+    /// @param _owner account with `onlyOwner` permission in `Owned` contract
+    constructor(address _owner) Owned(_owner) {}
     
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    } 
-    
+    /// @dev requires modified function to be called by `whitelist` account
     modifier onlyWhitelist {
-        require(whitelist[msg.sender]);
+        require(whitelist[msg.sender], "!whitelist");
         _;
     }
     
+    /// @dev add account to `whitelist`
+    /// @param _account account to add `whitelist`
     function addToWhitelist(address account) onlyOwner external {
         whitelist[account] = true;
-    }
-    
-    function changeOwner(address newOwner) onlyOwner external {
-        owner = newOwner;
     }
 }
