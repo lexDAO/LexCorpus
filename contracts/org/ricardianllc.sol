@@ -169,17 +169,7 @@ contract RicardianLLC {
         require(msg.sender == governance, "!governance");
         _;
     }
-    
-    function govMintLLC(address to) external onlyGovernance { 
-        _mint(to);
-    }
-    
-    function govMintLLCbatch(address[] calldata to) external onlyGovernance {
-        for (uint256 i = 0; i < to.length; i++) {
-            _mint(to[i]); 
-        }
-    }
-    
+
     function govTransferFrom(address from, address to, uint256 tokenId) external onlyGovernance {
         _transfer(from, to, tokenId);
     }
