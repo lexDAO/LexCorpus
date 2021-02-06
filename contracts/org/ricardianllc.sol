@@ -16,9 +16,9 @@
 pragma solidity 0.8.1;
 
 contract RicardianLLC {
-    address public governance;
-    uint256 public mintFee;
+    address payable public governance;
     uint256 public totalSupply;
+    string public commonURI;
     string public masterOperatingAgreement;
     string constant public name = "Ricardian LLC, Series";
     string constant public symbol = "LLC";
@@ -38,7 +38,7 @@ contract RicardianLLC {
     event UpdateTokenDetails(uint256 indexed tokenId, string details);
     event SetSale(address indexed buyer, uint256 indexed price, uint256 indexed tokenId);
     event GovTribute(address indexed caller, uint256 indexed amount, string details);
-    event GovUpdateSettings(address indexed governance, uint256 indexed mintFee, string masterOperatingAgreement);
+    event GovUpdateSettings(address indexed governance, string commonURI, string masterOperatingAgreement);
     event GovUpdateTokenURI(uint256 indexed tokenId, string tokenURI);
     
     struct Sale {
@@ -46,8 +46,9 @@ contract RicardianLLC {
         uint256 price;
     }
     
-    constructor(address _governance, string memory _masterOperatingAgreement) {
+    constructor(address payable _governance, string memory _commonURI, string memory _masterOperatingAgreement) {
         governance = _governance; 
+        commonURI = _commonURI;
         masterOperatingAgreement = _masterOperatingAgreement; 
         supportsInterface[0x80ac58cd] = true; // ERC721 
         supportsInterface[0x5b5e139f] = true; // METADATA
@@ -61,7 +62,7 @@ contract RicardianLLC {
         uint256 tokenId = totalSupply;
         balanceOf[to]++;
         ownerOf[tokenId] = to;
-        tokenURI[tokenId] = "";
+        tokenURI[tokenId] = commonURI;
         emit Transfer(address(0), to, tokenId); 
     }
     
@@ -80,29 +81,14 @@ contract RicardianLLC {
     PUBLIC MINTING
     *************/
     receive() external payable {
-        if (mintFee > 0) {
-            require(msg.value == mintFee, "!mintFee"); // call with ETH fee
-            (bool success, ) = governance.call{value: msg.value}("");
-            require(success, "!ethCall");
-        }
         _mint(msg.sender); 
     }
     
     function mintLLC(address to) external payable {
-        if (mintFee > 0) {
-            require(msg.value == mintFee, "!mintFee"); // call with ETH fee
-            (bool success, ) = governance.call{value: msg.value}("");
-            require(success, "!ethCall");
-        }
         _mint(to);
     }
     
     function mintLLCbatch(address[] calldata to) external payable {
-        if (mintFee > 0) {
-            require(msg.value == mintFee * to.length, "!mintFee"); // call with ETH fee adjusted for batch
-            (bool success, ) = governance.call{value: msg.value}("");
-            require(success, "!ethCall");
-        }
         for (uint256 i = 0; i < to.length; i++) {
             _mint(to[i]); 
         }
@@ -206,16 +192,14 @@ contract RicardianLLC {
     }
     
     function govTribute(string calldata details) external payable {
-        (bool success, ) = governance.call{value: msg.value}("");
-        require(success, "!ethCall");
         emit GovTribute(msg.sender, msg.value, details);
     }
     
-    function govUpdateSettings(address _governance, uint256 _mintFee, string calldata _masterOperatingAgreement) external onlyGovernance {
+    function govUpdateSettings(address payable _governance, string calldata _commonURI, string calldata _masterOperatingAgreement) external onlyGovernance {
         governance = _governance;
-        mintFee = _mintFee;
+        commonURI = _commonURI;
         masterOperatingAgreement = _masterOperatingAgreement;
-        emit GovUpdateSettings(_governance, _mintFee, _masterOperatingAgreement);
+        emit GovUpdateSettings(_governance, _commonURI, _masterOperatingAgreement);
     }
     
     function govUpdateTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
@@ -231,5 +215,10 @@ contract RicardianLLC {
             tokenURI[tokenId[i]] = _tokenURI[i];
             emit GovUpdateTokenURI(tokenId[i], _tokenURI[i]);
         }
+    }
+    
+    function govWithdrawETH() external onlyGovernance {
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "!ethCall");
     }
 }
