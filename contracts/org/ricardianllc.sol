@@ -77,9 +77,9 @@ contract RicardianLLC {
         emit Transfer(from, to, tokenId); 
     }
     
-    /*************
-    PUBLIC MINTING
-    *************/
+    /*******************
+    PUBLIC TOKEN MINTING
+    *******************/
     receive() external payable {
         _mint(msg.sender); 
     }
