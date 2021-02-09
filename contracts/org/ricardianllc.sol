@@ -77,9 +77,12 @@ contract RicardianLLC {
         emit Transfer(from, to, tokenId); 
     }
     
-    /*******************
-    PUBLIC TOKEN MINTING
-    *******************/
+    /***************
+    PUBLIC FUNCTIONS
+    ***************/
+    // **********
+    // TOKEN MINT
+    // **********
     receive() external payable {
         _mint(msg.sender); 
     }
@@ -94,9 +97,9 @@ contract RicardianLLC {
         }
     }
     
-    /****************
-    PUBLIC TOKEN MGMT
-    ****************/
+    // **********
+    // TOKEN MGMT
+    // **********
     function approve(address spender, uint256 tokenId) external {
         address owner = ownerOf[tokenId];
         require(msg.sender == owner || isApprovedForAll[owner][msg.sender], "!owner/operator");
@@ -133,9 +136,9 @@ contract RicardianLLC {
         emit UpdateTokenDetails(tokenId, details);
     }
     
-    // ***********
-    // PUBLIC SALE
-    // ***********
+    // **********
+    // TOKEN SALE
+    // **********
     function purchase(uint256 tokenId) external payable {
         if (sale[tokenId].buyer != address(0)) { // if buyer is preset, require caller match
             require(msg.sender == sale[tokenId].buyer, "!buyer");
