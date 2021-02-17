@@ -7,6 +7,8 @@ contract OwnableERC20 {
     address private erc20;
     uint256 private ownerBalance;
     
+    event SetERC20ownerBalance(address indexed erc20, uint256 ownerBalance);
+    
     /// @dev initialize contract with `erc20` and `ownerBalance` variables
     constructor(address _erc20, uint256 _ownerBalance) {
         erc20 = _erc20;
@@ -35,8 +37,9 @@ contract OwnableERC20 {
     }
     
      /// @dev internal function to set `erc20` and `ownerbalance` for access control 
-    function _setERC20(address _erc20, uint256 _ownerBalance) internal {
+    function _setERC20ownerBalance(address _erc20, uint256 _ownerBalance) internal {
         erc20 = _erc20;
         ownerBalance = _ownerBalance;
+        emit SetERC20ownerBalance(_erc20, _ownerBalance);
     }
 }
