@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 /// @title OwnableERC20
 /// @notice Use ERC20 ownership for access control
 contract OwnableERC20 {
-    address private erc20;
-    uint256 private ownerBalance;
+    address private erc20; // access control token address
+    uint256 private ownerBalance; // access control token balance
     
     event SetERC20ownerBalance(address indexed erc20, uint256 ownerBalance);
     
