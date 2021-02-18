@@ -42,6 +42,6 @@ contract SimpleToken {
 
 contract SimpleTokenFactory {
     fallback() external {
-        new Token(msg.sender);
+        new SimpleToken(msg.sender);
     }
 }
