@@ -13,6 +13,7 @@ contract OwnableERC20 {
     constructor(address _erc20, uint256 _ownerBalance) {
         erc20 = _erc20;
         ownerBalance = _ownerBalance;
+        emit SetERC20ownerBalance(_erc20, _ownerBalance);
     }
     
     /// @dev access control modifier that requires modified function to be called by account with `ownerbalance` of `erc20`
