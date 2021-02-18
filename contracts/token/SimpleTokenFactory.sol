@@ -1,9 +1,9 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity 0.8.1;
 
 contract SimpleToken {
-    string constant public name = "Token Asset";
-    string constant public symbol = "ASSET";
+    string constant public name = "TOKEN";
+    string constant public symbol = "TOKEN";
     uint8 constant public decimals = 18;
     uint256 constant public totalSupply = 100 ether;
     
@@ -41,7 +41,5 @@ contract SimpleToken {
 }
 
 contract SimpleTokenFactory {
-    fallback() external {
-        new SimpleToken(msg.sender);
-    }
+    fallback() external { new SimpleToken(msg.sender); }
 }
