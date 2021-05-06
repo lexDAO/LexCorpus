@@ -24,30 +24,30 @@ Listed resources should include (as available):
 📋 [**NVCA Code of Conduct Policy**](https://lib.openlaw.io/web/default/template/Code%20of%20Conduct%20Policy%20(NVCA)) / / open-source project alt: 📋 [**Contributor Covenant**](https://lib.openlaw.io/web/default/template/Contributor%20Covenant%20Code%20of%20Conduct) 
 
 * 🧥*Get form*
-📋 [**LLC Package (Delaware)**](https://app.openlaw.io/template/New%20York%20LLC%20Formation%20): This LLC Formation package includes simple forms for: (i) [*Certificate of Formation*](https://lib.openlaw.io/web/default/template/Delaware%20LLC%20Certificate%20of%20Formation), and (ii) [*Operating Agreement*](https://app.openlaw.io/template/New%20York%20LLC%20Operating%20Agreement%20(Multi-Member)).
+📋 [**LLC Package (Delaware)**](https://lib.openlaw.io/web/default/template/New%20York%20LLC%20Formation%20): This LLC Formation package includes simple forms for: (i) [*Certificate of Formation*](https://lib.openlaw.io/web/default/template/Delaware%20LLC%20Certificate%20of%20Formation), and (ii) [*Operating Agreement*](https://lib.openlaw.io/web/default/template/New%20York%20LLC%20Operating%20Agreement%20(Multi-Member)).
 
 * 💡*Get advice*
-📋 [**Founder Advisor Standard Template (FAST)**](https://app.openlaw.io/template/Founder%20Advisor%20Standard%20Template%20(FAST)) / / general alt: 📋 [**Advisor Agreement**](https://app.openlaw.io/template/Advisor%20Agreement)
+📋 [**Founder Advisor Standard Template (FAST)**](https://lib.openlaw.io/web/default/template/Founder%20Advisor%20Standard%20Template%20(FAST)) / / general alt: 📋 [**Advisor Agreement**](https://lib.openlaw.io/web/default/template/Advisor%20Agreement)
 
 * 🤐 *Get confidential*
-📋 [**Mutual Non-Dislosure Agreement (NDA)**](https://app.openlaw.io/template/Mutual%20Non-disclosure%20Agreement%20(NDA)): This form consists of a simple NDA to structure a confidential relationship between two parties (often used to protect trade secrets or other proprietary information).
+📋 [**Mutual Non-Dislosure Agreement (NDA)**](https://lib.openlaw.io/web/default/template/Mutual%20Non-disclosure%20Agreement%20(NDA)): This form consists of a simple NDA to structure a confidential relationship between two parties (often used to protect trade secrets or other proprietary information).
 
 * 🌱*Get seed capital*:
-📋 [**Shared Earnings Agreement**](https://app.openlaw.io/template/Shared%20Earnings%20Agreement) / / equity alt:
-📋 [**'Series Seed' Term Sheet (Equity)**](https://app.openlaw.io/template/Series%20Seed%20-%20Term%20Sheet%20(Equity%20Financing)) / 📋  [**Y Combinator Series AA Term Sheet**](https://app.openlaw.io/template/Y-Combinator%20Series%20AA%20Term%20Sheet) / 📋 [**Y Combinator SAFE**](https://app.openlaw.io/template/Y%20Combinator%20SAFE)
+📋 [**Shared Earnings Agreement**](https://lib.openlaw.io/web/default/template/Shared%20Earnings%20Agreement) / / equity alt:
+📋 [**'Series Seed' Term Sheet (Equity)**](https://lib.openlaw.io/web/default/template/Series%20Seed%20-%20Term%20Sheet%20(Equity%20Financing)) / 📋  [**Y Combinator Series AA Term Sheet**](https://lib.openlaw.io/web/default/template/Y-Combinator%20Series%20AA%20Term%20Sheet) / 📋 [**Y Combinator SAFE**](https://lib.openlaw.io/web/default/template/Y%20Combinator%20SAFE)
 
 * 🏗️*Get incorporated* 
-📋 [**Corp. Package (Delaware)**](https://app.openlaw.io/template/Incorporation%20(Delaware)): This Corp. Package includes simple forms for: (i) [*Action by Written Consent of Sole Incorporator*](https://app.openlaw.io/template/Action%20by%20Written%20Consent%20of%20Sole%20Incorporator), (ii) [*Certificate of Incorporation*](https://app.openlaw.io/template/Certificate%20of%20Incorporation), (iii) [*Action by Unanimous Written Consent*](https://app.openlaw.io/template/Action%20by%20Unanimous%20Written%20Consent), (iv) [*Bylaws*](https://app.openlaw.io/template/Bylaws), and (v) [*Certificate of Secretary*](https://app.openlaw.io/template/Certificate%20of%20Secretary).
+📋 [**Corp. Package (Delaware)**](https://lib.openlaw.io/web/default/template/Incorporation%20(Delaware)): This Corp. Package includes simple forms for: (i) [*Action by Written Consent of Sole Incorporator*](https://lib.openlaw.io/web/default/template/Action%20by%20Written%20Consent%20of%20Sole%20Incorporator), (ii) [*Certificate of Incorporation*](https://lib.openlaw.io/template/web/default/Certificate%20of%20Incorporation), (iii) [*Action by Unanimous Written Consent*](https://lib.openlaw.io/template/web/default/Action%20by%20Unanimous%20Written%20Consent), (iv) [*Bylaws*](https://lib.openlaw.io/web/default/template/Bylaws), and (v) [*Certificate of Secretary*](https://lib.openlaw.io/web/default/template/Certificate%20of%20Secretary).
 
 * 💻*Get online*
-📋 [**Website Package**](https://app.openlaw.io/template/Deal%3A%20Terms%20of%20Use%20%26%20Privacy%20Policy): This Website Package includes simple forms for: (i) [Terms of Use](https://app.openlaw.io/template/Terms%20of%20Use), and (ii) [Privacy Policy](https://app.openlaw.io/template/Privacy%20Policy).
+📋 [**Website Package**](https://lib.openlaw.io/web/default/template/Deal%3A%20Terms%20of%20Use%20%26%20Privacy%20Policy): This Website Package includes simple forms for: (i) [Terms of Use](https://lib.openlaw.io/web/default/template/Terms%20of%20Use), and (ii) [Privacy Policy](https://lib.openlaw.io/web/default/template/Privacy%20Policy).
 
 ## 📚 Library:
 > Ongoing sourcing of model forms for comparison and combination into "Starters" sets 👆:
 
 ### |🤝| Founders' Agreements |💪| 
 * [**Founder Accord**](https://www.mcoblaw.com/founder-accord) / / [.md](.github/Markdown/Founder-Accord-MD.md) / / [.doc](https://www.mcoblaw.com/s/Founder-Accord_Template.docx) / /
-[*OpenLaw Template*](https://app.openlaw.io/template/Founder%20Accord)
+[*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Founder%20Accord)
 
 > *A simple, plain English, short document that lays out the most basic structure for collaborating on a new idea or project that may develop into a company.* 
 
@@ -74,7 +74,7 @@ For additional details, see [Extended Founder Accord Description](.github/Descri
 #### LLC:
 ##### 📋 Operating Agreement:
 
-* [**New York LLC Operating Agreement (Multi-Member)**](https://eforms.com/operating-agreements/ny/new-york-multi-member-llc-operating-agreement-form/) / / [.doc](https://eforms.com/download/2016/01/new-york-multi-member-llc-operating-agreement-template.docx) / / [.pdf](https://eforms.com/download/2016/01/new-york-multi-member-llc-operating-agreement-template.pdf) / / [*OpenLaw Template*](https://app.openlaw.io/template/New%20York%20LLC%20Operating%20Agreement%20(Multi-Member))
+* [**New York LLC Operating Agreement (Multi-Member)**](https://eforms.com/operating-agreements/ny/new-york-multi-member-llc-operating-agreement-form/) / / [.doc](https://eforms.com/download/2016/01/new-york-multi-member-llc-operating-agreement-template.docx) / / [.pdf](https://eforms.com/download/2016/01/new-york-multi-member-llc-operating-agreement-template.pdf) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/New%20York%20LLC%20Operating%20Agreement%20(Multi-Member))
 
 ### |📜| Financing |💰|
 
@@ -90,17 +90,17 @@ For additional details, see [Extended Founder Accord Description](.github/Descri
 
 #### 📋 Term Sheet:
 
-* [**Series Seed - Term Sheet (Equity)**](https://github.com/CooleyLLP/seriesseed/blob/master/equity/Series%20Seed%20-%20Term%20Sheet.md) / / [.md](https://github.com/Ro5s/Startup-Starter-Pack/blob/master/.github/Markdown/Series-Seed-Term-Sheet-Equity.md) / / [.doc](https://www.seriesseed.com/files/series-seed---term-sheet-v-3-2.doc) / / [*OpenLaw Template*](https://app.openlaw.io/template/Series%20Seed%20-%20Term%20Sheet%20(Equity%20Financing)) 
+* [**Series Seed - Term Sheet (Equity)**](https://github.com/CooleyLLP/seriesseed/blob/master/equity/Series%20Seed%20-%20Term%20Sheet.md) / / [.md](https://github.com/Ro5s/Startup-Starter-Pack/blob/master/.github/Markdown/Series-Seed-Term-Sheet-Equity.md) / / [.doc](https://www.seriesseed.com/files/series-seed---term-sheet-v-3-2.doc) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Series%20Seed%20-%20Term%20Sheet%20(Equity%20Financing)) 
 
 * [**Series Seed - Term Sheet (Convertible Note)**](https://github.com/CooleyLLP/seriesseed/blob/master/notes/Series%20Seed%20Notes%20-%20Term%20Sheet.md) / / [.md](.github/Markdown/Series-Seed-Term-Sheet-Convertible-Note.md)
 
 * [**Techstars - Bridge Term Sheet (Convertible Note)**](https://github.com/ahmadnassri/awesome-startup-resources) / / [.doc](http://www.techstars.com/uploads/TechStars_Bridge_Term_Sheet1.doc)
 
-* [**Y Combinator - Series AA Term Sheet**](https://www.docracy.com/5/y-combinator-series-aa-termsheet) / / [.doc](https://www.docracy.com/word/5/3/y-combinator-series-aa-termsheet.doc) / / [.pdf](https://www.docracy.com/pdf/5/3) / / [*OpenLaw Template*](https://app.openlaw.io/template/Y-Combinator%20Series%20AA%20Term%20Sheet)
+* [**Y Combinator - Series AA Term Sheet**](https://www.docracy.com/5/y-combinator-series-aa-termsheet) / / [.doc](https://www.docracy.com/word/5/3/y-combinator-series-aa-termsheet.doc) / / [.pdf](https://www.docracy.com/pdf/5/3) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Y-Combinator%20Series%20AA%20Term%20Sheet)
 
 * [**NVCA - Series A Term Sheet**](https://nvca.org/resources/model-legal-documents/) / / [.doc](https://nvca.org/download/5091/) 
 
-* [**Shared Earnings Agreement**](https://earnestcapital.com/shared-earnings-agreement/) / / [EC Google Doc](https://docs.google.com/document/d/1MoLiH_VnhX-0vfZ1zgMSfpcIt0rdyD9rc27BbypplDI/edit) / / [.md](.github/Markdown/Shared-Earnings-Agreement.md) / / [*OpenLaw Template*](https://app.openlaw.io/template/Shared%20Earnings%20Agreement)
+* [**Shared Earnings Agreement**](https://earnestcapital.com/shared-earnings-agreement/) / / [EC Google Doc](https://docs.google.com/document/d/1MoLiH_VnhX-0vfZ1zgMSfpcIt0rdyD9rc27BbypplDI/edit) / / [.md](.github/Markdown/Shared-Earnings-Agreement.md) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Shared%20Earnings%20Agreement)
 
 > see: [SEAL Calculator](https://docs.google.com/spreadsheets/d/1h_L7oa3rbV8P-ZnMM-l1fY5zc97GetYkRjQ_zCi6by4/edit#gid=0)
 
@@ -187,7 +187,7 @@ For additional details, see [YC Extended SAFE Description](https://www.ycombinat
 
 ### |🙋| Advisor Agreements |💡| 
 * [**Founder Institute - Founder Advisor Standard Template (FAST)**](https://www.docracy.com/263/founder-advisor-standard-template) / /
-[.doc](https://www.docracy.com/word/263/7/founder-advisor-standard-template.doc) / / [.pdf](https://www.docracy.com/pdf/263/7) / / [*OpenLaw Template*](https://app.openlaw.io/template/Founder%20Advisor%20Standard%20Template%20(FAST))
+[.doc](https://www.docracy.com/word/263/7/founder-advisor-standard-template.doc) / / [.pdf](https://www.docracy.com/pdf/263/7) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Founder%20Advisor%20Standard%20Template%20(FAST))
 
 > *Developed by the Founder Institute to encourage collaboration between entrepreneurs and other domain experts to build meaningful and enduring technology companies. FAST allows any mentor, any advisor or any domain expert to quickly engage with and assist a fast growing technology company at any stage using fair terms for preset equity compensation.*
 
@@ -200,32 +200,32 @@ For additional details, see [YC Extended SAFE Description](https://www.ycombinat
 
 > *The IPA is a new way to do patent assignment that keeps control in the hands of engineers and designers. It is a commitment from Twitter to our employees that patents can only be used for defensive purposes. We will not use the patents from employees’ inventions in offensive litigation without their permission. What’s more, this control flows with the patents, so if we sold them to others, they could only use them as the inventor intended.*
 
-* [**Innovator's Patent Agreement**](https://blog.twitter.com/official/en_us/a/2012/introducing-the-innovator-s-patent-agreement.html) / / [.md](https://github.com/Ro5s/Startup-Starter-Pack/blob/master/.github/Markdown/Innovators-Patent-Agreement.md) / / [*Openlaw Template*](https://app.openlaw.io/template/Innovator's%20Patent%20Agreement)
+* [**Innovator's Patent Agreement**](https://blog.twitter.com/official/en_us/a/2012/introducing-the-innovator-s-patent-agreement.html) / / [.md](https://github.com/Ro5s/Startup-Starter-Pack/blob/master/.github/Markdown/Innovators-Patent-Agreement.md) / / [*Openlaw Template*](https://lib.openlaw.io/template/Innovator's%20Patent%20Agreement)
 
 #### Mutual NDA
 
 > *A Mutual Non-Disclosure Agreement (NDA) essentially creates a confidential relationship between two parties and is often used to protect trade secrets or other proprietary information.* 
 
-* [**Mutual Non-Dislosure Agreement (NDA)**](https://app.openlaw.io/template/Mutual%20Non-disclosure%20Agreement%20(NDA))
+* [**Mutual Non-Dislosure Agreement (NDA)**](https://lib.openlaw.io/web/default/template/Mutual%20Non-disclosure%20Agreement%20(NDA))
 
 #### Code of Conduct
 
-* [**NVCA Code of Conduct Policy**](https://nvca.org/resources/model-legal-documents/) / / [.doc](https://nvca.org/download/60966/) / / [*OpenLaw Template*](https://app.openlaw.io/template/Code%20of%20Conduct%20Policy%20(NVCA))
+* [**NVCA Code of Conduct Policy**](https://nvca.org/resources/model-legal-documents/) / / [.doc](https://nvca.org/download/60966/) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Code%20of%20Conduct%20Policy%20(NVCA))
 
 > *NVCA Sample Code of Conduct Policy for a Company/Firm to Adopt; per NVCA, reflects "the work product of a coalition of venture capital firms, H.R. professionals, and legal/employment professionals."*  
 
-* [**Contributor Covenant**](https://www.contributor-covenant.org) / / [.md](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md) / / [*OpenLaw Template*](https://app.openlaw.io/template/Contributor%20Covenant)
+* [**Contributor Covenant**](https://www.contributor-covenant.org) / / [.md](https://www.contributor-covenant.org/version/1/4/code-of-conduct.md) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Contributor%20Covenant)
 
 > *A common form of 'Code of Conduct' for open-source collaboration.*
 
 #### Terms of Use/Service
 
-* [**Terms of Use**](https://openlaw.io/terms?ref=footer) / / [*OpenLaw Template*](https://app.openlaw.io/template/Terms%20of%20Use)
+* [**Terms of Use**](https://openlaw.io/terms?ref=footer) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Terms%20of%20Use)
 
 > *Generalized ToU adapted from OpenLaw.io website.*
 
 #### Privacy Policy 
-* [**Privacy Policy**](https://openlaw.io/privacy?ref=footer) / / [*OpenLaw Template*](https://app.openlaw.io/template/Privacy%20Policy)
+* [**Privacy Policy**](https://openlaw.io/privacy?ref=footer) / / [*OpenLaw Template*](https://lib.openlaw.io/web/default/template/Privacy%20Policy)
 
 > *Generalized Privacy Policy adapted from OpenLaw.io website.*
 
