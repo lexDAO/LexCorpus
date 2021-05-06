@@ -8,4 +8,4 @@ Colección de documentos legales modelo para las necesidades típicas de creaci�
 > Conjuntos de acuerdos a medida para necesidades de inicio comunes deploy *implementados a través de [OpenLaw.io](https://openlaw.io):*
 
 * 💪 *Hablar en serio*
-📋 [**Acuerdo de Fundador**](https://app.openlaw.io/template/Acuerdo%20de%20Fundador): Este formulario consiste en un breve y simple acuerdo de fundadores que establece la estructura más básica para colaborar en un nuevo idea o proyecto que puede desarrollarse en una empresa.
+📋 [**Acuerdo de Fundador**](https://lib.openlaw.io/web/default/template/Acuerdo%20de%20Fundador): Este formulario consiste en un breve y simple acuerdo de fundadores que establece la estructura más básica para colaborar en un nuevo idea o proyecto que puede desarrollarse en una empresa.
