@@ -15,13 +15,3 @@ LexDAO emphasizes lean contract code for security and legibility.
 3. Request features by making an Issue ✋.
 4. Complete bounties listed as Issues 💰.
 5. Gain governance over LexDAO engineering and LexCorpus by earning $LEX ⚔️.
-
-### FEATURED LEXCORPUS CONTRACT DAPPS:
-#### [STANDARD TOKEN FACTORY](https://lexdao.github.io/OZToken/) 🏭
- * Launch a [standard OpenZeppelin reference erc20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/presets/ERC20PresetMinterPauser.sol).
-#### [LEXTOKEN FACTORY](https://lexdao.github.io/LexTokenize/) 🏭
- * Launch a token sale on [LexDAO legal engineering](https://lexdao.substack.com/p/launch-on-lextoken).
-#### [LEXDAO $LEX](https://lexdao.github.io/LEX/) ⚔️
- * $LEX rewards LexCorpus engineering and community beta testing 💸.
-#### [LEXLOCKER](https://lexdao.github.io/LXL/) 🔐
- * Locks in deals with escrow.
