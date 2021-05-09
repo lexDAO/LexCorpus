@@ -66,18 +66,18 @@ contract Certification {
         emit Transfer(from, address(0), tokenId); 
     }
     
+     function govTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
+        require(tokenId <= totalSupply, "!exist");
+        tokenURI[tokenId] = _tokenURI;
+        emit GovTokenURI(tokenId, _tokenURI);
+    }
+    
     function govTransferFrom(address from, address to, uint256 tokenId) external onlyGovernance {
         require(from == ownerOf[tokenId], "!owner");
         balanceOf[from]--; 
         balanceOf[to]++; 
         ownerOf[tokenId] = to;
         emit Transfer(from, to, tokenId); 
-    }
-    
-    function govTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
-        require(tokenId <= totalSupply, "!exist");
-        tokenURI[tokenId] = _tokenURI;
-        emit GovTokenURI(tokenId, _tokenURI);
     }
 
     function transferGovernance(address _governance, string calldata _details) external onlyGovernance {
