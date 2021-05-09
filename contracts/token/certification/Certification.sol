@@ -49,7 +49,7 @@ contract Certification {
 
     function mint(address to, string calldata customURI) external onlyGovernance { 
         string memory _tokenURI;
-        if (bytes(customURI).length > 0) {_tokenURI = baseURI;} else {_tokenURI = customURI;}
+        if (bytes(customURI).length > 0) {_tokenURI = customURI;} else {_tokenURI = baseURI;}
         totalSupply++;
         uint256 tokenId = totalSupply;
         balanceOf[to]++;
