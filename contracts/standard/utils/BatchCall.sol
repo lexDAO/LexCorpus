@@ -4,7 +4,7 @@
 pragma solidity 0.8.4;
 
 contract BatchCall {
-  function batchCall(bytes[] calldata calls, bool revertOnFail) external returns (string memory revertMsg) {
+    function batchCall(bytes[] calldata calls, bool revertOnFail) external returns (string memory revertMsg) {
         for (uint256 i = 0; i < calls.length; i++) {
             (bool success, bytes memory result) = address(this).delegatecall(calls[i]);
             if (!success && revertOnFail) 
