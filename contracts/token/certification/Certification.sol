@@ -46,10 +46,18 @@ contract Certification {
                     revertMsg = abi.decode(result, (string)); 
         }
     }
+    
+    function burn(address from, uint256 tokenId) external {
+        require(from == ownerOf[tokenId] || from == governance, "!owner||!governance");
+        balanceOf[from]--; 
+        ownerOf[tokenId] = address(0);
+        tokenURI[tokenId] = "";
+        emit Transfer(from, address(0), tokenId); 
+    }
 
     function mint(address to, string calldata customURI) external onlyGovernance { 
-        string memory _tokenURI;
-        if (bytes(customURI).length > 0) {_tokenURI = customURI;} else {_tokenURI = baseURI;}
+        string memory _tokenURI; 
+        bytes(customURI).length > 0 ? _tokenURI = customURI : _tokenURI = baseURI;
         totalSupply++;
         uint256 tokenId = totalSupply;
         balanceOf[to]++;
@@ -58,15 +66,7 @@ contract Certification {
         emit Transfer(address(0), to, tokenId);
     }
 
-    function govBurn(address from, uint256 tokenId) external onlyGovernance {
-        require(from == ownerOf[tokenId], "from!owner");
-        balanceOf[from]--; 
-        ownerOf[tokenId] = address(0);
-        tokenURI[tokenId] = "";
-        emit Transfer(from, address(0), tokenId); 
-    }
-    
-     function govTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
+    function govTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
         require(tokenId <= totalSupply, "!exist");
         tokenURI[tokenId] = _tokenURI;
         emit GovTokenURI(tokenId, _tokenURI);
