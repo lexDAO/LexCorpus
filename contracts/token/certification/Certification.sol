@@ -59,7 +59,7 @@ contract Certification {
     }
 
     function govBurn(address from, uint256 tokenId) external onlyGovernance {
-        require(from == ownerOf[tokenId], "!owner");
+        require(from == ownerOf[tokenId], "from!owner");
         balanceOf[from]--; 
         ownerOf[tokenId] = address(0);
         tokenURI[tokenId] = "";
@@ -73,7 +73,7 @@ contract Certification {
     }
     
     function govTransferFrom(address from, address to, uint256 tokenId) external onlyGovernance {
-        require(from == ownerOf[tokenId], "!owner");
+        require(from == ownerOf[tokenId], "from!owner");
         balanceOf[from]--; 
         balanceOf[to]++; 
         ownerOf[tokenId] = to;
