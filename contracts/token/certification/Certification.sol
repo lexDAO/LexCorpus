@@ -7,17 +7,17 @@ contract Certification {
     address public duesToken;
     address public governance;
     uint256 public duesAmount;
+    uint256 public duesGrace;
     uint256 public duesPeriod;
     uint256 public totalSupply;
     string  public baseURI;
     string  public details;
     string  public name;
     string  public symbol;
-    bytes4  constant SIG_TRANSFER = 0xa9059cbb; // erc20 function signature for simple 'safe transfer' - transfer(address,uint)
     bytes4  constant SIG_TRANSFER_FROM = 0x23b872dd; // erc20 function signature simple 'safe transferFrom' - transferFrom(address,address,uint)
     
     mapping(address => uint256) public balanceOf;
-    mapping(address => bool) public goodStanding;
+    mapping(address => uint256) public registration;
     mapping(uint256 => address) public ownerOf;
     mapping(uint256 => string) public tokenURI;
     mapping(bytes4 => bool) public supportsInterface; // ERC-165 
@@ -27,9 +27,10 @@ contract Certification {
     event GovTokenURI(uint256 indexed tokenId, string tokenURI);
     
     constructor(
+        address _governance,
         address _duesToken, 
-        address _governance, 
         uint256 _duesAmount,
+        uint256 _duesGrace,
         uint256 _duesPeriod,
         string memory _baseURI, 
         string memory _details, 
@@ -39,6 +40,7 @@ contract Certification {
         duesToken = _duesToken;
         governance = _governance;
         duesAmount = _duesAmount;
+        duesGrace = _duesGrace;
         duesPeriod = _duesPeriod;
         baseURI = _baseURI;
         details = _details; 
@@ -70,24 +72,28 @@ contract Certification {
         tokenURI[tokenId] = "";
         emit Transfer(from, address(0), tokenId); 
     }
+
+    function depositDues() external payable {
+        require(balanceOf[msg.sender] > 0, '!owner'); 
+        require(block.timestamp - registration[msg.sender] >= duesPeriod, 'paid');
+        if (duesToken == address(0)) { 
+            require(msg.value == duesAmount);
+            (bool success, ) = governance.call{value: msg.value}("");
+            require(success, "!payable");
+        } else {
+            (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(SIG_TRANSFER_FROM, msg.sender, governance, duesAmount));
+            require(success && (data.length == 0 || abi.decode(data, (bool))), 'transfer fail');
+        }
+        registration[msg.sender] = block.timestamp;
+    }
     
-    function checkDues(uint256 tokenId) external {
+    function enforceDues(uint256 tokenId) external {
         address owner = ownerOf[tokenId];
-        if (!goodStanding[owner])
+        require(block.timestamp - registration[msg.sender] > duesPeriod + duesGrace, 'paid');
         balanceOf[owner]--; 
         ownerOf[tokenId] = address(0);
         tokenURI[tokenId] = "";
         emit Transfer(owner, address(0), tokenId); 
-    }
-    
-    function depositDues() external payable {
-        if (duesToken == address(0)) { 
-            require(msg.value == duesAmount);
-        } else {
-            (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(SIG_TRANSFER, msg.sender, address(this), duesAmount));
-            require(success && (data.length == 0 || abi.decode(data, (bool))), 'transfer fail');
-        }
-        goodStanding[msg.sender] = true;
     }
 
     function mint(address to, string calldata customURI) external onlyGovernance { 
@@ -96,6 +102,7 @@ contract Certification {
         totalSupply++;
         uint256 tokenId = totalSupply;
         balanceOf[to]++;
+        registration[to] = block.timestamp;
         ownerOf[tokenId] = to;
         tokenURI[tokenId] = _tokenURI;
         emit Transfer(address(0), to, tokenId);
@@ -121,20 +128,11 @@ contract Certification {
         emit TransferGovernance(_governance, _details);
     }
     
-    function updateDues(address _duesToken, uint256 _duesAmount, uint256 _duesPeriod) external onlyGovernance {
+    function updateDues(address _duesToken, uint256 _duesAmount, uint256 _duesGrace, uint256 _duesPeriod) external onlyGovernance {
         duesToken = _duesToken;
         duesAmount = _duesAmount;
+        duesGrace = _duesGrace;
         duesPeriod = _duesPeriod;
-    }
-    
-    function withdrawDues() external onlyGovernance {
-        if (duesToken == address(0)) { 
-            (bool success, ) = msg.sender.call{value: address(this).balance}("");
-            require(success, "!payable");
-        } else {
-            (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(SIG_TRANSFER, msg.sender, duesAmount));
-            require(success && (data.length == 0 || abi.decode(data, (bool))), 'transfer fail');
-        }
     }
 }
 
@@ -142,16 +140,26 @@ contract CertificationFactory {
     event DeployCertification(Certification indexed certification, address indexed governance);
     
     function deployCertification(
-        address _duesToken, 
         address _governance, 
+        address _duesToken, 
         uint256 _duesAmount, 
+        uint256 _duesGrace, 
         uint256 _duesPeriod, 
         string memory _baseURI, 
         string memory _details, 
         string memory _name, 
         string memory _symbol
     ) external returns (Certification certification) {
-        certification = new Certification(_duesToken, _governance, _duesAmount, _duesPeriod, _baseURI, _details, _name, _symbol);
+        certification = new Certification(
+            _governance, 
+            _duesToken, 
+            _duesAmount, 
+            _duesGrace, 
+            _duesPeriod, 
+            _baseURI, 
+            _details, 
+            _name, 
+            _symbol);
         emit DeployCertification(certification, _governance);
     }
 }
