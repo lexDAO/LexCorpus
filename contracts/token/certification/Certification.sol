@@ -14,7 +14,6 @@ contract Certification {
     string  public details;
     string  public name;
     string  public symbol;
-    bytes4  constant SIG_TRANSFER_FROM = 0x23b872dd; // erc20 function signature simple 'safe transferFrom' - transferFrom(address,address,uint)
     
     mapping(address => uint256) public balanceOf;
     mapping(address => uint256) public registration;
@@ -81,7 +80,7 @@ contract Certification {
             (bool success, ) = governance.call{value: msg.value}("");
             require(success, "!payable");
         } else {
-            (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(SIG_TRANSFER_FROM, msg.sender, governance, duesAmount));
+            (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(0x23b872dd, msg.sender, governance, duesAmount));
             require(success && (data.length == 0 || abi.decode(data, (bool))), 'transfer fail');
         }
         registration[msg.sender] = block.timestamp;
