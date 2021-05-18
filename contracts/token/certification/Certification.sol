@@ -49,11 +49,6 @@ contract Certification {
         supportsInterface[0x5b5e139f] = true; // METADATA
     }
     
-    modifier onlyGovernance {
-        require(msg.sender == governance, '!governance');
-        _;
-    }
-    
     function batchCall(bytes[] calldata calls, bool revertOnFail) external returns (string memory revertMsg) {
         for (uint256 i = 0; i < calls.length; i++) {
             (bool success, bytes memory result) = address(this).delegatecall(calls[i]);
@@ -64,15 +59,8 @@ contract Certification {
         }
     }
     
-    function burn(address from, uint256 tokenId) external {
-        require(from == ownerOf[tokenId] || from == governance, '!owner||!governance');
-        balanceOf[from]--; 
-        ownerOf[tokenId] = address(0);
-        tokenURI[tokenId] = "";
-        emit Transfer(from, address(0), tokenId); 
-    }
-
-    function depositDues(address to) external payable {
+    /// **** DUES
+    function payDues(address to) external payable {
         require(balanceOf[to] > 0, '!owner'); 
         require(block.timestamp - registration[to] >= duesPeriod, 'paid');
         if (duesToken == address(0)) { 
@@ -94,7 +82,13 @@ contract Certification {
         tokenURI[tokenId] = "";
         emit Transfer(owner, address(0), tokenId); 
     }
-
+    
+    /// **** GOVERNANCE
+    modifier onlyGovernance {
+        require(msg.sender == governance, '!governance');
+        _;
+    }
+    
     function mint(address to, string calldata customURI) external onlyGovernance { 
         string memory _tokenURI; 
         bytes(customURI).length > 0 ? _tokenURI = customURI : _tokenURI = baseURI;
@@ -105,6 +99,14 @@ contract Certification {
         ownerOf[tokenId] = to;
         tokenURI[tokenId] = _tokenURI;
         emit Transfer(address(0), to, tokenId);
+    }
+    
+    function burn(address from, uint256 tokenId) external {
+        require(from == ownerOf[tokenId] || from == governance, '!owner||!governance');
+        balanceOf[from]--; 
+        ownerOf[tokenId] = address(0);
+        tokenURI[tokenId] = "";
+        emit Transfer(from, address(0), tokenId); 
     }
     
     function govTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
