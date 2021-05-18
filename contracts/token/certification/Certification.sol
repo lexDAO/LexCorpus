@@ -72,9 +72,9 @@ contract Certification {
         emit Transfer(from, address(0), tokenId); 
     }
 
-    function depositDues() external payable {
-        require(balanceOf[msg.sender] > 0, '!owner'); 
-        require(block.timestamp - registration[msg.sender] >= duesPeriod, 'paid');
+    function depositDues(address to) external payable {
+        require(balanceOf[to] > 0, '!owner'); 
+        require(block.timestamp - registration[to] >= duesPeriod, 'paid');
         if (duesToken == address(0)) { 
             require(msg.value == duesAmount);
             (bool success, ) = governance.call{value: msg.value}("");
@@ -83,7 +83,7 @@ contract Certification {
             (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(0x23b872dd, msg.sender, governance, duesAmount));
             require(success && (data.length == 0 || abi.decode(data, (bool))), 'transfer fail');
         }
-        registration[msg.sender] = block.timestamp;
+        registration[to] = block.timestamp;
     }
     
     function enforceDues(uint256 tokenId) external {
