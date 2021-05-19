@@ -1,3 +1,3 @@
 # Escrow
 
-Code to lock value for legal performance.
+Code to lock value.
