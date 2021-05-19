@@ -1,15 +1,15 @@
-## Variables
+Variables
 V1 - Is visibility set? (SWC-108)
 V2 - Can they be private?
 V3 - Can it be constant?
 V4 - Can it be immutable?
 V5 - No unused variables? (SWC-131)
 
-## Structs
+Structs
 S1 - Are the members split on 256 boundaries?
 S2 - Can any members be a smaller type?
 
-## Functions
+Functions
 F1 - Set visibility: Change external to public to support batching. Should it be private? (SWC-100)
 F2 - Should it be payable?
 F3 - Can it be combined with another similar function?
@@ -21,14 +21,14 @@ F8 - Check Gas Limit DoS via Block Stuffing
 F9 - Are the correct modifiers applied, such as onlyOwner?
 F10 - Return arguments are always assigned?
 
-## Modifiers
+Modifiers
 M1 - No state changes (except for a reentrancy lock)?
 M2 - No external calls?
 M3 - Checks only
 M4 - Are any unbounded loops/arrays used that can cause DoS? (SWC-128)
 M5 - Check behaviour for all function arguments when wrong or extreme
 
-## Code
+Code
 C1 - Are any storage slots read multiple times?
 C2 - Are any unbounded loops/arrays used that can cause DoS? (SWC-128)
 C3 - Use block.timestamp only for long intervals (SWC-116)
@@ -53,14 +53,14 @@ C21 - Are all state variables read from the correct contract: master vs. clone?
 C22 - Is > or < or >= or <= correct?
 C23 - Are logical operators correct ==, !=, &&, ||, !, ?
 
-## Calls in Functions
+Calls in Functions
 X1 - Is the result checked and errors dealt with? (SWC-104)
 X2 - If there is an error, could it cause a DoS - like balanceOf causing revert? (SWC-113)
 X3 - What if it uses all gas?
 X4 - Is an external contract call needed?
 X5 - Is a lock used? If so are the external calls protected?
 
-## Staticcalls(view) in functions
+Staticcalls(view) in Functions
 S1 - Is it actually marked as view in the interface?
 S2 - If there is an error, could it cause a DoS - like balanceOf causing revert? (SWC-113)
 S3 - What if it uses all gas?
