@@ -7,7 +7,7 @@ contract ReentrancyGuard {
     uint constant _ENTERED = 2;
     uint _status;
 
-    constructor () {
+    constructor() {
         _status = _NOT_ENTERED;
     }
 
