@@ -1,12 +1,12 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.0;
+pragma solidity ^0.8.0;
 
 interface IERC20 { // brief interface for erc20 token txs
     function transfer(address to, uint256 value) external returns (bool);
     function transferFrom(address from, address to, uint256 value) external returns (bool);
 }
 
-contract DepositLocker {
+contract Escrow {
     address public ETH_TOKEN = address(0);
     uint256 public lockerCount;
     
