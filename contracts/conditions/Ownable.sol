@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 /// @notice Contract that manages function access control, adapted from @boringcrypto (https://github.com/boringcrypto/BoringSolidity).
 contract Ownable {
-    address public owner; // account with access control
-    address public pendingOwner; // account that can call {claimOwner} for access control
+    address public owner; 
+    address public pendingOwner;
     
-    event TransferOwnership(address indexed from, address indexed to); // track `owner` transfers
-    event TransferOwnershipClaim(address indexed from, address indexed to); // track transfer of `owner` claim to `pendingOwner`
+    event TransferOwnership(address indexed from, address indexed to); 
+    event TransferOwnershipClaim(address indexed from, address indexed to);
     
     /// @notice Initialize contract.
     /// @param _owner Account granted initial access control.
