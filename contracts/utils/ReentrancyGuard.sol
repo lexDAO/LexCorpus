@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 /// @notice Contract with modifier for reentrancy guard.
 contract ReentrancyGuard {
-    uint256 constant _NOT_ENTERED = 1;
-    uint256 constant _ENTERED = 2;
-    uint256 _status;
+    uint constant _NOT_ENTERED = 1;
+    uint constant _ENTERED = 2;
+    uint _status;
 
     constructor () {
         _status = _NOT_ENTERED;
