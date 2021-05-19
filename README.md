@@ -10,7 +10,7 @@ LexDAO emphasizes lean contract code for security and legibility.
 
 ### GETTING STARTED
 
-1. Check out our [starter guide]() to legal engineering on ethereum 🔧. 
+1. Check out our [starter guide](GUIDE.md) to legal engineering on ethereum 🔧. 
 2. Review Contributor Guidelines 📋 (CONTRIBUTING.md).
 3. Request features by making an Issue ✋.
 4. Complete bounties listed as Issues 💰.
