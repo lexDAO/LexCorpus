@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 /// @title IERC20
-/// @notice Standard ERC-20 token interface + EIP-2612 `permit()` extension
+/// @notice Standard ERC-20 token interface + EIP-2612 {permit} extension
 interface IERC20 { 
     /// @dev ERC-20
     function allowance(address owner, address spender) external view returns (uint256);
