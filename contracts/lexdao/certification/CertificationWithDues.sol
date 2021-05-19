@@ -3,7 +3,7 @@
 /// @notice Minimal Certification NFT.
 pragma solidity 0.8.4;
 
-contract Certification {
+contract CertificationWithDues {
     address public duesToken;
     address public governance;
     uint256 public duesAmount;
