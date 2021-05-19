@@ -1,1 +1,0 @@
-Docs for LexToken factory.

@@ -1,2 +1,2 @@
 # Token
-Code to represent value for legal performance.
+Code to represent value.
