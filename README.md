@@ -9,3 +9,11 @@ LexDAO emphasizes lean contract code for security and legibility.
 2. Review [Contributor Guidelines](CONTRIBUTING.md) 📋.
 3. Request features by [making an Issue](https://github.com/lexDAO/LexCorpus/issues/new) ✋.
 4. Gain [governance](https://snapshot.org/#/lex) over LexDAO engineering and LexCorpus by earning [$LEX ⚔️](https://etherscan.io/address/0x63125c0d5Cd9071de9A1ac84c400982f41C697AE#code) for making substantive pull requests.
+
+### LexDAO Engineering Projects
+
+#### [Ricardian LLC](https://github.com/lexDAO/Ricardian) 🪐
+> Tokenized LLC toolkit using a Delaware Series LLC anchor, NFT minter, and governance via [`LexDAO LLC, Ricardian Series`](https://gnosis-safe.io/app/#/safes/0x1427354Cda3e65cb57791115B67a171FA7bb97c7).
+
+#### [Digital Arbitration](https://github.com/lexDAO/Arbitration) 🧑‍⚖️
+> [`LexDAO LLC, Resolver Series`](https://gnosis-safe.io/app/#/safes/0x5B620676E28693fC14876b035b08CbB1B657dF38) provides dispute resolution services to escrow and other requested smart contracts.
