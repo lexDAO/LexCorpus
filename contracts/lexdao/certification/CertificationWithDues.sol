@@ -1,8 +1,7 @@
+/// SPDX-License-Identifier: MIT
 /// Presented by LexDAO LLC
-/// SPDX-License-Identifier: GPL-3.0-or-later
-/// @notice Minimal Certification NFT.
 pragma solidity 0.8.4;
-
+/// @notice Minimal Certification NFT.
 contract CertificationWithDues {
     address public duesToken;
     address public governance;
@@ -60,9 +59,9 @@ contract CertificationWithDues {
     }
     
     /// **** DUES
-    function payDues(address to) external payable {
-        require(balanceOf[to] > 0, '!owner'); 
-        require(block.timestamp - registration[to] >= duesPeriod, 'paid');
+    function payDues(uint256 tokenId) external payable {
+        address owner = ownerOf[tokenId];
+        require(block.timestamp - registration[owner] >= duesPeriod, 'paid');
         if (duesToken == address(0)) { 
             require(msg.value == duesAmount);
             (bool success, ) = governance.call{value: msg.value}("");
@@ -71,7 +70,7 @@ contract CertificationWithDues {
             (bool success, bytes memory data) = duesToken.call(abi.encodeWithSelector(0x23b872dd, msg.sender, governance, duesAmount));
             require(success && (data.length == 0 || abi.decode(data, (bool))), 'transfer fail');
         }
-        registration[to] = block.timestamp;
+        registration[owner] = block.timestamp;
     }
     
     function enforceDues(uint256 tokenId) external {
@@ -138,7 +137,7 @@ contract CertificationWithDues {
 }
 
 contract CertificationFactory {
-    event DeployCertification(Certification indexed certification, address indexed governance);
+    event DeployCertification(CertificationWithDues indexed certification, address indexed governance);
     
     function deployCertification(
         address _governance, 
@@ -150,8 +149,8 @@ contract CertificationFactory {
         string memory _details, 
         string memory _name, 
         string memory _symbol
-    ) external returns (Certification certification) {
-        certification = new Certification(
+    ) external returns (CertificationWithDues certification) {
+        certification = new CertificationWithDues(
             _governance, 
             _duesToken, 
             _duesAmount, 
