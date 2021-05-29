@@ -52,7 +52,7 @@ contract Accreditation {
         emit Transfer(from, address(0), tokenId); 
     }
     
-    function mint(address to, string calldata customURI, string calldata ) external { 
+    function mint(address to, string calldata customURI) external { 
         require(attorney[msg.sender], '!attorney');
         string memory _tokenURI; 
         bytes(customURI).length > 0 ? _tokenURI = customURI : _tokenURI = baseURI;
