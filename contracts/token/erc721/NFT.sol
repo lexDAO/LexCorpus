@@ -11,16 +11,14 @@ contract MiniNFT {
     mapping(uint256 => address) public getApproved;
     mapping(uint256 => address) public ownerOf;
     mapping(uint256 => string) public tokenURI;
-    mapping(bytes4 => bool) public supportsInterface; // ERC-165 
     mapping(address => mapping(address => bool)) public isApprovedForAll;
     
     event Approval(address indexed approver, address indexed spender, uint256 indexed tokenId);
     event ApprovalForAll(address indexed approver, address indexed operator, bool approved);
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
-    constructor() {
-        supportsInterface[0x80ac58cd] = true; // ERC-721 
-        supportsInterface[0x5b5e139f] = true; // METADATA
+    function supportsInterface(bytes4 sig) external pure returns (bool) {
+        return (sig == 0x80ac58cd || sig == 0x5b5e139f); // ERC-165
     }
     
     function approve(address spender, uint256 tokenId) external {
