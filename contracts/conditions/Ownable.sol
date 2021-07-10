@@ -1,6 +1,7 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
-/// @notice Contract that manages function access control, adapted from @boringcrypto (https://github.com/boringcrypto/BoringSolidity).
+pragma solidity ^0.8.6;
+
+/// @notice This contract manages function access control, adapted from @boringcrypto (https://github.com/boringcrypto/BoringSolidity).
 contract Ownable {
     address public owner; 
     address public pendingOwner;
@@ -9,10 +10,9 @@ contract Ownable {
     event TransferOwnershipClaim(address indexed from, address indexed to);
     
     /// @notice Initialize contract.
-    /// @param _owner Account granted initial access control.
-    constructor(address _owner) {
-        owner = _owner;
-        emit TransferOwnership(address(0), _owner);
+    constructor() {
+        owner = msg.sender;
+        emit TransferOwnership(address(0), msg.sender);
     }
     
     /// @notice Access control modifier that requires modified function to be called by `owner` account.
