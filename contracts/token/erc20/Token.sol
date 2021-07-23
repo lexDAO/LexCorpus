@@ -34,7 +34,7 @@ contract Token {
         return true;
     }
     
-    function transferFrom(address from, address to, uint amount) external returns (bool) {
+    function transferTo(address from, address to, uint amount) external returns (bool) {
         if (allowance[from][msg.sender] != type(uint).max) 
             allowance[from][msg.sender] -= amount;
         balanceOf[from] -= amount;
