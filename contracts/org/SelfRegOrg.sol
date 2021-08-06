@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0;
 
-import "../conditions/IPool.sol";
+import "../conditions/Ownable.sol";
 
 contract SelfRegOrg is Ownable {
     string public purposeAndRules;
