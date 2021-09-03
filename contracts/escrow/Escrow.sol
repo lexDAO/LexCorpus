@@ -1,12 +1,10 @@
 /// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
 
-interface IERC20 { // brief interface for erc20 token txs
+interface IToken { // brief interface for erc20/721 txs
     function transfer(address to, uint256 value) external returns (bool);
     function transferFrom(address from, address to, uint256 value) external returns (bool);
 }
-
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721.sol";
 
 contract Escrow {
     address public ETH_TOKEN = address(0);
@@ -31,7 +29,7 @@ contract Escrow {
             (bool success, ) = address(this).call{value: amount}("");
             require(success, "withdraw failed");
         } else {
-            IERC20 erc20 = IERC20(token);
+            IToken erc20 = IToken(token);
             erc20.transferFrom(msg.sender, address(this), amount);
         }
         
@@ -44,7 +42,7 @@ contract Escrow {
     }
     
     function depositLockerNFT(address receiver, address token, uint256 tokenId) external payable {
-        IERC721 erc721 = IERC721(token);
+        IToken erc721 = IToken(token);
         erc721.transferFrom(msg.sender, address(this), tokenId);
         
         lockerCount++;
@@ -62,7 +60,7 @@ contract Escrow {
             (bool success, ) = lockers[registration].receiver.call{value: lockers[registration].amount}("");
             require(success, "withdraw failed");
         } else {
-            IERC20 erc20 = IERC20(lockers[registration].token);
+            IToken erc20 = IToken(lockers[registration].token);
             erc20.transfer(lockers[registration].receiver, lockers[registration].amount);
         }
         
@@ -72,7 +70,7 @@ contract Escrow {
     function releaseLockerNFT(uint256 registration) external {
         require(msg.sender == lockers[registration].sender);
         
-        IERC721 erc721 = IERC721(lockers[registration].token);
+        IToken erc721 = IToken(lockers[registration].token);
         erc721.transferFrom(address(this), lockers[registration].receiver, lockers[registration].amount);
         
         emit ReleaseLocker(registration);
