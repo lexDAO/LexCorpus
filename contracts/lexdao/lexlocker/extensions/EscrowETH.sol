@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.7.5;
+pragma solidity ^0.8.0;
 
 /*FOR DEMONSTRATION ONLY, not recommended to be used for any purpose and provided with no warranty whatsoever
 **@dev create a simple smart escrow contract, with ETH as payment, expiration denominated in seconds, and option for dispute resolution with LexLocker
