@@ -5,11 +5,11 @@ require('@nomiclabs/hardhat-waffle');
  */
 module.exports = {
   solidity: {
-    version: '^0.8.0',
+    version: '0.8.7',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 283
+        runs: 200
       }
     }
   },
