@@ -1,5 +1,5 @@
 {
-  "name": "@sushiswap/trident",
+  "name": "@lexDAO/LexCorpus",
   "scripts": {
     "build": "hardhat compile",
     "console": "hardhat console",
