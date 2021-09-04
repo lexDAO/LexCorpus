@@ -17,7 +17,7 @@ DEAR MSG.SENDER(S):
 //// presented by LexDAO LLC
 */
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.7.4;
+pragma solidity ^0.8.0;
 
 interface IERC20ApproveTransfer { // interface for erc20 approve/transfer
     function approve(address spender, uint256 amount) external returns (bool);

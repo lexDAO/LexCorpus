@@ -1,7 +1,7 @@
 /// Presented by LexDAO LLC
 /// SPDX-License-Identifier: GPL-3.0-or-later
 /// @notice Minimal Certification NFT.
-pragma solidity 0.8.4;
+pragma solidity ^0.8.0;
 
 contract Certification {
     address public governance;

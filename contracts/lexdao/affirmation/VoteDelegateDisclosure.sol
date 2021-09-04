@@ -2,7 +2,7 @@
 // Copyright (c) 2021 Varia LLC
 /// Wet Code by Erich Dylus & Sarah Brennan
 /// Dry Code by LexDAO LLC
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.0;
 
 /// @notice This contract manages function access control, adapted from @boringcrypto (https://github.com/boringcrypto/BoringSolidity).
 contract Ownable {

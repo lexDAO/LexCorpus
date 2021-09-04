@@ -20,7 +20,7 @@ DEAR MSG.SENDER(S):
 ~presented by LexDAO LLC \+|+/ 
 */
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.7.5;
+pragma solidity ^0.8.0;
 
 interface IERC20 { // brief interface for erc20 token
     function balanceOf(address account) external view returns (uint256);
