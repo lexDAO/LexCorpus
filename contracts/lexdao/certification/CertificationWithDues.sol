@@ -1,6 +1,6 @@
 /// SPDX-License-Identifier: MIT
 /// Presented by LexDAO LLC
-pragma solidity 0.8.4;
+pragma solidity ^0.8.0;
 /// @notice Minimal Certification NFT.
 contract CertificationWithDues {
     address public duesToken;
