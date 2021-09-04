@@ -1,7 +1,7 @@
 /// SPDX-License-Identifier: MIT
 /// Presented by LexDAO LLC
 /// @notice Minimal Certification NFT for Accredited Investors.
-pragma solidity 0.8.4;
+pragma solidity ^0.8.0;
 
 contract Accreditation {
     address public governance;
