@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.7;
+pragma solidity ^0.8.0;
 /// @notice Bilateral escrow for ETH and ERC20/721.
 /// @author LexDAO LLC.
 contract LexLockerLite {
