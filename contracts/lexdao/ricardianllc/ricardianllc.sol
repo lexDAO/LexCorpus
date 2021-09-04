@@ -13,7 +13,7 @@
 ╚══════╝╚══════╝ ╚═════╝*/
 /// Presented by LexDAO LLC
 /// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.1;
+pragma solidity ^0.8.0;
 
 contract RicardianLLC {
     address payable public governance;
