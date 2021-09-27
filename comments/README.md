@@ -20,6 +20,8 @@ Regulatory feedback and educational materials provided by LexDAO engineers to th
 
 ## Legislation 🧾
 
+- [Comment to Senate Banking Committee](https://gateway.pinata.cloud/ipfs/QmQKHrbDDCurshW1Vr4x7JvGyVMGyXSoFYiG3TpGW8VTEy)
+
 - [Stablecoin Tethering & Bank Licensing Enforcement (STABLE) Act](https://lexdao.substack.com/p/stable-act-a-legal-engineers-perspective)
 
 - [WY DAO Bill](https://lexdao.substack.com/p/wyoming-built-a-home-for-daos-but)
