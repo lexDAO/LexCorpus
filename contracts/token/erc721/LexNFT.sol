@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity >=0.8.0;
 
@@ -21,9 +21,14 @@ contract LexNFT {
     
     bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)");
-    bytes32 public immutable DOMAIN_SEPARATOR;
+    bytes32 public constant PERMIT_ALL_TYPEHASH = 
+        keccak256("Permit(address owner,address spender,uint256 nonce,uint256 deadline)");
+    
+    uint256 internal immutable DOMAIN_SEPARATOR_CHAIN_ID;
+    bytes32 internal immutable _DOMAIN_SEPARATOR;
 
-    mapping(address => uint256) public nonces;
+    mapping(uint256 => uint256) public nonces;
+    mapping(address => uint256) public noncesForAll;
     
     constructor(
         string memory _name,
@@ -34,8 +39,15 @@ contract LexNFT {
     ) {
         name = _name;
         symbol = _symbol;
+        
+        DOMAIN_SEPARATOR_CHAIN_ID = block.chainid;
+        _DOMAIN_SEPARATOR = _calculateDomainSeparator();
 
-        DOMAIN_SEPARATOR = keccak256(
+        _mint(owner, tokenId, _tokenURI);
+    }
+    
+    function _calculateDomainSeparator() internal view returns (bytes32 domainSeperator) {
+        domainSeperator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(name)),
@@ -44,27 +56,10 @@ contract LexNFT {
                 address(this)
             )
         );
-        
-        _mint(owner, tokenId, _tokenURI);
     }
     
-    function transfer(address to, uint256 tokenId) external {
-        require(msg.sender == ownerOf[tokenId], "NOT_OWNER");
-        
-        // This is safe because ownership is checked
-        // against decrement, and sum of all user
-        // balances can't exceed type(uint256).max!
-        unchecked {
-            balanceOf[msg.sender]--; 
-        
-            balanceOf[to]++;
-        }
-        
-        delete getApproved[tokenId];
-        
-        ownerOf[tokenId] = to;
-        
-        emit Transfer(msg.sender, to, tokenId); 
+    function DOMAIN_SEPARATOR() public view returns (bytes32 domainSeperator) {
+        domainSeperator = block.chainid == DOMAIN_SEPARATOR_CHAIN_ID ? _DOMAIN_SEPARATOR : _calculateDomainSeparator();
     }
     
     function supportsInterface(bytes4 interfaceId) external pure returns (bool supported) {
@@ -85,6 +80,25 @@ contract LexNFT {
         isApprovedForAll[msg.sender][operator] = approved;
         
         emit ApprovalForAll(msg.sender, operator, approved);
+    }
+    
+    function transfer(address to, uint256 tokenId) external {
+        require(msg.sender == ownerOf[tokenId], "NOT_OWNER");
+        
+        // This is safe because ownership is checked
+        // against decrement, and sum of all user
+        // balances can't exceed type(uint256).max!
+        unchecked {
+            balanceOf[msg.sender]--; 
+        
+            balanceOf[to]++;
+        }
+        
+        delete getApproved[tokenId];
+        
+        ownerOf[tokenId] = to;
+        
+        emit Transfer(msg.sender, to, tokenId); 
     }
 
     function transferFrom(address, address to, uint256 tokenId) public {
@@ -113,11 +127,11 @@ contract LexNFT {
         emit Transfer(owner, to, tokenId); 
     }
     
-    function safetransferFrom(address, address to, uint256 tokenId) external {
-        safetransferFrom(address(0), to, tokenId, "");
+    function safeTransferFrom(address, address to, uint256 tokenId) external {
+        safeTransferFrom(address(0), to, tokenId, "");
     }
     
-    function safetransferFrom(address, address to, uint256 tokenId, bytes memory data) public {
+    function safeTransferFrom(address, address to, uint256 tokenId, bytes memory data) public {
         transferFrom(address(0), to, tokenId); 
         
         if (to.code.length != 0) {
@@ -142,35 +156,73 @@ contract LexNFT {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
         
         address owner = ownerOf[tokenId];
-        
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, spender, tokenId, nonces[owner]++, deadline))
-            )
-        );
+        // This is reasonably safe from overflow because incrementing `nonces` beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits!
+        unchecked {
+            bytes32 digest = keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    DOMAIN_SEPARATOR(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, spender, tokenId, nonces[tokenId]++, deadline))
+                )
+            );
 
-        address recoveredAddress = ecrecover(digest, v, r, s);
-        require(recoveredAddress != address(0) 
-                && recoveredAddress == owner
-                || isApprovedForAll[owner][recoveredAddress], 
-                "INVALID_PERMIT_SIGNATURE"
-        );
+            address recoveredAddress = ecrecover(digest, v, r, s);
+            require(recoveredAddress != address(0) 
+                    && recoveredAddress == owner
+                    || isApprovedForAll[owner][recoveredAddress], 
+                    "INVALID_PERMIT_SIGNATURE"
+            );
+        }
         
         getApproved[tokenId] = spender;
 
         emit Approval(owner, spender, tokenId);
     }
     
+    function permitAll(
+        address owner,
+        address operator,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+        
+        // This is reasonably safe from overflow because incrementing `nonces` beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits!
+        unchecked {
+            bytes32 digest = keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    DOMAIN_SEPARATOR(),
+                    keccak256(abi.encode(PERMIT_ALL_TYPEHASH, owner, operator, noncesForAll[owner]++, deadline))
+                )
+            );
+
+            address recoveredAddress = ecrecover(digest, v, r, s);
+            require(recoveredAddress != address(0) 
+                    && recoveredAddress == owner
+                    || isApprovedForAll[owner][recoveredAddress], 
+                    "INVALID_PERMIT_SIGNATURE"
+            );
+        }
+        
+        isApprovedForAll[owner][operator] = true;
+
+        emit ApprovalForAll(owner, operator, true);
+    }
+    
     function _mint(address to, uint256 tokenId, string memory _tokenURI) internal { 
         require(ownerOf[tokenId] == address(0), "ALREADY_MINTED");
-        
-        totalSupply++;
-        
-        // This is safe because the sum of all user
-        // balances can't exceed type(uint256).max!
+  
+        // This is reasonably safe from overflow because incrementing `nonces` beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits,
+        // and because the sum of all user balances can't exceed type(uint256).max!
         unchecked {
+            totalSupply++;
+            
             balanceOf[to]++;
         }
         
