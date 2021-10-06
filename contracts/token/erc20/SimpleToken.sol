@@ -1,6 +1,7 @@
-/// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
-/// @notice Basic ERC20 implementation.
+// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity >=0.8.0;
+
+/// @notice Basic ERC20 token implementation.
 contract Token {
     string public name;
     string public symbol;
