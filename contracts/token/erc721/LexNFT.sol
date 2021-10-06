@@ -168,11 +168,8 @@ contract LexNFT {
             );
 
             address recoveredAddress = ecrecover(digest, v, r, s);
-            require(recoveredAddress != address(0) 
-                    && recoveredAddress == owner
-                    || isApprovedForAll[owner][recoveredAddress], 
-                    "INVALID_PERMIT_SIGNATURE"
-            );
+            require(recoveredAddress != address(0), "INVALID_PERMIT_SIGNATURE");
+            require(recoveredAddress == owner || isApprovedForAll[owner][recoveredAddress], "INVALID_SIGNER");
         }
         
         getApproved[tokenId] = spender;
@@ -202,10 +199,9 @@ contract LexNFT {
             );
 
             address recoveredAddress = ecrecover(digest, v, r, s);
-            require(recoveredAddress != address(0) 
-                    && recoveredAddress == owner
-                    || isApprovedForAll[owner][recoveredAddress], 
-                    "INVALID_PERMIT_SIGNATURE"
+            require(
+                (recoveredAddress != address(0) && recoveredAddress == owner) || isApprovedForAll[owner][recoveredAddress],
+                "INVALID_PERMIT_SIGNATURE"
             );
         }
         
