@@ -1,20 +1,15 @@
-/// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-/// @notice Contract with modifier for reentrancy guard.
-contract ReentrancyGuard {
-    uint constant _NOT_ENTERED = 1;
-    uint constant _ENTERED = 2;
-    uint _status;
+pragma solidity >=0.8.0;
 
-    constructor() {
-        _status = _NOT_ENTERED;
-    }
-
+/// @notice Contract module that helps prevent reentrant calls to a function.
+abstract contract ReentrancyGuard {
+    uint256 status = 1;
+    
     modifier nonReentrant() {
-        require(_status != _ENTERED, 'ReentrancyGuard:reentrant');
-        _status = _ENTERED;
+        require(status == 1, "reentrant"); 
+        status = 2; 
         _;
-        _status = _NOT_ENTERED;
+        status = 1;
     }
 }
