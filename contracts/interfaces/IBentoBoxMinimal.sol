@@ -18,17 +18,6 @@ interface IBentoBoxMinimal {
         bytes32 s
     ) external;
 
-    /// @dev Helper function to represent an `amount` of `token` in shares.
-    /// @param token The ERC-20 token.
-    /// @param amount The `token` amount.
-    /// @param roundUp If the result `share` should be rounded up.
-    /// @return share The token amount represented in shares.
-    function toShare(
-        address token,
-        uint256 amount,
-        bool roundUp
-    ) external view returns (uint256 share);
-
     /// @notice Deposit an amount of `token` represented in either `amount` or `share`.
     /// @param token_ The ERC-20 token to deposit.
     /// @param from which account to pull the tokens.
