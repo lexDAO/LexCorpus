@@ -12,7 +12,7 @@ contract LexLocker {
     address immutable wETH;
     uint256 lockerCount;
     bytes32 public immutable DOMAIN_SEPARATOR;
-    bytes32 public constant INVOICE_HASH = keccak256("DepositWithInvoiceSig(address depositor,address receiver,address resolver,string details)");
+    bytes32 public constant INVOICE_HASH = keccak256("DepositInvoiceSig(address depositor,address receiver,address resolver,string details)");
 
     mapping(uint256 => string) public agreements;
     mapping(uint256 => Locker) public lockers;
@@ -46,7 +46,7 @@ contract LexLocker {
         uint256 value, 
         uint256 indexed registration,
         string details);
-    event DepositWithInvoiceSig(address indexed depositor, address indexed receiver);
+    event DepositInvoiceSig(address indexed depositor, address indexed receiver);
     event Release(uint256 indexed registration);
     event Withdraw(uint256 indexed registration);
     event Lock(uint256 indexed registration, string details);
@@ -77,8 +77,8 @@ contract LexLocker {
     // **** ESCROW PROTOCOL **** //
     // ------------------------ //
     /// @notice Deposits tokens (ERC-20/721) into escrow 
-    /// - locked funds can be released by `msg.sender` `depositor` 
-    /// - both parties can {lock} for `resolver`. 
+    // - locked funds can be released by `msg.sender` `depositor` 
+    // - both parties can {lock} for `resolver`. 
     /// @param receiver The account that receives funds.
     /// @param resolver The account that unlock funds.
     /// @param token The asset used for funds.
@@ -119,8 +119,8 @@ contract LexLocker {
     }
 
     /// @notice Deposits tokens (ERC-20/721) into BentoBox escrow 
-    /// - locked funds can be released by `msg.sender` `depositor` 
-    /// - both parties can {lock} for `resolver`. 
+    // - locked funds can be released by `msg.sender` `depositor` 
+    // - both parties can {lock} for `resolver`. 
     /// @param receiver The account that receives funds.
     /// @param resolver The account that unlock funds.
     /// @param token The asset used for funds (note: NFT not supported in BentoBox).
@@ -140,18 +140,15 @@ contract LexLocker {
         require(resolvers[resolver].active, "resolver not active");
         require(resolver != msg.sender && resolver != receiver, "resolver cannot be party"); /// @dev Avoid conflicts.
  
-        /// @dev Conversion/check for BentoBox shares.
-        value = bento.toShare(token, value, false);
-
         /// @dev Handle ETH/ERC-20 deposit.
         if (msg.value != 0) {
             require(msg.value == value, "wrong msg.value");
             /// @dev Override to clarify wETH is used in BentoBox for ETH.
             if (token != wETH) token = wETH;
-            bento.deposit{value: msg.value}(address(0), address(this), address(this), 0, msg.value);
+            (, value) = bento.deposit{value: msg.value}(address(0), address(this), address(this), msg.value, 0);
         } else if (wrapBento) {
             safeTransferFrom(token, msg.sender, address(bento), value);
-            bento.deposit(token, address(bento), address(this), 0, value);
+            (, value) = bento.deposit(token, address(bento), address(this), value, 0);
         } else {
             bento.transfer(token, msg.sender, address(this), value);
         }
@@ -179,7 +176,7 @@ contract LexLocker {
     /// @param v The recovery byte of the signature.
     /// @param r Half of the ECDSA signature pair.
     /// @param s Half of the ECDSA signature pair.
-    function depositWithInvoiceSig(
+    function depositInvoiceSig(
         address receiver, 
         address resolver, 
         address token, 
@@ -220,12 +217,12 @@ contract LexLocker {
             depositBento(receiver, resolver, token, value, termination, wrapBento, details);
         }
         
-        emit DepositWithInvoiceSig(msg.sender, receiver);
+        emit DepositInvoiceSig(msg.sender, receiver);
     }
     
     /// @notice Releases escrowed assets to designated `receiver` 
-    /// - can only be called by `depositor` if not `locked`
-    /// - can be called after `termination` as optional extension.
+    // - can only be called by `depositor` if not `locked`
+    // - can be called after `termination` as optional extension.
     /// @param registration The index of escrow deposit.
     function release(uint256 registration) external {
         Locker storage locker = lockers[registration]; 
@@ -250,7 +247,7 @@ contract LexLocker {
     }
     
     /// @notice Releases escrowed assets back to designated `depositor` 
-    /// - can only be called by `depositor` if `termination` reached.
+    // - can only be called by `depositor` if `termination` reached.
     /// @param registration The index of escrow deposit.
     function withdraw(uint256 registration) external {
         Locker storage locker = lockers[registration];
@@ -291,7 +288,7 @@ contract LexLocker {
     }
     
     /// @notice Resolves locked escrow deposit in split between parties - if NFT, must be complete award (so, one party receives '0')
-    /// - `resolverFee` is automatically deducted from both parties' awards.
+    // - `resolverFee` is automatically deducted from both parties' awards.
     /// @param registration The registration index of escrow deposit.
     /// @param depositorAward The sum given to `depositor`.
     /// @param receiverAward The sum given to `receiver`.
@@ -383,7 +380,7 @@ contract LexLocker {
     /// @notice Provides EIP-2612 signed approval for this contract to spend user tokens.
     /// @param token Address of ERC-20 token.
     /// @param amount Token amount to grant spending right over.
-    /// @param deadline Termination for signed approval (UTC timestamp in seconds).
+    /// @param deadline Termination for signed approval in Unix time.
     /// @param v The recovery byte of the signature.
     /// @param r Half of the ECDSA signature pair.
     /// @param s Half of the ECDSA signature pair.
@@ -403,7 +400,7 @@ contract LexLocker {
     /// @notice Provides DAI-derived signed approval for this contract to spend user tokens.
     /// @param token Address of ERC-20 token.
     /// @param nonce Token owner's nonce - increases at each call to {permit}.
-    /// @param expiry Termination for signed approval - UTC timestamp in seconds.
+    /// @param expiry Termination for signed approval in Unix time.
     /// @param v The recovery byte of the signature.
     /// @param r Half of the ECDSA signature pair.
     /// @param s Half of the ECDSA signature pair.
