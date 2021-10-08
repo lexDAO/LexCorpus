@@ -1,41 +1,36 @@
-/// SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-import "./Ownable.sol";
+pragma solidity >=0.8.0;
 
-contract Whitelistable is Ownable {
-    bool private _whitelistEnabled; // track access control status
-    mapping(address => bool) private _whitelisted; // track account whitelisting
+import "./LexOwnable.sol";
+
+/// @notice Function whitelisting contract.
+abstract contract LexWhitelistable is LexOwnable {
+    bool public whitelistEnabled; 
+    mapping(address => bool) public whitelisted; 
     
-    /// @dev initialize contract with `owner` variable and `whitelistEnabled` status
-    constructor(address owner, bool whitelistEnabled) Ownable(owner) {}
+    /// @notice Initialize contract with `whitelistEnabled` status.
+    constructor(bool _whitelistEnabled) {
+        whitelistEnabled = _whitelistEnabled;
+    }
     
-    /// @dev requires modified function to be called by `whitelisted` account
-    modifier onlyWhitelisted {
-        require(_whitelisted[msg.sender], "!whitelisted");
+    /// @notice Whitelisting modifier that conditions modified function to be called between `whitelisted` accounts.
+    modifier onlyWhitelisted(address from, address to) {
+        if (whitelistEnabled) 
+        require(whitelisted[from] && whitelisted[to], "NOT_WHITELISTED");
         _;
     }
     
-    /// @dev return whether `whitelistEnabled` for access control
-    function whitelistEnabled() public view virtual returns (bool) {
-        return _whitelistEnabled;
+    /// @notice Update account `whitelisted` status.
+    /// @param account Account to update.
+    /// @param _whitelisted If 'true', `account` is `whitelisted`.
+    function updateWhitelist(address account, bool _whitelisted) external onlyOwner {
+        whitelisted[account] = _whitelisted;
     }
     
-    /// @dev return whether `account` is `whitelisted` for access control
-    function whitelisted(address account) public view virtual returns (bool) {
-        return _whitelisted[account];
-    }
-    
-    /// @dev update account `whitelisted` status
-    /// @param account Account to update 
-    /// @param whitelisted If `true`, `account` is `whitelisted` for access control
-    function updateWhitelist(address account, bool whitelisted) onlyOwner external {
-        _whitelisted[account] = whitelisted;
-    }
-    
-    /// @dev `owner` can toggle `whitelisted` access control on/off
-    /// @param whitelistEnabled If `true`, `whitelisted` access control is on
-    function toggleWhitelist(bool whitelistEnabled) onlyOwner external {
-        _whitelistEnabled = whitelistEnabled;
+    /// @notice Toggle `whitelisted` conditions on/off.
+    /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
+    function toggleWhitelist(bool _whitelistEnabled) external onlyOwner {
+        whitelistEnabled = _whitelistEnabled;
     }
 }
