@@ -6,12 +6,16 @@ import "./LexOwnable.sol";
 
 /// @notice Function whitelisting contract.
 abstract contract LexWhitelistable is LexOwnable {
+    event ToggleWhiteList(bool indexed whitelistEnabled);
+    event UpdateWhitelist(address indexed account, bool indexed whitelisted);
+    
     bool public whitelistEnabled; 
     mapping(address => bool) public whitelisted; 
     
     /// @notice Initialize contract with `whitelistEnabled` status.
     constructor(bool _whitelistEnabled) {
         whitelistEnabled = _whitelistEnabled;
+        emit ToggleWhiteList(_whitelistEnabled);
     }
     
     /// @notice Whitelisting modifier that conditions modified function to be called between `whitelisted` accounts.
@@ -26,11 +30,13 @@ abstract contract LexWhitelistable is LexOwnable {
     /// @param _whitelisted If 'true', `account` is `whitelisted`.
     function updateWhitelist(address account, bool _whitelisted) external onlyOwner {
         whitelisted[account] = _whitelisted;
+        emit UpdateWhitelist(account, _whitelisted);
     }
     
     /// @notice Toggle `whitelisted` conditions on/off.
     /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
     function toggleWhitelist(bool _whitelistEnabled) external onlyOwner {
         whitelistEnabled = _whitelistEnabled;
+        emit ToggleWhiteList(_whitelistEnabled);
     }
 }
