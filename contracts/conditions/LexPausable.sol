@@ -6,11 +6,14 @@ import "./LexOwnable.sol";
 
 /// @notice Function pausing contract.
 abstract contract LexPausable is LexOwnable {
+    event SetPause(bool indexed paused);
+    
     bool public paused;
     
     /// @notice Initialize contract with `paused` status.
     constructor(bool _paused) {
         paused = _paused;
+        emit SetPause(_paused);
     }
     
     /// @notice Function pausability modifier.
@@ -23,5 +26,6 @@ abstract contract LexPausable is LexOwnable {
     /// @param _paused If 'true', modified functions are paused.
     function setPause(bool _paused) external onlyOwner {
         paused = _paused;
+        emit SetPause(_paused);
     }
 }
