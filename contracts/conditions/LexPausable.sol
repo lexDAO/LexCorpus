@@ -4,28 +4,28 @@ pragma solidity >=0.8.0;
 
 import "./LexOwnable.sol";
 
-/// @notice Function pausing contract.
+/// @notice Ownable function pausing module.
 abstract contract LexPausable is LexOwnable {
-    event SetPause(bool indexed paused);
+    event TogglePause(bool indexed paused);
     
     bool public paused;
     
-    /// @notice Initialize contract with `paused` status.
+    /// @notice Initialize pausing module with `paused` status.
     constructor(bool _paused) {
         paused = _paused;
-        emit SetPause(_paused);
+        emit TogglePause(_paused);
     }
     
-    /// @notice Function pausability modifier.
+    /// @notice Function pausing modifier.
     modifier notPaused() {
         require(!paused, "PAUSED");
         _;
     }
     
-    /// @notice Sets function pausing status.
+    /// @notice Toggle `paused` conditions on/off.
     /// @param _paused If 'true', modified functions are paused.
-    function setPause(bool _paused) external onlyOwner {
+    function togglePause(bool _paused) external onlyOwner {
         paused = _paused;
-        emit SetPause(_paused);
+        emit TogglePause(_paused);
     }
 }
