@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 
 import "./LexOwnable.sol";
 
-/// @notice Function whitelisting contract.
+/// @notice Ownable function whitelisting module.
 abstract contract LexWhitelistable is LexOwnable {
     event ToggleWhiteList(bool indexed whitelistEnabled);
     event UpdateWhitelist(address indexed account, bool indexed whitelisted);
