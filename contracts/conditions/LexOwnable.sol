@@ -2,22 +2,22 @@
 
 pragma solidity >=0.8.0;
 
-/// @notice Access control contract.
-/// @author Adapted from https://github.com/sushiswap/trident/blob/master/contracts/utils/TridentOwnable.sol.
+/// @notice Single owner access control contract.
 abstract contract LexOwnable {
-    event TransferOwner(address indexed sender, address indexed recipient);
-    event TransferOwnerClaim(address indexed sender, address indexed recipient);
+    event TransferOwner(address indexed from, address indexed to);
+    event TransferOwnerClaim(address indexed from, address indexed to);
     
     address public owner;
     address public pendingOwner;
 
-    /// @notice Initialize and grant deployer account (`msg.sender`) `owner` access role.
-    constructor() {
-        owner = msg.sender;
-        emit TransferOwner(address(0), msg.sender);
+    /// @notice Initialize ownership module for function access control.
+    /// @param _owner Account to grant ownership.
+    constructor(address _owner) {
+        owner = _owner;
+        emit TransferOwner(address(0), _owner);
     }
 
-    /// @notice Access control modifier that conditions modified function to be called by `owner` account.
+    /// @notice Access control modifier that conditions function to be restricted to `owner` account.
     modifier onlyOwner() {
         require(msg.sender == owner, "NOT_OWNER");
         _;
@@ -32,16 +32,17 @@ abstract contract LexOwnable {
     }
 
     /// @notice Transfer `owner` account.
-    /// @param recipient Account granted `owner` access control.
+    /// @param to Account granted `owner` access control.
     /// @param direct If 'true', ownership is directly transferred.
-    function transferOwner(address recipient, bool direct) external onlyOwner {
-        require(recipient != address(0), "ZERO_ADDRESS");
+    function transferOwner(address to, bool direct) external onlyOwner {
+        require(to != address(0), "ZERO_ADDRESS");
+        
         if (direct) {
-            owner = recipient;
-            emit TransferOwner(msg.sender, recipient);
+            owner = to;
+            emit TransferOwner(msg.sender, to);
         } else {
-            pendingOwner = recipient;
-            emit TransferOwnerClaim(msg.sender, recipient);
+            pendingOwner = to;
+            emit TransferOwnerClaim(msg.sender, to);
         }
     }
 }
