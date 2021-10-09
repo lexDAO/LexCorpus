@@ -17,7 +17,7 @@ abstract contract LexPausable is LexOwnable {
         emit TogglePause(_paused);
     }
     
-    /// @notice Function pausing modifier.
+    /// @notice Function pausing modifier that conditions functions to be called when `paused` is not enabled.
     modifier notPaused() {
         require(!paused, "PAUSED");
         _;
