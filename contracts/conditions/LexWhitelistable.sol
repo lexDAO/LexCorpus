@@ -10,6 +10,7 @@ abstract contract LexWhitelistable is LexOwnable {
     event UpdateWhitelist(address indexed account, bool indexed whitelisted);
     
     bool public whitelistEnabled; 
+    
     mapping(address => bool) public whitelisted; 
     
     /// @notice Initialize contract with `whitelistEnabled` status.
