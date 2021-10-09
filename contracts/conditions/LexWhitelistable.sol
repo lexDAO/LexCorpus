@@ -26,18 +26,18 @@ abstract contract LexWhitelistable is LexOwnable {
         _;
     }
     
+    /// @notice Toggle `whitelisted` conditions on/off.
+    /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
+    function toggleWhitelist(bool _whitelistEnabled) external onlyOwner {
+        whitelistEnabled = _whitelistEnabled;
+        emit ToggleWhiteList(_whitelistEnabled);
+    }
+    
     /// @notice Update account `whitelisted` status.
     /// @param account Account to update.
     /// @param _whitelisted If 'true', `account` is `whitelisted`.
     function updateWhitelist(address account, bool _whitelisted) external onlyOwner {
         whitelisted[account] = _whitelisted;
         emit UpdateWhitelist(account, _whitelisted);
-    }
-    
-    /// @notice Toggle `whitelisted` conditions on/off.
-    /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
-    function toggleWhitelist(bool _whitelistEnabled) external onlyOwner {
-        whitelistEnabled = _whitelistEnabled;
-        emit ToggleWhiteList(_whitelistEnabled);
     }
 }
