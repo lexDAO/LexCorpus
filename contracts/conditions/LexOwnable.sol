@@ -5,11 +5,11 @@ pragma solidity >=0.8.0;
 /// @notice Access control contract.
 /// @author Adapted from https://github.com/sushiswap/trident/blob/master/contracts/utils/TridentOwnable.sol.
 abstract contract LexOwnable {
-    address public owner;
-    address public pendingOwner;
-
     event TransferOwner(address indexed sender, address indexed recipient);
     event TransferOwnerClaim(address indexed sender, address indexed recipient);
+    
+    address public owner;
+    address public pendingOwner;
 
     /// @notice Initialize and grant deployer account (`msg.sender`) `owner` access role.
     constructor() {
