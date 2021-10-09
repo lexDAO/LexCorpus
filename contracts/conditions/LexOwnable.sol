@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0;
 
-/// @notice Single owner function access control contract module.
+/// @notice Single owner function access control module.
 abstract contract LexOwnable {
     event TransferOwner(address indexed from, address indexed to);
     event TransferOwnerClaim(address indexed from, address indexed to);
