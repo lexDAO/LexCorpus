@@ -152,6 +152,7 @@ contract LexNFT {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
         
         address owner = ownerOf[tokenId];
+        
         /// @dev This is reasonably safe from overflow because incrementing `nonces` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits.
         unchecked {
