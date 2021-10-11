@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 
 import "../../interfaces/IERC20.sol";
 
-contract LivingTrustV1 {
+contract LivingTrust {
     address public grantor; // supplies funds to vault - initial trustee
     address public beneficiary; // can claim trust funds - initially grantor
     address public successorTrustee;
