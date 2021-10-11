@@ -2,9 +2,9 @@
 
 pragma solidity >=0.8.0;
 
-/// @notice Contract module that helps prevent reentrant calls to a function.
+/// @notice Contract module that enables calling multiple methods in a single call to inheriting contract.
 abstract contract Multicall {
-    /// @notice Enables calling multiple methods in a single call to this contract.
+    /// @param data Payload for calls.
     function multicall(bytes[] calldata data) external returns (bytes[] memory results) {
         results = new bytes[](data.length);
         unchecked {
