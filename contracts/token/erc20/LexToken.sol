@@ -20,7 +20,10 @@ contract LexToken {
 
     bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-    bytes32 public immutable DOMAIN_SEPARATOR;
+    
+    uint256 internal immutable INITIAL_CHAIN_ID;
+
+    bytes32 internal immutable INITIAL_DOMAIN_SEPARATOR;
 
     mapping(address => uint256) public nonces;
 
@@ -33,7 +36,12 @@ contract LexToken {
         symbol = _symbol;
         decimals = _decimals;
 
-        DOMAIN_SEPARATOR = keccak256(
+        INITIAL_CHAIN_ID = block.chainid;
+        INITIAL_DOMAIN_SEPARATOR = _calculateDomainSeparator();
+    }
+    
+    function _calculateDomainSeparator() internal view returns (bytes32 domainSeperator) {
+        domainSeperator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(name)),
@@ -42,6 +50,10 @@ contract LexToken {
                 address(this)
             )
         );
+    }
+    
+    function DOMAIN_SEPARATOR() public view returns (bytes32 domainSeperator) {
+        domainSeperator = block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : _calculateDomainSeparator();
     }
 
     function approve(address spender, uint256 value) public virtual returns (bool) {
@@ -56,7 +68,7 @@ contract LexToken {
         balanceOf[msg.sender] -= value;
 
         /// @dev This is safe because the sum of all user
-        // balances can't exceed type(uint256).max.
+        // balances can't exceed 'type(uint256).max'.
         unchecked {
             balanceOf[to] += value;
         }
@@ -78,7 +90,7 @@ contract LexToken {
         balanceOf[from] -= value;
 
         /// @dev This is safe because the sum of all user
-        // balances can't exceed type(uint256).max.
+        // balances can't exceed 'type(uint256).max'.
         unchecked {
             balanceOf[to] += value;
         }
@@ -98,19 +110,23 @@ contract LexToken {
         bytes32 s
     ) public virtual {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
+        
+        /// @dev This is reasonably safe from overflow because incrementing `nonces` beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits.
+        unchecked {
+            bytes32 digest = keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    DOMAIN_SEPARATOR(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                )
+            );
 
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-            )
-        );
-
-        address recoveredAddress = ecrecover(digest, v, r, s);
-        require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_PERMIT_SIGNATURE");
-
-        allowance[recoveredAddress][spender] = value;
+            address recoveredAddress = ecrecover(digest, v, r, s);
+            require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_PERMIT_SIGNATURE");
+        
+            allowance[recoveredAddress][spender] = value;
+        }
 
         emit Approval(owner, spender, value);
     }
@@ -119,7 +135,7 @@ contract LexToken {
         totalSupply += value;
 
         /// @dev This is safe because the sum of all user
-        // balances can't exceed type(uint256).max.
+        // balances can't exceed 'type(uint256).max'.
         unchecked {
             balanceOf[to] += value;
         }
@@ -131,7 +147,7 @@ contract LexToken {
         balanceOf[from] -= value;
 
         /// @dev This is safe because a user won't ever
-        // have a balance larger than totalSupply.
+        // have a balance larger than `totalSupply`.
         unchecked {
             totalSupply -= value;
         }
