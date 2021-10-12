@@ -210,7 +210,7 @@ contract LexNFT {
     function _mint(address to, uint256 tokenId, string memory _tokenURI) internal { 
         require(ownerOf[tokenId] == address(0), "ALREADY_MINTED");
   
-        /// @dev This is reasonably safe from overflow because incrementing `nonces` beyond
+        /// @dev This is reasonably safe from overflow because incrementing `totalSupply` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits,
         // and because the sum of all user balances can't exceed 'type(uint256).max'.
         unchecked {
