@@ -1,1 +1,1 @@
-Conditions to manage rules for contract functions.
+Code to manage rules for contract functions.
