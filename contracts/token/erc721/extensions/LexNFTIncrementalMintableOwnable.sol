@@ -6,10 +6,8 @@ import '../../../LexNFT.sol';
 import '../../../LexOwnable.sol';
 
 /// @notice Extension for LexNFT that allows owner-restricted (incremental) minting and burning.
-
 contract LexNFTIncrementalMintableOwnable is LexNFT, LexOwnable {
-
-    constructor(string memory _name, string memory _symbol, uint tokenId, string memory _tokenURI, address owner) LexNFT(_name, _symbol, tokenId, _tokenURI, owner) {}
+    constructor(string memory _name, string memory _symbol, string memory _tokenURI, address owner) LexNFT(_name, _symbol, 1, _tokenURI, owner) {}
 
     function mint(address to, string memory _tokenURI) external onlyOwner {
         _mint(to, totalSupply + 1, _tokenURI);
