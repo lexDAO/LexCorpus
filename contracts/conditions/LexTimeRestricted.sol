@@ -15,7 +15,8 @@ abstract contract LexTimeRestricted is LexOwnable {
     /// @notice Initialize time restriction module.
     /// @param _timeRestriction Point when restriction ends in Unix time.
     /// @param _timeRestrictionEnabled If 'true', modified functions are restricted.
-    constructor(uint256 _timeRestriction, bool _timeRestrictionEnabled) {
+    /// @param _owner Account to grant ownership of this module.
+    constructor(uint256 _timeRestriction, bool _timeRestrictionEnabled, address _owner) LexOwnable(_owner) {
         timeRestriction = _timeRestriction;
         timeRestrictionEnabled = _timeRestrictionEnabled;
         emit ToggleTimeRestriction(_timeRestrictionEnabled);
