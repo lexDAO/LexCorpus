@@ -12,7 +12,8 @@ abstract contract LexPausable is LexOwnable {
     
     /// @notice Initialize pausing module.
     /// @param _paused If 'true', modified functions are paused.
-    constructor(bool _paused) {
+    /// @param _owner Account to grant ownership of this module.
+    constructor(bool _paused, address _owner) LexOwnable(_owner) {
         paused = _paused;
         emit TogglePause(_paused);
     }
