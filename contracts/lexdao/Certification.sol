@@ -1,40 +1,38 @@
 /// SPDX-License-Identifier: MIT
 /// Presented by LexDAO LLC
-/// @notice Minimal Certification NFT for Accredited Investors.
-pragma solidity ^0.8.0;
+/// @notice Minimal Certification NFT.
+pragma solidity 0.8.4;
 
-contract Accreditation {
+contract Certification {
     address public governance;
     uint256 public totalSupply;
     string  public baseURI;
     string  public details;
-    string  public template;
-    string  constant public name = "Accredited Investor Token";
-    string  constant public symbol = "AIT";
+    string  public name;
+    string  public symbol;
     
     mapping(address => uint256) public balanceOf;
-    mapping(address => bool) public attorney;
     mapping(uint256 => address) public ownerOf;
-    mapping(uint256 => uint256) public stamp;
     mapping(uint256 => string) public tokenURI;
     mapping(bytes4 => bool) public supportsInterface; // ERC-165 
     
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event GovTokenURI(uint256 indexed tokenId, string tokenURI);
     event TransferGovernance(address indexed governance);
-    event UpdateBase(string baseURI, string details, string template);
-    event WhitelistAttorney(address indexed account, bool approved);
+    event UpdateBaseURI(string baseURI);
     
     constructor(
         address _governance,
         string memory _baseURI, 
         string memory _details, 
-        string memory _template
+        string memory _name, 
+        string memory _symbol
     ) {
         governance = _governance;
         baseURI = _baseURI;
         details = _details; 
-        template = _template;
+        name = _name; 
+        symbol = _symbol;  
         supportsInterface[0x80ac58cd] = true; // ERC-721 
         supportsInterface[0x5b5e139f] = true; // METADATA
     }
@@ -52,23 +50,15 @@ contract Accreditation {
         emit Transfer(from, address(0), tokenId); 
     }
     
-    function mint(address to, string calldata customURI) external { 
-        require(attorney[msg.sender], '!attorney');
+    function mint(address to, string calldata customURI) external onlyGovernance { 
         string memory _tokenURI; 
         bytes(customURI).length > 0 ? _tokenURI = customURI : _tokenURI = baseURI;
         totalSupply++;
         uint256 tokenId = totalSupply;
         balanceOf[to]++;
         ownerOf[tokenId] = to;
-        stamp[tokenId] = block.timestamp;
         tokenURI[tokenId] = _tokenURI;
         emit Transfer(address(0), to, tokenId);
-    }
-    
-    function renew(uint256 tokenId) external {
-        require(tokenId <= totalSupply, '!exist');
-        require(attorney[msg.sender], '!attorney');
-        stamp[tokenId] = block.timestamp;
     }
 
     function govTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyGovernance {
@@ -90,15 +80,8 @@ contract Accreditation {
         emit TransferGovernance(_governance);
     }
     
-    function updateBase(string calldata _baseURI, string calldata _details, string calldata _template) external onlyGovernance {
+    function updateBaseURI(string calldata _baseURI) external onlyGovernance {
         baseURI = _baseURI;
-        details = _details;
-        template = _template;
-        emit UpdateBase(_baseURI, _details, _template);
-    }
-    
-    function whitelistAttorney(address account, bool approved) external onlyGovernance {
-        attorney[account] = approved;
-        emit WhitelistAttorney(account, approved);
+        emit UpdateBaseURI(_baseURI);
     }
 }

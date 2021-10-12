@@ -4,12 +4,13 @@ pragma solidity >=0.8.0;
 
 import "./LexOwnable.sol";
 
-/// @notice Function whitelisting contract.
+/// @notice Ownable function whitelisting module.
 abstract contract LexWhitelistable is LexOwnable {
     event ToggleWhiteList(bool indexed whitelistEnabled);
     event UpdateWhitelist(address indexed account, bool indexed whitelisted);
     
     bool public whitelistEnabled; 
+    
     mapping(address => bool) public whitelisted; 
     
     /// @notice Initialize contract with `whitelistEnabled` status.
@@ -18,11 +19,18 @@ abstract contract LexWhitelistable is LexOwnable {
         emit ToggleWhiteList(_whitelistEnabled);
     }
     
-    /// @notice Whitelisting modifier that conditions modified function to be called between `whitelisted` accounts.
+    /// @notice Whitelisting modifier that conditions function to be called between `whitelisted` accounts.
     modifier onlyWhitelisted(address from, address to) {
         if (whitelistEnabled) 
         require(whitelisted[from] && whitelisted[to], "NOT_WHITELISTED");
         _;
+    }
+    
+    /// @notice Toggle `whitelisted` conditions on/off.
+    /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
+    function toggleWhitelist(bool _whitelistEnabled) external onlyOwner {
+        whitelistEnabled = _whitelistEnabled;
+        emit ToggleWhiteList(_whitelistEnabled);
     }
     
     /// @notice Update account `whitelisted` status.
@@ -31,12 +39,5 @@ abstract contract LexWhitelistable is LexOwnable {
     function updateWhitelist(address account, bool _whitelisted) external onlyOwner {
         whitelisted[account] = _whitelisted;
         emit UpdateWhitelist(account, _whitelisted);
-    }
-    
-    /// @notice Toggle `whitelisted` conditions on/off.
-    /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
-    function toggleWhitelist(bool _whitelistEnabled) external onlyOwner {
-        whitelistEnabled = _whitelistEnabled;
-        emit ToggleWhiteList(_whitelistEnabled);
     }
 }
