@@ -14,7 +14,9 @@ abstract contract LexWhitelistable is LexOwnable {
     mapping(address => bool) public whitelisted; 
     
     /// @notice Initialize contract with `whitelistEnabled` status.
-    constructor(bool _whitelistEnabled) {
+    /// @param _whitelistEnabled If 'true', `whitelisted` conditions are on.
+    /// @param _owner Account to grant ownership of this module.
+    constructor(bool _whitelistEnabled, address _owner) LexOwnable(_owner) {
         whitelistEnabled = _whitelistEnabled;
         emit ToggleWhiteList(_whitelistEnabled);
     }
