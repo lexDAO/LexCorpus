@@ -1,1 +1,1 @@
-Contracts and utilities designed for LexDAO use cases.
+Code for LexDAO use cases.
