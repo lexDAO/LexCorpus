@@ -15,7 +15,8 @@ abstract contract LexTokenOwnable is LexOwnable {
     /// @notice Initialize token ownership module for function access control.
     /// @param _token ERC-20/721 token to use for ownership checks.
     /// @param _ownerBalance Token balance required for ownership access.
-    constructor(IERC20 _token, uint256 _ownerBalance) {
+    /// @param _owner Account to grant ownership of this module.
+    constructor(IERC20 _token, uint256 _ownerBalance, address _owner) LexOwnable(_owner) {
         token = _token;
         ownerBalance = _ownerBalance;
         emit UpdateOwnerTokenBalance(_token, _ownerBalance);
@@ -29,7 +30,7 @@ abstract contract LexTokenOwnable is LexOwnable {
 
     /// @notice Returns whether `account` has ownership access based on their `token` `ownerBalance`.
     /// @param account Address to check.
-    function checkOwner(address account) external view returns (bool owner) {
+    function checkTokenOwner(address account) external view returns (bool owner) {
         owner = token.balanceOf(account) >= ownerBalance;
     }
 
