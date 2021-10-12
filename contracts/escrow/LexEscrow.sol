@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import "./interfaces/IBentoBoxMinimal.sol";
+import "../interfaces/IBentoBoxMinimal.sol";
 
 /// @notice Escrow for ETH and ERC-20/721 tokens with BentoBox integration.
 contract LexEscrow {
