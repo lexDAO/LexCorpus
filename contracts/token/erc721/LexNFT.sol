@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0;
 
 /// @notice Modern and gas efficient ERC-721 + ERC-20/EIP-2612-like implementation.
-contract LexNFT {
+abstract contract LexNFT {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Approval(address indexed owner, address indexed spender, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
