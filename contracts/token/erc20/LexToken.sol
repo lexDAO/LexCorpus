@@ -5,7 +5,7 @@ pragma solidity >=0.8.0;
 /// @notice Modern and gas efficient ERC20 + EIP-2612 implementation.
 /// @author Adapted from RariCapital, https://github.com/Rari-Capital/solmate/blob/main/src/erc20/ERC20.sol,
 // License-Identifier: AGPL-3.0-only.
-contract LexToken {
+abstract contract LexToken {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
