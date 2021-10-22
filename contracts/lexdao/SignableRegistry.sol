@@ -16,13 +16,15 @@ contract SignableRegistry {
     /// @dev Signable counter and struct mapping:
     uint256 public signablesCount;
     
-    mapping(uint256 => Signable) signables;
+    mapping(uint256 => Signable) public signables;
     
     struct Signable {
-        address author;
         string content;
         mapping(address => bool) signed;
     }
+    
+    address public superadmin;
+    mapping(address => bool) public admins;
     
     /// @dev Initialize contract and `DOMAIN_SEPARATOR`.
     constructor() {
@@ -35,6 +37,38 @@ contract SignableRegistry {
                 address(this)
             )
         );
+        
+        superadmin = msg.sender;
+        admins[msg.sender] = true;
+    }
+
+    // **** MODIFIERS **** //
+    // ------------------------- //
+    
+    modifier onlyAdmins() {
+        require(admins[msg.sender] == true, "Not an admin");
+        _;
+    }
+
+    modifier onlySuperadmin() {
+        require(msg.sender == superadmin, "Not superadmin");
+        _;
+    }
+    
+    modifier contentExists(uint256 index) {
+        require(index < signablesCount && signablesCount > 0, "This content does not exist");
+        _;
+    }
+    
+    // **** USER MANAGEMENT **** //
+    // ------------------------- //
+    
+    function addAdmin(address admin) external onlySuperadmin {
+        admins[admin] = true;
+    }
+    
+    function removeAdmin(address admin) external onlySuperadmin {
+        admins[admin] = false;
     }
     
     // **** SIGNING PROTOCOL **** //
@@ -43,7 +77,7 @@ contract SignableRegistry {
     /// @notice Check an `account` for signature against indexed `content`.
     /// @param account Address to check signature for.
     /// @param index `content` # to check signature against.
-    function checkSignature(address account, uint256 index) external view returns (bool signed) {
+    function checkSignature(address account, uint256 index) external view contentExists(index) returns (bool signed) {
         signed = signables[index].signed[account];
     }
     
@@ -51,7 +85,7 @@ contract SignableRegistry {
     
     /// @notice Register signature against indexed `content`.
     /// @param index `content` # to map signature against.
-    function sign(uint256 index) external {
+    function sign(uint256 index) external contentExists(index) {
         signables[index].signed[msg.sender] = true;
         emit Sign(msg.sender, index);
     }
@@ -62,7 +96,7 @@ contract SignableRegistry {
     /// @param v The recovery byte of the signature.
     /// @param r Half of the ECDSA signature pair.
     /// @param s Half of the ECDSA signature pair.
-    function signMeta(address account, uint256 index, uint8 v, bytes32 r, bytes32 s) external {
+    function signMeta(address account, uint256 index, uint8 v, bytes32 r, bytes32 s) external contentExists(index) {
         // Validate signature elements:
         bytes32 digest =
             keccak256(
@@ -89,7 +123,7 @@ contract SignableRegistry {
     
     /// @notice Revoke signature against indexed `content`.
     /// @param index `content` # to map signature revocation against.
-    function revoke(uint256 index) external {
+    function revoke(uint256 index) external contentExists(index) {
         signables[index].signed[msg.sender] = false;
         emit Revoke(msg.sender, index);
     }
@@ -100,7 +134,7 @@ contract SignableRegistry {
     /// @param v The recovery byte of the signature.
     /// @param r Half of the ECDSA signature pair.
     /// @param s Half of the ECDSA signature pair.
-    function revokeMeta(address account, uint256 index, uint8 v, bytes32 r, bytes32 s) external {
+    function revokeMeta(address account, uint256 index, uint8 v, bytes32 r, bytes32 s) external contentExists(index) {
         // Validate revocation elements:
         bytes32 digest =
             keccak256(
@@ -128,19 +162,17 @@ contract SignableRegistry {
     
     /// @notice Register `content` for signatures.
     /// @param content Signable string - could be IPFS hash, plaintext, or JSON.
-    function register(string calldata content) external {
-        signablesCount++;
+    function register(string calldata content) external onlyAdmins {
         uint256 index = signablesCount;
-        signables[index].author = msg.sender;
         signables[index].content = content;
+        signablesCount++;
         emit Register(msg.sender, content);
     }
     
     /// @notice Update `content` for signatures - only callable by `author`.
     /// @param index `content` # to update.
     /// @param content Signable string - could be IPFS hash, plaintext, or JSON.
-    function amend(uint256 index, string calldata content) external {
-        require(msg.sender == signables[index].author, "NOT_AUTHOR");
+    function amend(uint256 index, string calldata content) external onlyAdmins contentExists(index) {
         signables[index].content = content;
         emit Amend(msg.sender, index, content);
     }
