@@ -81,7 +81,7 @@ abstract contract LexNFT {
     function transfer(address to, uint256 tokenId) public virtual {
         require(msg.sender == ownerOf[tokenId], "NOT_OWNER");
         
-        /// @dev This is safe because ownership is checked
+        // This is safe because ownership is checked
         // against decrement, and sum of all user
         // balances can't exceed 'type(uint256).max'.
         unchecked {
@@ -107,7 +107,7 @@ abstract contract LexNFT {
             "NOT_APPROVED"
         );
         
-        /// @dev This is safe because ownership is checked
+        // This is safe because ownership is checked
         // against decrement, and sum of all user
         // balances can't exceed 'type(uint256).max'.
         unchecked { 
@@ -131,7 +131,7 @@ abstract contract LexNFT {
         transferFrom(address(0), to, tokenId); 
         
         if (to.code.length != 0) {
-            /// @dev selector = `onERC721Received(address,address,uint,bytes)`.
+            // selector = `onERC721Received(address,address,uint,bytes)`.
             (, bytes memory returned) = to.staticcall(abi.encodeWithSelector(0x150b7a02,
                 msg.sender, address(0), tokenId, data));
                 
@@ -153,7 +153,7 @@ abstract contract LexNFT {
         
         address owner = ownerOf[tokenId];
         
-        /// @dev This is reasonably safe from overflow because incrementing `nonces` beyond
+        // This is reasonably safe from overflow because incrementing `nonces` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits.
         unchecked {
             bytes32 digest = keccak256(
@@ -184,7 +184,7 @@ abstract contract LexNFT {
     ) public virtual {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
         
-        /// @dev This is reasonably safe from overflow because incrementing `nonces` beyond
+        // This is reasonably safe from overflow because incrementing `nonces` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits.
         unchecked {
             bytes32 digest = keccak256(
@@ -210,7 +210,7 @@ abstract contract LexNFT {
     function _mint(address to, uint256 tokenId, string memory _tokenURI) internal { 
         require(ownerOf[tokenId] == address(0), "ALREADY_MINTED");
   
-        /// @dev This is reasonably safe from overflow because incrementing `totalSupply` beyond
+        // This is reasonably safe from overflow because incrementing `totalSupply` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits,
         // and because the sum of all user balances can't exceed 'type(uint256).max'.
         unchecked {
@@ -231,7 +231,7 @@ abstract contract LexNFT {
         
         require(ownerOf[tokenId] != address(0), "NOT_MINTED");
         
-        /// @dev This is safe because a user won't ever
+        // This is safe because a user won't ever
         // have a balance larger than `totalSupply`.
         unchecked {
             totalSupply--;
