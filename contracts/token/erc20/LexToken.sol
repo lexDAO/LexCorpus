@@ -4,10 +4,10 @@ pragma solidity >=0.8.0;
 
 /// @notice Modern and gas efficient ERC20 + EIP-2612 implementation.
 /// @author Adapted from RariCapital, https://github.com/Rari-Capital/solmate/blob/main/src/erc20/ERC20.sol,
-// License-Identifier: AGPL-3.0-only.
+/// License-Identifier: AGPL-3.0-only.
 abstract contract LexToken {
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
 
     string public name;
     string public symbol;
@@ -56,24 +56,24 @@ abstract contract LexToken {
         domainSeperator = block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : _calculateDomainSeparator();
     }
 
-    function approve(address spender, uint256 value) public virtual returns (bool) {
-        allowance[msg.sender][spender] = value;
+    function approve(address spender, uint256 amount) public virtual returns (bool) {
+        allowance[msg.sender][spender] = amount;
 
-        emit Approval(msg.sender, spender, value);
+        emit Approval(msg.sender, spender, amount);
 
         return true;
     }
 
-    function transfer(address to, uint256 value) public virtual returns (bool) {
-        balanceOf[msg.sender] -= value;
+    function transfer(address to, uint256 amount) public virtual returns (bool) {
+        balanceOf[msg.sender] -= amount;
 
-        /// @dev This is safe because the sum of all user
+        // This is safe because the sum of all user
         // balances can't exceed 'type(uint256).max'.
         unchecked {
-            balanceOf[to] += value;
+            balanceOf[to] += amount;
         }
 
-        emit Transfer(msg.sender, to, value);
+        emit Transfer(msg.sender, to, amount);
 
         return true;
     }
@@ -81,21 +81,21 @@ abstract contract LexToken {
     function transferFrom(
         address from,
         address to,
-        uint256 value
+        uint256 amount
     ) public virtual returns (bool) {
         if (allowance[from][msg.sender] != type(uint256).max) {
-            allowance[from][msg.sender] -= value;
+            allowance[from][msg.sender] -= amount;
         }
 
-        balanceOf[from] -= value;
+        balanceOf[from] -= amount;
 
-        /// @dev This is safe because the sum of all user
+        // This is safe because the sum of all user
         // balances can't exceed 'type(uint256).max'.
         unchecked {
-            balanceOf[to] += value;
+            balanceOf[to] += amount;
         }
 
-        emit Transfer(from, to, value);
+        emit Transfer(from, to, amount);
 
         return true;
     }
@@ -111,7 +111,7 @@ abstract contract LexToken {
     ) public virtual {
         require(deadline >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
         
-        /// @dev This is reasonably safe from overflow because incrementing `nonces` beyond
+        // This is reasonably safe from overflow because incrementing `nonces` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits.
         unchecked {
             bytes32 digest = keccak256(
@@ -131,27 +131,27 @@ abstract contract LexToken {
         emit Approval(owner, spender, value);
     }
 
-    function _mint(address to, uint256 value) internal {
-        totalSupply += value;
+    function _mint(address to, uint256 amount) internal {
+        totalSupply += amount;
 
-        /// @dev This is safe because the sum of all user
+        // This is safe because the sum of all user
         // balances can't exceed 'type(uint256).max'.
         unchecked {
-            balanceOf[to] += value;
+            balanceOf[to] += amount;
         }
 
-        emit Transfer(address(0), to, value);
+        emit Transfer(address(0), to, amount);
     }
 
-    function _burn(address from, uint256 value) internal {
-        balanceOf[from] -= value;
+    function _burn(address from, uint256 amount) internal {
+        balanceOf[from] -= amount;
 
-        /// @dev This is safe because a user won't ever
+        // This is safe because a user won't ever
         // have a balance larger than `totalSupply`.
         unchecked {
-            totalSupply -= value;
+            totalSupply -= amount;
         }
 
-        emit Transfer(from, address(0), value);
+        emit Transfer(from, address(0), amount);
     }
 }
