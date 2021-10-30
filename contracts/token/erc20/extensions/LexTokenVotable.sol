@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 
 import './LexTokenMintable.sol';
 
-/// @notice LexToken with owned minting.
+/// @notice LexToken with owned minting and Compound-style voting.
 contract LexTokenVotable is LexTokenMintable {
     bytes32 public constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
     
