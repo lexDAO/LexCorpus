@@ -64,9 +64,9 @@ To the maximum extent permitted by applicable law, no [DAO Membership Units Tick
 
 # Article V - Governance Shares and Capital Shares
 
-**Section 5.1 - Issuance and terms.** It is noted that different Designated Smart Contracts have different manners of managing governance shares (“[DAO Membership Units Ticker]”) versus contributed capital and efforts resulting in retains to [DAO Informal Name] (“Loot Shares”).  Currently, [DAO Membership Units Ticker] members have no rights of redemption of any working capital, or token assets, held within [DAO Informal Name].  In the future, to evidence capital or contributions of efforts provided by members, the Co-op may issue “Loot Shares”. Loot Shares may be issued only to persons eligible for and admitted to membership in [DAO Informal Name]. Loot Shares shall be considered issued upon their issue and they need not be evidenced by certificates.  Loot Shares shall be entitled to no dividend or other monetary return on contributed capital and may not be used to secure loans or other obligations of members. Loot Shares shall be subject to assessment for the reasonable capital needs of [DAO Informal Name], as determined by mutual agreement.  Loot Shares (if issued) should be considered to be similar to “retains” and are envisioned as a manner of tracking contributions made to the nonprofit.  It is not anticipated that [DAO Informal Name] will ever turn a “profit” as excess capital will be paid out via charitable donations, grants, or other forms of support meant to carry out the Mission Statement.
+**Section 5.1 - Issuance and terms.** It is noted that different Designated Smart Contracts have different manners of managing governance shares (“[DAO Membership Units Ticker]”) versus contributed capital and efforts resulting in retains to [DAO Informal Name] (“Loot Shares”).  Currently, [DAO Membership Units Ticker] members have no rights of redemption of any working capital, or token assets, held within [DAO Informal Name].  In the future, to evidence capital or contributions of efforts provided by members, the [DAO Informal Name] may issue “Loot Shares”. Loot Shares may be issued only to persons eligible for and admitted to membership in [DAO Informal Name]. Loot Shares shall be considered issued upon their issue and they need not be evidenced by certificates.  Loot Shares shall be entitled to no dividend or other monetary return on contributed capital and may not be used to secure loans or other obligations of members. Loot Shares shall be subject to assessment for the reasonable capital needs of [DAO Informal Name], as determined by mutual agreement.  Loot Shares (if issued) should be considered to be similar to restricted donations and are envisioned as a manner of tracking contributions made to the nonprofit, yet are retrievable by the holder should they beleive that the [DAO Informal Name] no longer is fulfilling its purpose, the process for signalling such a redeption of Loot Shares is a "Loot Quit".  It is not anticipated that [DAO Informal Name] will ever turn a “profit” as excess capital will be paid out via charitable donations, grants, or other forms of support meant to carry out the Mission Statement.
 
-**Section 5.2 - Redemption.** Upon request following termination of [DAO Informal Name] membership or via a future Smart Contract Mechanism to remove capital via a burn of Loot Shares, the Loot Shares shall be redeemed via a mechanism to be determined by [DAO Membership Units Ticker] members.  A “Rage Quit” is a request to burn both [DAO Membership Units Ticker] Membership token and Loot Shares. A “Loot Quit”, is simply to burn and withdraw Loot Shares as return of retains.  Loot Shares (if ever created) shall be redeemable at the approved Designated Smart Contract less a reasonable processing fee (if any).
+**Section 5.2 - Redemption.** Upon request following termination of [DAO Informal Name] membership or via a future Smart Contract Mechanism to remove capital via a burn of Loot Shares, the Loot Shares shall be redeemed via a mechanism to be determined by [DAO Membership Units Ticker] members.  A “Rage Quit” is a request to burn both [DAO Membership Units Ticker] Membership token and Loot Shares. A “Loot Quit”, is simply to burn and withdraw Loot Shares as return of retreivable funds.  Loot Shares (if ever created) shall be redeemable at the approved Designated Smart Contract less a reasonable processing fee (if any). Burning Loot Shares if/when [DAO Informal Name] is near the zone of insolvency may result in personal action to reclaim capital to the insolvent organization, fraudulent conveyance recapture, etc.
 
 # Article VI - Guild Kick/Member Removal and Exit
 
@@ -74,21 +74,7 @@ To the maximum extent permitted by applicable law, no [DAO Membership Units Tick
 
 **Section 6.2 - Material Adverse Exception Event.** Notwithstanding anything to the contrary set forth in Section 4, if there is a Material Adverse Exception Event, then the rules and procedures set forth in this clause shall determine the rights and obligations of the [DAO Membership Units Ticker] holding members relating to the [DAO Informal Name] property.
 
-# Article VII - Patronage Dividends
-
-**Section 7.1 - Distribution obligation.** The realized net earnings of [DAO Informal Name] attributable to the patronage of members through contributions and voting shall be allocated and distributed among members in proportion to their patronage and in such a manner and at such a time as to constitute patronage dividends within the meaning of federal income tax law. Unless otherwise required under federal tax law all of the operations of the [DAO Informal Name] shall be netted into a single allocation unit.
-
-**Section 7.2 - Reductions.** Any distributable net earnings of such a nominal amount as not to justify the expenses of distribution may, as determined by the [DAO Informal Name] Advisory Group or [DAO Membership Units Ticker] Members, be excluded from distribution. Net earnings may be reduced by such reasonable reserves for necessary business purposes as is determined by the [DAO Informal Name] Advisory Group or [DAO Membership Units Ticker] Members. A patronage dividend to which members are entitled may be waived in whole or in part by vote of members.
-
-**Section 7.3 - Consent of members.** By obtaining or retaining membership in [DAO Informal Name], each member shall there by consent to take into account, in the manner and to the extent required by Section 1385 of the Internal Revenue Code, the stated dollar amount of any qualified written notice of allocation in the taxable year in which such notice is received.
-
-**Section 7.4 - Deferred amounts.** Payment of patronage dividends may be deferred for the reasonable capital needs of [DAO Informal Name], as determined by [DAO Membership Units Ticker] Members. Such amounts shall accrue no dividend or other monetary return on capital. Deferred patronage dividends may be redeemed when determined by [DAO Membership Units Ticker] Members to be no longer needed for capital purposes. 
-
-**Section 7.5 - Net losses.** No portion of a net operating loss realized by the Cooperative shall be allocated to members. The patronage portion of such losses shall be carried forward to offset patronage-sourced income of subsequent years. The non patronage portion of such losses shall be carried back and forward to offset non patronage-sourced income of prior and subsequent years as required or permitted under federal income tax law. As a nonprofit unincorporated association, it is not anticipated there will be tax returns or profits.
-
-**Section 7.6 - Failure to Claim or Redeem.** The patronage dividend distributed to any member, by any means, including as cash, as a voucher, or by digital asset may be used for the purchase of [DAO Informal Name] items and services, or donated to [DAO Informal Name]. The portion of a patronage dividend distributed to any member that is not claimed, used, redeemed or donated within 90 days of issuance date, or by the next June 30th from issuance date, whichever is later, shall potentially revert to [DAO Informal Name] as a donation without further notice to the member. Such portions of patronage dividends that are donated or that revert to [DAO Informal Name] as provided in this subsection shall be distributed and allocated to a tax-exempt charity or grant as the [DAO Membership Units Ticker] Members may determine.
-
-# Article VIII - Fiscal and Miscellaneous Matters
+# Article VII - Fiscal and Miscellaneous Matters
 
 **Section 8.1 - Fiscal year.** The fiscal year of [DAO Informal Name] shall be the calendar year beginning January 1st and Ending December 31st.
 
@@ -96,7 +82,7 @@ To the maximum extent permitted by applicable law, no [DAO Membership Units Tick
 
 **Section 8.3 - Communication by electronic means.** Unless otherwise required by law or by agreement, any notice, vote, consent, petition, or other oral or written communication required or permitted can be delivered by electronic means, provided that, in the case where such communication expressly or impliedly requires the signature of the person submitting the communication, means are in place to reasonably assure the authenticity of the signature.
 
-# Article IX - Interpretation and Amendment of Constitution
+# Article VIII - Interpretation and Amendment of Constitution
 
 **Section 9.1 - Interpretation.** The [DAO Informal Name] Advisory Group (if formed via vote of [DAO Membership Units Ticker] Members) shall have the power to interpret this Constitution, apply them to particular circumstances, and adopt policies in furtherance of them, provided that all such actions are reasonable and consistent.
  
@@ -104,7 +90,7 @@ To the maximum extent permitted by applicable law, no [DAO Membership Units Tick
 
 **Section 9.3 - Amendment.** This Constitution may be amended by presenting the redlined version of the amendments at a meeting of members, and adopted by a vote or merge request as prescribed in the Handbook. As a form of soft consensus, any [DAO Membership Units Ticker] Member may timely protest a merge request made to the Constitution that has not been adopted as an approved version by [DAO Membership Units Ticker] Members via the Designated Smart Contract.  
 
-# Article XI - Definitions
+# Article IX - Definitions
 
 (a) **“Account Address”** means a public key address on the Designated Blockchain Network that is uniquely associated with a single private key, and at which no smart contract has been deployed.
 
