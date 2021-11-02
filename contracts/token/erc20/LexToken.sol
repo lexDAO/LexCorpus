@@ -40,8 +40,8 @@ abstract contract LexToken {
         INITIAL_DOMAIN_SEPARATOR = _calculateDomainSeparator();
     }
     
-    function _calculateDomainSeparator() internal view returns (bytes32 domainSeperator) {
-        domainSeperator = keccak256(
+    function _calculateDomainSeparator() internal view returns (bytes32 domainSeparator) {
+        domainSeparator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(name)),
@@ -52,8 +52,8 @@ abstract contract LexToken {
         );
     }
     
-    function DOMAIN_SEPARATOR() public view returns (bytes32 domainSeperator) {
-        domainSeperator = block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : _calculateDomainSeparator();
+    function DOMAIN_SEPARATOR() public view returns (bytes32 domainSeparator) {
+        domainSeparator = block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : _calculateDomainSeparator();
     }
 
     function approve(address spender, uint256 amount) public virtual returns (bool) {
