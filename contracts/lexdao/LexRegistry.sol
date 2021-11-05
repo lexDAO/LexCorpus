@@ -16,17 +16,18 @@ contract LexRegistry {
     }
     
     event LawyerRegistered(address indexed lawyer, string name, string jurisdiction, string details);
-    event UpdatedAvailability(address indexed lawyer, bool availability);
-
+    event AvailabilityUpdated(address indexed lawyer, bool availability);
+    event OwnerTransferred(address indexed previousOwner, address indexed newOwner);
+    
     constructor() {
         owner = msg.sender;
     }
     
-    // @param lawyer: ETH address of lawyer to be registered
-    // @param name: name of lawyer
-    // @param jurisdiction: jurisdiction(s) in which lawyer is qualified to practice 
-    // @param details: lawyer's link, bio, or concise explanation of lawyer's expertise or experience
-    function register(address lawyer, string calldata name, string calldata jurisdiction, string calldata details) external {
+    /// @param lawyer: ETH address of lawyer to be registered
+    /// @param name: name of lawyer
+    /// @param jurisdiction: jurisdiction(s) in which lawyer is qualified to practice 
+    /// @param details: lawyer's link, bio, or concise explanation of lawyer's expertise or experience
+    function registerLawyer(address lawyer, string calldata name, string calldata jurisdiction, string calldata details) external {
         require(msg.sender == owner, "NOT_OWNER");
         lawyers[lawyer] = Lawyer(name, jurisdiction, details, true);
         emit LawyerRegistered(lawyer, name, jurisdiction, details);
@@ -36,11 +37,12 @@ contract LexRegistry {
         bytes memory name = bytes(lawyers[msg.sender].name);
         require(name.length > 0, "NOT_LAWYER");
         lawyers[msg.sender].availability = availability;
-        emit UpdatedAvailability(msg.sender, availability);
+        emit AvailabilityUpdated(msg.sender, availability);
     }
 
     function transferOwner(address owner_) external {
         require(msg.sender == owner, "NOT_OWNER");
         owner = owner_;
+        emit OwnerTransferred(msg.sender, owner_);
     }
 }
