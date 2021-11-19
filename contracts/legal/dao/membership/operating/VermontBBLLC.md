@@ -1,3 +1,5 @@
+# Based on dOrg LLC 
+
 # **Operating Agreement of [[Company Name]], LLC**
 
 This Agreement (the "***Agreement***") is among [[Members]], the sole current members of [[Company Name]], LLC (the "***Company***").  These persons and any others who may become members of the Company are collectively known as the "Members" or singly as a "Member".  Interests of the Members of the Company are denominated in "Units".  
