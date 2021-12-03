@@ -1,167 +1,151 @@
-# **Fei - Rari Capital Tribe Governance Unification**
+# **[[Acquirer]] - [[Target]] [[AcquirerDAO]] Governance Unification**
 
-This framework has been provided for informational and discussion purposes only, and does not constitute nor shall it be construed as offering legal, financial, business, or tax advice. This framework does not propose to be legally binding on any party. No warranties or guarantees are made about the accuracy of any numbers or figures provided, though they are presented in good faith and with an effort to make them as accurate and up to date as possible with the information provided by both parties, as of the date of writing. Any digital assets referenced herein currently face an uncertain regulatory landscape in not only the United States but also in many foreign jurisdictions, including but not limited to the United Kingdom, European Union, Singapore, South Korea, Japan, and China. The legal and regulatory risks inherent in referenced digital assets are not the subject of this content, and no decision to buy, sell, exchange, or otherwise utilize any digital asset is recommended based on the content of this framework. For guidance regarding the possibility of said risks, one should consult with his or her own appropriate legal and/or regulatory counsel. One should consult one’s own advisors for any and all matters related to finance, business, tax jurisdiction, tax treatment, interpretation of unaudited financial statements, legal, regulatory, and technical knowledge or expertise. This non-binding agreement was prepared by GFX Labs in consultation with representatives of Tribe and Rari Capital. This document should not be relied upon to provide any form of investor protections or business advice and is only provided to assist all interested parties in sharing the same expectations. Use or publication of this framework represents an acknowledgment that GFX Labs is indemnified from any form of liability associated with actions taken by Tribe, Rari Capital, or any other interested party. That explicit indemnification is acknowledged by the user or publisher to be legally binding and severable from all other portions of this document.
+This framework has been provided for informational and discussion purposes only, and does not constitute nor shall it be construed as offering legal, financial, business, or tax advice. This framework does not propose to be legally binding on any party. No warranties or guarantees are made about the accuracy of any numbers or figures provided, though they are presented in good faith and with an effort to make them as accurate and up to date as possible with the information provided by both parties, as of the date of writing. Any digital assets referenced herein currently face an uncertain regulatory landscape in not only the United States but also in many foreign jurisdictions, including but not limited to the United Kingdom, European Union, Singapore, South Korea, Japan, and China. The legal and regulatory risks inherent in referenced digital assets are not the subject of this content, and no decision to buy, sell, exchange, or otherwise utilize any digital asset is recommended based on the content of this framework. For guidance regarding the possibility of said risks, one should consult with his or her own appropriate legal and/or regulatory counsel. One should consult one’s own advisors for any and all matters related to finance, business, tax jurisdiction, tax treatment, interpretation of unaudited financial statements, legal, regulatory, and technical knowledge or expertise. This non-binding agreement was prepared by [[Matchmaker]] in consultation with representatives of [[AcquirerDAO]] and [[Target]]. This document should not be relied upon to provide any form of investor protections or business advice and is only provided to assist all interested parties in sharing the same expectations. Use or publication of this framework represents an acknowledgment that [[Matchmaker]] is indemnified from any form of liability associated with actions taken by [[AcquirerDAO]], [[Target]], or any other interested party. That explicit indemnification is acknowledged by the user or publisher to be legally binding and severable from all other portions of this document.
 
 I. Summary & Scope
-The founders of Fei Protocol and Rari Capital, subject to the approval of their organizations’ respective voting processes, propose that Rari Capital protocol governance become fully integrated with Tribe and its TRIBE governance token, a digital asset.
+The founders of [[Acquirer]] and [[Target]], subject to the approval of their organizations’ respective voting processes, propose that [[Target]] protocol governance become fully integrated with [[AcquirerDAO]] and its [[Gov_Token_1]] governance token, a digital asset.
 
 II. Definitions
-A. “Fei Protocol” meaning a decentralized, scalable, and DeFi-native stablecoin protocol governed by Tribe.
-B. “Tribe” meaning the decentralized autonomous organization (DAO) that governs the Fei Protocol, powered by TRIBE.
-C. “TRIBE” meaning the governance token utilized by Tribe.
-D. “Rari Capital” meaning a borrow & lend DeFi tool.
-E. “RGT” meaning the governance token utilized by Rari Capital.
-F. “FEI” meaning a decentralized stablecoin, a digital asset, governed by the Fei Protocol.
+A. “[[Acquirer]]” meaning a decentralized, scalable, and DeFi-native stablecoin protocol governed by [[AcquirerDAO]].
+B. “[[AcquirerDAO]]” meaning the decentralized autonomous organization (DAO) that governs the [[Acquirer]], powered by [[Gov_Token_1]].
+C. “[[Gov_Token_1]]” meaning the governance token utilized by [[AcquirerDAO]].
+D. “[[Target]]” meaning a borrow & lend DeFi tool.
+E. “[[Gov_Token_2]]” meaning the governance token utilized by [[Target]].
+F. “[[Stablecoin]]” meaning a decentralized stablecoin, a digital asset, governed by the [[Acquirer]].
 G. “On-chain” is defined as existing on or being executed upon the Ethereum blockchain.
-H. “Governance” is defined as the collective on-chain processes used to enact changes to parameters, code, or other upgrades and alterations to a protocol (e.g. Fei Protocol, Rari Capital).
-I. “Rari Developer Multisig” meaning a multisig contract that Rari Capital contributors control. See Appendix for Ethereum address.
-J. “Snapshot Block” is 13623378. This block occurred at 12 am +UTC on November 16, 2021, and was chosen because it is projected to be prior to the invention of the pricing structure used.
-K. “Rari Treasury Balance” is 2,415,366.5219806656885298 from 13697660.
-L. “Tribe Treasury Balance” is 291,025,163.276474189338679350 from block 13697660.
-M. “Dripper Balance” is 74,508,838.570600494412126519 from block 13697660.
-N. “TribalChief Balance” is 14,860,272.827536207119048252 from block 13697660.
-O. “Liquidity Mining Balance” is Dripper Balance + TribalChief Balance, for a total of 89,369,111.39813669.
-P. “Protocol Controlled Value” is “protocolControlledValue” in pcvStats multiplied by 10^-18.
-Q. “User Circulating FEI” is “userCirculatingFei” in pcvStats multiplied by 10^-18.
-R. “Protocol Equity” is Protocol Controlled Value subtracted by User Circulating FEI.
-S. “ETH Price” is $4132.53937 from block 13697660.
-T. “FEI Price” is $1.
-U. “TRIBE Price” is $1.088479434, equal to the 7-day TWAP (13653498 to 13697660).
-V. “RGT Price” is $29.0685763, equal to the 7-day TWAP (13653498 to 13697660) multiplied by ETH Price.
-W. “Exchange Rate” is 26.7056734303, equal to RGT Price divided by TRIBE Price.
-X. “Pre-merger TRIBE Circulating Supply” is TRIBE max total supply - Tribe Treasury Balance - Liquidity Mining Balance, for a total of 619,605,725.325389147 TRIBE.
+H. “Governance” is defined as the collective on-chain processes used to enact changes to parameters, code, or other upgrades and alterations to a protocol (e.g. [[Acquirer]], [[Target]]).
+I. “[[Target]] Developer Multisig” meaning a multisig contract that [[Target]] contributors control. See Appendix for Ethereum address.
+J. “Snapshot Block” is [BLOCK NUMBER]. This block occurred at [UTC TIME AND DATE], and was chosen because it is projected to be prior to the invention of the pricing structure used.
+K. “[[Target]] Treasury Balance” is [NUMBER] from [BLOCK NUMBER].
+L. “[[AcquirerDAO]] Treasury Balance” is [NUMBER] from block [BLOCK NUMBER].
+M. “[[Account_1]] Balance” is [NUMBER] from block [BLOCK NUMBER].
+N. “[[Account_2]] Balance” is [NUMBER] from block [BLOCK NUMBER].
+O. “Liquidity Mining Balance” is [Account_1]] Balance + [[Account_2]] Balance, for a total of [NUMBER].
+P. “Protocol Controlled Value” is “protocolControlledValue” in [[Function_Name]] multiplied by 10^-18.
+Q. “User Circulating [[Stablecoin]]” is “userCirculating[[Stablecoin]]” in [[Function_Name]] multiplied by 10^-18.
+R. “Protocol Equity” is Protocol Controlled Value subtracted by User Circulating [[Stablecoin]].
+S. “ETH Price” is $[USD PRICE] from block [BLOCK NUMBER].
+T. “[[Stablecoin]] Price” is $1.
+U. “[[Gov_Token_1]] Price” is $[USD PRICE], equal to the 7-day TWAP ([BLOCK NUMBER] to [BLOCK NUMBER]).
+V. “[[Gov_Token_2]] Price” is $[USD PRICE], equal to the 7-day TWAP ([BLOCK NUMBER] to [BLOCK NUMBER]) multiplied by ETH Price.
+W. “Exchange Rate” is [NUMBER], equal to [[Gov_Token_2]] Price divided by [[Gov_Token_1]] Price.
+X. “Pre-merger [[Gov_Token_1]] Circulating Supply” is [[Gov_Token_1]] max total supply - [[AcquirerDAO]] Treasury Balance - Liquidity Mining Balance, for a total of [NUMBER] [[Gov_Token_1]].
 
 III. Background
-A. Rari Capital is a protocol built on the Ethereum blockchain. Any user can supply and borrow any asset by making their own Fuse pool or by participating in an existing Fuse pool. Rari Capital also offers a product called Vaults, which provides easy to access opportunities to deploy capital and earn interest.
-a. RGT is the governance token of Rari Capital. All protocol changes, improvements, and decisions are managed through an on-chain voting mechanism via Governor Bravo.
+A. [[Target]] is a protocol built on the Ethereum blockchain. Any user can supply and borrow any asset by making their own [[Interest_Rate_Protocol_Name]] pool or by participating in an existing [[Interest_Rate_Protocol_Name]] pool. [[Target]] also offers a product called [NAME], which provides easy to access opportunities to deploy capital and earn interest.
+a. [[Gov_Token_2]] is the governance token of [[Target]]. All protocol changes, improvements, and decisions are managed through an on-chain voting mechanism via [GOVERNANCE CONTRACT NAME].
 
-B. Fei Protocol is a decentralized, scalable, and DeFi-native stablecoin protocol that is governed by Tribe. The stablecoin, FEI, is pegged to $1 target market price and is backed by Protocol Controlled Value (PCV). PCV consists of decentralized assets and is deployed to provide liquidity and earn yield.
-a. TRIBE is the governance token of Tribe. All protocol changes, improvements, and decisions are managed through an on-chain voting mechanism via Governor OZ.
+B. [[Acquirer]] is a decentralized, scalable, and DeFi-native stablecoin protocol that is governed by [[AcquirerDAO]]. The stablecoin, [[Stablecoin]], is pegged to $1 target market price and is backed by Protocol Controlled Value (PCV). PCV consists of decentralized assets and is deployed to provide liquidity and earn yield.
+a. [[Gov_Token_1]] is the governance token of [[AcquirerDAO]]. All protocol changes, improvements, and decisions are managed through an on-chain voting mechanism via [GOVERNANCE CONTRACT NAME].
 
 IV. Rationale
-“Rari and Fei’s strengths play perfectly together, with many synergies coming from an RGT/TRIBE merge. The main bottlenecks to Fuse’s growth are bootstrapping pools with initial liquidity, and ensuring manipulation resistant oracles for long-tail assets. The Fei DAO can easily provide this initial FEI liquidity to solve the chicken-and-egg problem, and has already done so in 15 Fuse pools, including 8 of the top 10.
+“[[Target]] and [[Acquirer]]’s strengths play perfectly together, with many synergies coming from an [[Gov_Token_2]]/[[Gov_Token_1]] merge. The main bottlenecks to [[Interest_Rate_Protocol_Name]]’s growth are [DESCRIBE PROBLEM]. The [[Acquirer]] DAO can easily [DESCRIBE SOLUTION].
 
-Tighter integration between the protocols would enable fundamentally new types of DeFi services. On Rari, the oracle problem is a major bottleneck, and the Fei DAO can help scale this through Liquidity as a Service with Ondo. By quickly and cheaply spinning up deep liquidity on Uni v3 or Balancer v2, protocols can get a manipulation resistant full-range embedded TWAP oracle to power the Fuse market. Combined with a FEI liquidity deposit, users can go end-to-end on any trade they would like to achieve in the market with existing FEI liquidity. As more pairs begin to form against FEI, the network effects grow for Fuse and FEI to list more assets and more pools with more utility for each.
+Tighter integration between the protocols would enable fundamentally new types of DeFi services. On [[Target]], the [DESCRIBE] problem is a major bottleneck, and the [[Acquirer]] DAO can help scale this through [DESCRIBE SOLUTIONS AND BENEFITS].
 
-A united front between Rari and Fei will enhance this relationship. For any token, Fuse becomes the easiest and most frictionless way to scale out utility, and FEI becomes the most liquid pair.
-Our communities and teams together already have a synergistic relationship. The Fei DAO is actively developing cutting edge Fuse infrastructure:
-● First DAO owned pool
-● First incentivized pool (with dynamic incentive controls through TRIBE rewards contract)
-● Generalized Plugins including LUSD Stability Pool
-● Oracles through LaaS + Balancer
+A united front between [[Target]] and [[Acquirer]] will enhance this relationship. For any token, [[Interest_Rate_Protocol_Name]] becomes the easiest and most frictionless way to scale out utility, and [[Stablecoin]] becomes the most liquid pair.
+Our communities and teams together already have a synergistic relationship. The [[Acquirer]] DAO is actively developing cutting edge [[Interest_Rate_Protocol_Name]] infrastructure:
+[DESCRIBE ACQUIRER DAO INFRASTRUCTURE]
 
-A merge cements a long term relationship and unity of fortune that can’t be achieved by a token swap. It sets up a broader vision to be the focal point of DeFi innovation for the foreseeable future.” - Joey Santoro of Fei
+A merge cements a long term relationship and unity of fortune that can’t be achieved by a token swap. It sets up a broader vision to be the focal point of DeFi innovation for the foreseeable future.” - [SPEAKER NAME] of [[Acquirer]]
 
-“Rari and Fei are two of the most powerful primitives with the potential to change the world in their own right, but they are stronger together. We’ve already gotten a hint of how powerful this collaboration can be:
-● Fei was the first DAO to spin up a Fuse pool and deposit directly from a DAO
-● Fei is directly providing liquidity into a wide spectrum of Fuse pools (10+)
-● Fei has assisted in writing one of the first Fuse plugins to level up the capital
-efficiency of the Liquity/LUSD fuse pool
-● Fuse pools hold a large percentage of TRIBE supply
-● Fei / Tribe being the first assets inside of Fuse to receive liquidity mining rewards
-● Fuse has enabled Fei to directly bootstrap usage of their stablecoin in a way that Aave / Compound never could because of the lindy that existing stables have received
+“[[Target]] and [[Acquirer]] are two of the most powerful primitives with the potential to change the world in their own right, but they are stronger together. We’ve already gotten a hint of how powerful this collaboration can be:
+[DESCRIBE BENEFITS OF MERGER]
 
-These achievements are just a taste of what Rari and Fei can accomplish together. I believe that we should double down on this collaborative effort for the benefit of both DAOs, communities, and the DeFi ecosystem as a whole.
+These achievements are just a taste of what [[Target]] and [[Acquirer]] can accomplish together. I believe that we should double down on this collaborative effort for the benefit of both DAOs, communities, and the DeFi ecosystem as a whole.
 
-I propose we bring RGT into the Tribe family and unify our efforts in creating the future of decentralized finance. Together, we will create a DeFi capable of immense TVL scaling and truly revolutionizing the way we (DeFi users today and tomorrow) interact with money and finance.
+I propose we bring [[Gov_Token_2]] into the [[AcquirerDAO]] family and unify our efforts in creating the future of decentralized finance. Together, we will create a DeFi capable of immense TVL scaling and truly revolutionizing the way we (DeFi users today and tomorrow) interact with money and finance.
 I propose:
-1. $1:$1 conversion of RGT to TRIBE, created from both the existing treasury and newly minted TRIBE
-2. Fei creating proper contributor incentives as a mechanism to scale Fuse / yield aggregator
-3. Fully pay back the Rari DAO’s debts from the ETH yield aggregator exploit (to REPT-b holders) in Fei (full compensation in Fei, at Dai price at hack time)
-4. Keep independent communities (Fei, Rari) building together under a shared Tribe family
+1. $1:$1 conversion of [[Gov_Token_2]] to [[Gov_Token_1]], created from both the existing treasury and newly minted [[Gov_Token_1]]
+2. [[Acquirer]] creating proper contributor incentives as a mechanism to scale [[Interest_Rate_Protocol_Name]] / yield aggregator
+3. Keep independent communities ([[Acquirer]], [[Target]]) building together under a shared [[AcquirerDAO]] family
 
-(you can view Joey’s proposal with the details of each of the mechanics here: Fei Letter to Rari 134)
+(you can view [ACQUIRER SPEAKER NAME]’s proposal with the details of each of the mechanics here: [[Acquirer]] Letter to [[Target]] [REFERENCE NUMBER])
 
-There are a number of protocol-specific collaborations that will be possible with the passing of this proposal. By combining the yield aggregator, Fuse and Fei can quickly accelerate Fei’s usage as a dominant stablecoin across various chains and layers. Additionally, we can work together on numerous joint products: various DAO treasury projects, automated liquidity products for new pools and even an innovative oracle model to guarantee liquidity for TWAPs. This will have no direct impact for the users of today. For the users of tomorrow, it should result in better products, better experiences and a wider set of possibilities. As a user of Rari, I am excited for what this means.
+There are a number of protocol-specific collaborations that will be possible with the passing of this proposal. By combining the yield aggregator, [[Interest_Rate_Protocol_Name]] and [[Acquirer]] can quickly accelerate [[Stablecoin]]’s usage as a dominant stablecoin across various chains and layers. Additionally, we can work together on numerous joint products: various DAO treasury projects, automated liquidity products for new pools and even an innovative oracle model to guarantee liquidity for TWAPs. This will have no direct impact for the users of today. For the users of tomorrow, it should result in better products, better experiences and a wider set of possibilities. As a user of [[Target]], I am excited for what this means.
 
 A treasury diversification into each other’s assets is something that we have seen before, but historically doesn’t actually provide much substance in aligning incentives because of the sheer scale of DeFi projects. By going all in with each other, we are absolutely aligned with each other’s products, communities and spirits. We are in it for the long haul, together.
 
-By working together with the Fei community, becoming part of the Tribe family together, we instantly start to build our empire. Together, we are stronger than ever before. We will be ready to scale and conquer. I am excited about the potential of the Rari Capital community joining the Tribe family and I am stoked for what we will be able to do together.” - Jai Bhavnani
+By working together with the [[Acquirer]] community, becoming part of the [[AcquirerDAO]] family together, we instantly start to build our empire. Together, we are stronger than ever before. We will be ready to scale and conquer. I am excited about the potential of the [[Target]] community joining the [[AcquirerDAO]] family and I am stoked for what we will be able to do together.” - [TARGET SPEAKER NAME]
 
 V. Voting Schedule
 Parties shall agree to the following voting schedule.
-A. Tribe governance will initiate the first proposal. Note that (a) - (f) will only execute after Rari governance sets the pendingAdmin:
-a. Calls method `party1Accept` on TribeRagequit.
-b. Calls method `party1Accept` on PegExchanger.
-c. Sets the TribeRagequit as a minter.
-d. Sends TRIBE to the PegExchanger.
-e. Sends TRIBE to GFX Labs.
-f. Accepts adminship of the RgtTimelock.
-B. Rari governance will initiate the second proposal:
-a. Transfers ownership of the Timelock to Tribe governance.
-b. Calls method `party0Accept` on TribeRagequit.
-c. Calls method `party0Accept` on PegExchanger.
-d. Transfer ownership of 0x1FA69a416bCF8572577d3949b742fBB0a9CD98c7 to Tribe Timelock.
-e. Transfer ownership of 0x66f4856f1bbd1eb09e1c8d9d646f5a3a193da569 to Tribe Timelock.
-f. Transfer ownership of 0x59FA438cD0731EBF5F4cDCaf72D4960EFd13FCe6 to Tribe Timelock.
-g. Transfer ownership of 0x3F4931A8E9D4cdf8F56e7E8A8Cfe3BeDE0E43657 to Tribe Timelock.
-h. Transfer ownership of 0xD6e194aF3d9674b62D1b30Ec676030C23961275e to Tribe Timelock.
-i. Transfer ownership of 0xaFD2AaDE64E6Ea690173F6DE59Fc09F5C9190d74 to Tribe Timelock.
-j. Transfer ownership of 0xB465BAF04C087Ce3ed1C266F96CA43f4847D9635 to Tribe Timelock.
+A. [[AcquirerDAO]] will initiate the first proposal. Note that (a) - (f) will only execute after [[Target]] governance sets the pendingAdmin:
+a. Calls method `party1Accept` on [[AcquirerDAO]]Ragequit.
+b. Calls method `party1Accept` on [[Exchanger_Object_Name]].
+c. Sets the [[AcquirerDAO]]Ragequit as a minter.
+d. Sends [[Gov_Token_1]] to the [[Exchanger_Object_Name]].
+e. Sends [[Gov_Token_1]] to [[Matchmaker]].
+f. Accepts adminship of the [[Gov_Token_2]]Timelock.
+B. [[Target]] governance will initiate the second proposal:
+a. Transfers ownership of the Timelock to [[AcquirerDAO]].
+b. Calls method `party0Accept` on [[AcquirerDAO]]Ragequit.
+c. Calls method `party0Accept` on [[Exchanger_Object_Name]].
+d. Transfer ownership of [[Address_1]] to [[AcquirerDAO]] Timelock.
+e. Transfer ownership of [[Address_2]] to [[AcquirerDAO]] Timelock.
+f. Transfer ownership of [[Address_3]] to [[AcquirerDAO]] Timelock.
+g. Transfer ownership of [[Address_4]] to [[AcquirerDAO]] Timelock.
+h. Transfer ownership of [[Address_5]] to [[AcquirerDAO]] Timelock.
+i. Transfer ownership of [[Address_6]] to [[AcquirerDAO]] Timelock.
+j. Transfer ownership of [[Address_7]] to [[AcquirerDAO]] Timelock.
 
-VI. Distribution of TRIBE to RGT holders
-PegExchanger will facilitate the exchange of RGT for TRIBE at the Exchange Rate. RGT may be exchanged indefinitely. Tribe governance may set an expiration date for the exchange to cease, but only at a minimum of 2,336,000 blocks, or approximately one year, after the exchange starts.
+VI. Distribution of [[Gov_Token_1]] to [[Gov_Token_2]] holders
+[[Exchanger_Object_Name]] will facilitate the exchange of [[Gov_Token_2]] for [[Gov_Token_1]] at the Exchange Rate. [[Gov_Token_2]] may be exchanged indefinitely. [[AcquirerDAO]] governance may set an expiration date for the exchange to cease, but only at a minimum of [NUMBER] blocks, or approximately [TIME PERIOD], after the exchange starts.
 
 VII. Governance Transition
-A. Rari Capital relies on the Rari governance token (RGT), their Governance Bravo contract, team multisig (0x5eA4A9a7592683bF0Bc187d6Da706c6c4770976F), and other contracts to function. The transfer of Rari Capital’s admin to Tribe will occur over two governance proposals. Rari governance will set a pending admin, and Tribe governance will accept the admin role.
-B. The Rari Developer Multisig will transfer administrative rights of multisig-owned contracts noted in the Appendix to a joint multisig. See Appendix for more details regarding Rari Capital contracts and the controlling address or contract for each contract.
+A. [[Target]] relies on the [[Target]] governance token ([[Gov_Token_2]]), their [GOVERNANCE CONTRACT NAME] contract, team multisig ([ADDRESS]), and other contracts to function. The transfer of [[Target]]’s admin to [[AcquirerDAO]] will occur over two governance proposals. [[Target]] governance will set a pending admin, and [[AcquirerDAO]] governance will accept the admin role.
+B. The [[Target]] Developer Multisig will transfer administrative rights of multisig-owned contracts noted in the Appendix to a joint multisig. See Appendix for more details regarding [[Target]] contracts and the controlling address or contract for each contract.
 
 VIII. Ragequit
-A. Tribe governance will permission the “Tribe Ragequit contract” as a FEI minter to enable FEI payouts for TRIBE holders.
-B. Anyone who held TRIBE at the Snapshot Block will be able to exchange their TRIBE for FEI through the Tribe Ragequit contract, up to the amount of TRIBE they held at the Snapshot Block.
-C. Intrinsic Value (IV) is defined as Protocol Equity (PCV - User Circulating Fei) divided by the Pre-merger TRIBE Circulating Supply. The Protocol Equity number is taken from Fei’s Collaterization Oracle and updated on each ragequit such that Protocol Equity can only be lowered.
-D. When a TRIBE holder exchanges TRIBE through the Tribe Ragequit contract, the amount of FEI that they receive equals the amount of TRIBE sold multiplied by Intrinsic Value at the block in which the exchange takes place.
-E. TRIBE exchanged through the Tribe Ragequit contract will be sent to the Tribe Treasury.
-F. The Tribe Ragequit contract will end after 19200 blocks, or approximately 3 calendar days from the first block at which party0Accept and party1Accept are both true.
+A. [[AcquirerDAO]] will permission the “[[AcquirerDAO]] Ragequit contract” as a [[Stablecoin]] minter to enable [[Stablecoin]] payouts for [[Gov_Token_1]] holders.
+B. Anyone who held [[Gov_Token_1]] at the Snapshot Block will be able to exchange their [[Gov_Token_1]] for [[Stablecoin]] through the [[AcquirerDAO]] Ragequit contract, up to the amount of [[Gov_Token_1]] they held at the Snapshot Block.
+C. Intrinsic Value (IV) is defined as Protocol Equity (PCV - User Circulating [[Stablecoin]]) divided by the Pre-merger [[Gov_Token_1]] Circulating Supply. The Protocol Equity number is taken from [[Stablecoin]]’s Collaterization Oracle and updated on each ragequit such that Protocol Equity can only be lowered.
+D. When a [[Gov_Token_1]] holder exchanges [[Gov_Token_1]] through the [[AcquirerDAO]] Ragequit contract, the amount of [[Stablecoin]] that they receive equals the amount of [[Gov_Token_1]] sold multiplied by Intrinsic Value at the block in which the exchange takes place.
+E. [[Gov_Token_1]] exchanged through the [[AcquirerDAO]] Ragequit contract will be sent to the [[AcquirerDAO]] Treasury.
+F. The [[AcquirerDAO]] Ragequit contract will end after [NUMBER] blocks, or approximately [NUMBER] calendar days from the first block at which party0Accept and party1Accept are both true.
 
 IX. Costs of Implementation
-Tribe and Rari Capital will each, respectively, be solely responsible for any costs associated with due diligence, administration, deployment costs, gas fees, or any other costs unless explicitly described in this proposal.
+[[AcquirerDAO]] and [[Target]] will each, respectively, be solely responsible for any costs associated with due diligence, administration, deployment costs, gas fees, or any other costs unless explicitly described in this proposal.
 
-X. Assumption of REPT-b Repayment Obligations
-A. Upon both DAOs accepting the terms of the merger, Tribe acknowledges an obligation to offer FEI in exchange for REPT-b tokens.
-B. No later than 90 calendar days after both DAOs accept the terms, Tribe will announce a method for exchanging REPT-b for FEI.
-C. Tribe does not acknowledge assumption of any other costs associated with the events related to the distribution of REPT-b, including but not limited to the proper distribution of REPT-b, ancillary costs such as “gas” paid in ETH to redeem REPT-b for FEI, or any other costs known or unknown related to the creation of and distribution of REPT-b tokens.
+X. [[Matchmaker]] Payment
+This document describes the details of a historic DAO-to-DAO merger and is expected to set an industry precedent. [[Matchmaker]] has taken the lead in providing services related to the research, organization, development, and engineering of this merger. As compensation for these valuable services, and to foster a long term relationship between [[AcquirerDAO]] and [[Matchmaker]], [[AcquirerDAO]] will transfer [NUMBER] [[Gov_Token_1]] to an Ethereum address chosen by [[Matchmaker]].
 
-XI. GFX Labs Payment
-This document describes the details of a historic DAO-to-DAO merger and is expected to set an industry precedent. GFX Labs has taken the lead in providing services related to the research, organization, development, and engineering of this merger. As compensation for these valuable services, and to foster a long term relationship between Tribe and GFX Labs, Tribe will transfer 3,000,000 TRIBE to an Ethereum address chosen by GFX Labs.
+XI. Treasury Assets and Future Assets
+[[AcquirerDAO]] will assume control of all current [[Target]] treasury positions. Any future airdrops, or events that are similar to an airdrop, to [[Target]] will be controlled by [[AcquirerDAO]].
 
-XII. Treasury Assets and Future Assets
-Tribe will assume control of all current Rari Capital treasury positions. Any future airdrops, or events that are similar to an airdrop, to Rari Capital will be controlled by Tribe.
-
-XIII. Prohibitions
-A. Neither Tribe nor Rari Capital will engage in any extraordinary actions after each party accepts the terms and before the merger has completed. Prohibited activities are:
-1. The creation of new RGT tokens outside of a pre-determined schedule and declared as an appendix to this proposal.
-2. The creation of new TRIBE tokens outside of a pre-determined schedule and declared as an appendix to this proposal.
+XII. Prohibitions
+A. Neither [[AcquirerDAO]] nor [[Target]] will engage in any extraordinary actions after each party accepts the terms and before the merger has completed. Prohibited activities are:
+1. The creation of new [[Gov_Token_2]] tokens outside of a pre-determined schedule and declared as an appendix to this proposal.
+2. The creation of new [[Gov_Token_1]] tokens outside of a pre-determined schedule and declared as an appendix to this proposal.
 3. The deployment of new smart contracts outside of those described and declared as an appendix to this proposal.
-4. The alteration of ownership, administrative access, or other functional control over any part of Tribe governance except as described and declared as an appendix to this proposal.
-5. The alteration of ownership, administrative access, or other functional control over any part of Rari Capital protocol except as described and declared as an appendix to this proposal.
-6. The creation of new FEI tokens outside of routine business activities or related to the execution of this agreement.
+4. The alteration of ownership, administrative access, or other functional control over any part of [[AcquirerDAO]] governance except as described and declared as an appendix to this proposal.
+5. The alteration of ownership, administrative access, or other functional control over any part of [[Target]] protocol except as described and declared as an appendix to this proposal.
+6. The creation of new [[Stablecoin]] tokens outside of routine business activities or related to the execution of this agreement.
 7. The receipt or provision of any incentive, financial or otherwise, for the purposes of altering voting behavior, except as outlined within this proposal or pre-determined and declared as an appendix to this proposal.
-8. The manipulation of FEI, TRIBE, or RGT prices outside of routine business activities.
-B. Should Tribe or Rari Capital engage in any of the activities described in Section XIII.A, then the proposed governance merge shall be considered indefinitely postponed until a new proposal has been approved by both Tribe and Rari Capital.
+8. The manipulation of [[Stablecoin]], [[Gov_Token_1]], or [[Gov_Token_2]] prices outside of routine business activities.
+B. Should [[AcquirerDAO]] or [[Target]] engage in any of the activities described in Section XII.A, then the proposed governance merge shall be considered indefinitely postponed until a new proposal has been approved by both [[AcquirerDAO]] and [[Target]].
 
-XIV. Financial or Technical Statements
-By accepting the TribeRagequit & PegExchanger on-chain, both Rari Capital and Tribe represent that, to the best of their knowledge, any financial or technical statements, representations, documentation, or information are correct and that all reasonable, good-faith efforts have been made to ensure their accuracy. Any financial or technical statements, representations, documentation, or information officially disclosed by either Rari Capital or Tribe are declared as an appendix to this proposal.
+XIII. Financial or Technical Statements
+By accepting the [[AcquirerDAO]]Ragequit & [[Exchanger_Object_Name] on-chain, both [[Target]] and [[AcquirerDAO]] represent that, to the best of their knowledge, any financial or technical statements, representations, documentation, or information are correct and that all reasonable, good-faith efforts have been made to ensure their accuracy. Any financial or technical statements, representations, documentation, or information officially disclosed by either [[Target]] or [[AcquirerDAO]] are declared as an appendix to this proposal.
 
 Executive Summary
-● Each RGT can be exchanged for 26.705673 TRIBE.
-● The TRIBE circulating supply prior to the merger is 619,605,725.
-● TRIBE holders will have the opportunity to ragequit. Each TRIBE will be exchanged for approximately 1.22 FEI.
-○ This amount is equal to (Protocol Equity / Circulating Tribe) at the time of ragequit, and changes dynamically based on Protocol Equity.
-○ All FEI issued to ragequitters will be minted by Fei protocol.
-○ All TRIBE received from ragequitters will be sent to the Tribe Treasury.
-○ The ragequit option will be available for three calendar days after the merger proposals pass.
-● Tribe will cover any outstanding Rari Capital debts.
+● Each [[Gov_Token_2]] can be exchanged for [NUMBER] [[Gov_Token_1]].
+● The [[Gov_Token_1]] circulating supply prior to the merger is [NUMBER].
+● [[Gov_Token_1]] holders will have the opportunity to ragequit. Each [[Gov_Token_1]] will be exchanged for approximately [NUMBER] [[Stablecoin]].
+○ This amount is equal to (Protocol Equity / Circulating [[Gov_Token_1]]) at the time of ragequit, and changes dynamically based on Protocol Equity.
+○ All [[Stablecoin]] issued to ragequitters will be minted by [[Acquirer]].
+○ All [[Gov_Token_1]] received from ragequitters will be sent to the [[AcquirerDAO]] Treasury.
+○ The ragequit option will be available for [NUMBER] calendar days after the merger proposals pass.
+● [[AcquirerDAO]] will cover any outstanding [[Target]] debts.
 
 Dilution Table
 
-TABLE NEEDS TO BE INSERTED
+<!-- insert table here -->  
 
-The exchange of RGT for TRIBE dilutes both TRIBE and RGT holders. For example, assuming all RGT is exchanged for TRIBE, if a TRIBE holder who owns 10% of Tribe pre-merger holds on to all of their TRIBE, their ownership percentage of Tribe is reduced to 6.947% as a result of the exchange. If an RGT holder who owns 10% of Rari Capital pre-merger exchanges all of their RGT to TRIBE, their ownership percentage of Tribe becomes 3.053%.
+The exchange of [[Gov_Token_2]] for [[Gov_Token_1]] dilutes both [[Gov_Token_1]] and [[Gov_Token_2]] holders. For example, assuming all [[Gov_Token_2]] is exchanged for [[Gov_Token_1]], if a [[Gov_Token_1]] holder who owns 10% of [[AcquirerDAO]] pre-merger holds on to all of their [[Gov_Token_1]], their ownership percentage of [[AcquirerDAO]] is reduced to [NUMBER]% as a result of the exchange. If a [[Gov_Token_2]] holder who owns 10% of [[Target]] pre-merger exchanges all of their [[Gov_Token_2]] to [[Gov_Token_1]], their ownership percentage of [[AcquirerDAO]] becomes [NUMBER]%.
 
-On the other hand, a ragequit increases the ownership of remaining TRIBE holders. For example, suppose 25% of TRIBE holders ragequit after the merger. Then the ownership percentage of the TRIBE holder in the above example would increase from 6.947% to 8.407%, and the ownership percentage of the RGT holder in the above example would increase from 3.053% to 3.695%, assuming neither holder participates in the ragequit.
+On the other hand, a ragequit increases the ownership of remaining [[Gov_Token_1]] holders. For example, suppose 25% of [[Gov_Token_1]] holders ragequit after the merger. Then the ownership percentage of the [[Gov_Token_1]] holder in the above example would increase from [NUMBER]% to [NUMBER]%, and the ownership percentage of the [[Gov_Token_2]] holder in the above example would increase from [NUMBER]% to [NUMBER]%, assuming neither holder participates in the ragequit.
 
 Appendix:
 
-APPENDIX NEEDS TO BE INSERTED -- A REVERSE APPENDECTOMY, IF YOU WILL
-
+<!-- insert appendix here -->  
