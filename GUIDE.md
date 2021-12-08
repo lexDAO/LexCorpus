@@ -1,6 +1,6 @@
 # Getting Started with LexDAO Contracts
 
-Welcome! You've made it this far, so you are probably the kind of curious sort LexDAO needs.
+Welcome! You've made it this far, so you are probably the kind of curious sort LexDAO needs. Do some edits.
 
 Here are some pointers for using [github](https://github.com/), making your first "[pull request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)" and testing out contracts using [Remix](http://remix.ethereum.org/).
 
