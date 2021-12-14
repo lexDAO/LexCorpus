@@ -52,7 +52,7 @@ First, switch your network to a tesnet like `Kovan` on your wallet:
 
 ![](https://i.imgur.com/wYKMR7W.png)
 
-Go to a [Kovan faucet](https://faucet.kovan.network/) and input your wallet address:
+Go to a [Kovan faucet](https://faucet.kovan.network/) or the [Paradigm testnet facuet](https://faucet.paradigm.xyz/) and input your wallet address:
 
 ![](https://i.imgur.com/ysFB1DF.png)
 
